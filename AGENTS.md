@@ -41,3 +41,5 @@ Pull requests should explain the capability, changed files, usage examples, and 
 ## Agent-Specific Instructions
 
 When the user requests `/grill-me`, `grill-me`, or a requirements interview, read `skills/grill-me/SKILL.md` and follow it. This routes conversational requests; it does not register a native CLI command. Resolve repository facts through inspection before asking the user. Keep interview decisions separate from assumptions, and preserve existing authorization boundaries.
+
+When the user requests `make-plan` or an execution plan, or chooses to continue from a grill-me summary, read `skills/make-plan/SKILL.md` and follow it. A plan request does not authorize implementation.
