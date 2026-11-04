@@ -4,6 +4,8 @@
 
 This repository collects reusable AI skills and workflows. `README.md` describes available capabilities and usage. Each skill lives in `skills/<skill-name>/SKILL.md`; add supporting scripts, references, or assets only when the workflow needs them. There is currently no application source, build system, or automated test suite.
 
+Host-specific entry files live in `.agents/skills/<skill-name>/SKILL.md` for Codex and `.claude/skills/<skill-name>/SKILL.md` for Claude Code. Keep workflow instructions in the shared original. Codex invokes skills with `$grill-me` or selects them through `/skills`; Claude Code uses `/grill-me`.
+
 ## Build, Test, and Development Commands
 
 - `git diff --check`: check changes for whitespace errors before submitting.

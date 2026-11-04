@@ -10,6 +10,18 @@ AI로 할 수 있는 일을 재사용 가능한 스킬과 워크플로로 모으
 
 ## 인터뷰 사용하기
 
+### Codex CLI / IDE 확장
+
+이 저장소를 연 상태에서 `/skills`로 `grill-me`가 있는지 확인하거나 `$`를 입력해 선택합니다.
+
+```text
+$grill-me AI로 주간 뉴스 정리를 자동화하고 싶어
+```
+
+Codex용 진입 파일은 `.agents/skills/grill-me/SKILL.md`입니다. 목록이 갱신되지 않으면 Codex를 재시작하세요. `/grill-me`는 Codex의 등록된 슬래시 명령이 아닙니다. [공식 스킬 문서](https://learn.chatgpt.com/docs/build-skills)
+
+### 일반 대화로 요청하기
+
 이 저장소의 `AGENTS.md`를 읽는 에이전트에게 다음처럼 요청합니다.
 
 ```text
