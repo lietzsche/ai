@@ -45,3 +45,5 @@ When the user requests `/grill-me`, `grill-me`, or a requirements interview, rea
 When the user requests `make-plan` or an execution plan, or chooses to continue from a grill-me summary, read `skills/make-plan/SKILL.md` and follow it. A plan request does not authorize implementation.
 
 When the user requests `skill-maker`, `/skill-maker`, or asks to create, port, or update a skill in this repository, read `skills/skill-maker/SKILL.md` and follow it.
+
+When the user requests `boost`, `/boost`, or multi-hypothesis deep reasoning on a complex bug or optimization task, read `skills/boost/SKILL.md` and follow it.

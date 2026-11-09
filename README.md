@@ -10,6 +10,7 @@ AI로 할 수 있는 일을 재사용 가능한 스킬과 워크플로로 모으
 | [make-plan](skills/make-plan/SKILL.md) | 확정된 요구사항을 단계·산출물·검증·위험이 담긴 실행 계획으로 정리 |
 | [cli-guide](skills/cli-guide/SKILL.md) | 특정 CLI의 명령어를 공식 문서 기준으로 조사해 검색·펼쳐보기가 있는 단일 HTML 설명서로 정리 |
 | [skill-maker](skills/skill-maker/SKILL.md) | 아이디어나 반복 작업을 새로운 교차 호환 스킬로 설계·작성하거나 기존 스킬 수정 및 타 도구 워크플로 이식 |
+| [boost](skills/boost/SKILL.md) | 복잡한 버그·경쟁 상태·최적화 문제를 3단계 심층 추론(가설 수립 → 다각도 탐색·구현 → 독립 검증)으로 해결 |
 
 ## 인터뷰 사용하기
 
@@ -86,6 +87,20 @@ $skill-maker PR 올리기 전에 변경 파일을 점검하고 체크리스트�
 ```
 
 위는 Codex(`$`나 `/skills`로 선택), 아래는 Claude Code 예시입니다. 진입 파일은 `.agents/skills/skill-maker/SKILL.md`와 `.claude/skills/skill-maker/SKILL.md`입니다.
+
+## 심층 추론(Boost) 사용하기
+
+`boost`는 Antigravity의 `/boost` 워크플로(Orchestrator → DeepInvestigator/DeepCoder → Independent Verifier)를 모티프로, 복잡한 버그·경쟁 상태·성능 최적화 문제를 3단계 다중 가설 탐색과 독립 검증으로 해결합니다. 서브에이전트 도구가 있는 환경에서는 조사와 검증을 분리 위임하고, 단일 에이전트 환경에서는 단계별 역할을 전환하며 수행합니다.
+
+```text
+$boost 간헐적으로 발생하는 결제 중복 처리 경쟁 상태 원인을 찾고 수정해줘
+```
+
+```text
+/boost 대용량 그래프 탐색 루틴의 병목을 분석하고 최적화해줘
+```
+
+위는 Codex(`$`나 `/skills`로 선택), 아래는 Claude Code 예시입니다. 진입 파일은 `.agents/skills/boost/SKILL.md`와 `.claude/skills/boost/SKILL.md`입니다.
 
 ## Claude Code에서 사용하기
 
