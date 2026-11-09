@@ -72,72 +72,19 @@
 <div class="wrap">
 <header>
   <h1>Antigravity CLI 스킬 정리</h1>
-  <p>Google Antigravity CLI(<code>agy</code>)의 스킬 시스템과 기본 탑재 슬래시 명령을 공식 문서 기준으로 정리했습니다.</p>
+  <p>Google Antigravity CLI(<code>agy</code>)의 스킬 사용법과 기본 탑재 슬래시 명령을 공식 문서 기준으로 정리했습니다.</p>
   <div class="meta">조사일: 2026-11-09 · 출처: antigravity.google 공식 문서 · 문서는 수시로 바뀔 수 있습니다.</div>
 </header>
 
 <nav class="toc" aria-label="목차">
-  <a href="#system">1. 스킬이란</a>
-  <a href="#paths">2. CLI에서 스킬 쓰기</a>
-  <a href="#workflow">3. 핵심 워크플로 명령</a>
-  <a href="#all">4. 전체 슬래시 명령</a>
+  <a href="#paths">1. CLI에서 스킬 쓰기</a>
+  <a href="#workflow">2. 핵심 워크플로 명령</a>
+  <a href="#all">3. 전체 슬래시 명령</a>
 </nav>
 
 <main>
-<section id="system">
-  <h2>1. 스킬이란</h2>
-  <p class="lead">스킬은 에이전트 능력을 확장하는 오픈 표준입니다. <code>SKILL.md</code>가 들어 있는 폴더 하나가 스킬 하나이며, App·CLI·IDE에서 공통으로 쓰입니다.</p>
-  <div class="grid">
-    <article class="card">
-      <h3>폴더 구성</h3>
-<pre><code>my-skill/
-├── SKILL.md    # 필수: 지침과 메타데이터
-├── scripts/    # 선택: 실행 스크립트
-├── examples/   # 선택: 참고 구현
-└── resources/  # 선택: 템플릿·스키마·데이터</code></pre>
-      <a class="src" href="https://antigravity.google/docs/skills/" target="_blank" rel="noopener">출처: Agent skills ↗</a>
-    </article>
-    <article class="card">
-      <h3>SKILL.md 형식</h3>
-<pre><code>---
-name: code-review
-description: Reviews code changes for bugs,
-  style issues, and best practices. Use when
-  reviewing pull requests.
----
-# Code Review Skill
-...</code></pre>
-      <ul>
-        <li><code>name</code> (선택): 소문자·하이픈. 없으면 폴더 이름</li>
-        <li><code>description</code> (필수): 무엇을 하고 언제 쓰는지</li>
-      </ul>
-      <a class="src" href="https://antigravity.google/docs/skills/" target="_blank" rel="noopener">출처: Agent skills ↗</a>
-    </article>
-    <article class="card">
-      <h3>동작 방식 (점진적 공개)</h3>
-      <ul>
-        <li><b>발견</b>: 매 턴 스킬 이름·설명 목록만 봄</li>
-        <li><b>활성화</b>: 관련 있어 보이면 <code>SKILL.md</code> 전체를 읽음</li>
-        <li><b>실행</b>: 지침에 따라 작업</li>
-      </ul>
-      <p>따로 지시하지 않아도 맥락으로 판단하고, 이름을 언급하면 확실히 사용합니다.</p>
-      <a class="src" href="https://antigravity.google/docs/skills/" target="_blank" rel="noopener">출처: Agent skills ↗</a>
-    </article>
-    <article class="card">
-      <h3>작성 모범 사례</h3>
-      <ul>
-        <li>스킬 하나는 한 가지 일에 집중</li>
-        <li>description은 3인칭으로, 키워드를 넣어 구체적으로</li>
-        <li>스크립트는 블랙박스로: 소스 대신 <code>--help</code> 먼저</li>
-        <li>복잡한 스킬엔 의사결정 트리 추가</li>
-      </ul>
-      <a class="src" href="https://antigravity.google/docs/skills/" target="_blank" rel="noopener">출처: Agent skills ↗</a>
-    </article>
-  </div>
-</section>
-
 <section id="paths">
-  <h2>2. CLI에서 스킬 쓰기</h2>
+  <h2>1. CLI에서 스킬 쓰기</h2>
   <p class="lead">CLI가 스킬을 읽는 위치, 슬래시 명령 변환, 관리 명령입니다.</p>
   <div class="tablebox">
     <table>
@@ -179,7 +126,7 @@ agy plugin install ./my-skills-plugin</code></pre>
 </section>
 
 <section id="workflow">
-  <h2>3. 핵심 워크플로 명령</h2>
+  <h2>2. 핵심 워크플로 명령</h2>
   <p class="lead">공식 문서의 "Slash commands overview"에 실린 공개 워크플로 명령입니다. App과 CLI에서 동일하게 동작합니다.</p>
   <div class="grid">
     <article class="card"><h3><code>/boost</code> <span class="tag">Reasoning</span><span class="tag paid">유료</span></h3>
@@ -214,7 +161,7 @@ agy plugin install ./my-skills-plugin</code></pre>
 </section>
 
 <section id="all">
-  <h2>4. CLI 전체 슬래시 명령</h2>
+  <h2>3. CLI 전체 슬래시 명령</h2>
   <p class="lead">공식 "CLI commands" 레퍼런스의 TUI 슬래시 명령 전체 목록입니다. 프롬프트에서 <code>/</code>를 입력하면 자동완성 메뉴가 열립니다.</p>
   <input class="filter" id="cmd-filter" type="search" placeholder="명령·분류·설명 검색..." aria-label="슬래시 명령 검색">
   <div class="tablebox">
