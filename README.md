@@ -8,6 +8,7 @@ AI로 할 수 있는 일을 재사용 가능한 스킬과 워크플로로 모으
 | --- | --- |
 | [grill-me](skills/grill-me/SKILL.md) | 한 번에 한 질문씩 인터뷰하여 아이디어를 목표·범위·제약·완료 기준으로 정리 |
 | [make-plan](skills/make-plan/SKILL.md) | 확정된 요구사항을 단계·산출물·검증·위험이 담긴 실행 계획으로 정리 |
+| [cli-guide](skills/cli-guide/SKILL.md) | 특정 CLI의 명령어를 공식 문서 기준으로 조사해 검색·펼쳐보기가 있는 단일 HTML 설명서로 정리 |
 
 ## 인터뷰 사용하기
 
@@ -56,6 +57,20 @@ $make-plan 사내 위키의 오래된 문서를 매달 점검하는 자동화를
 ```
 
 위는 Codex(`$`나 `/skills`로 선택), 아래는 Claude Code 예시입니다. Codex용 진입 파일은 `.agents/skills/make-plan/SKILL.md`, Claude Code용은 `.claude/skills/make-plan/SKILL.md`입니다.
+
+## CLI 명령어 설명서 만들기
+
+`cli-guide`는 지정한 도구의 명령어를 조사해 [docs/antigravity-cli-skills.html](docs/antigravity-cli-skills.html)과 같은 양식(핵심 명령 카드, 검색 가능한 전체 명령 표, 행을 클릭하면 펼쳐지는 상세 설명)의 HTML로 만듭니다. 경로를 지정하지 않으면 `docs/<대상>-cli-guide.html`에 저장합니다.
+
+```text
+$cli-guide Linux 파일·프로세스 관리 명령어
+```
+
+```text
+/cli-guide Claude Code 슬래시 명령어
+```
+
+위는 Codex(`$`나 `/skills`로 선택), 아래는 Claude Code 예시입니다. 진입 파일은 `.agents/skills/cli-guide/SKILL.md`와 `.claude/skills/cli-guide/SKILL.md`이며, 양식 견본은 `skills/cli-guide/assets/example.html`입니다.
 
 ## Claude Code에서 사용하기
 
