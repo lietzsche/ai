@@ -85,3 +85,14 @@ $cli-guide Linux 파일·프로세스 관리 명령어
 공식 문서: [프로젝트 지침과 AGENTS.md](https://code.claude.com/docs/en/memory#agentsmd), [Claude Code 스킬](https://code.claude.com/docs/en/skills).
 
 참고한 기능은 [Google Antigravity의 내장 `/grill-me` 명령](https://antigravity.google/docs/commands/grill-me/)입니다.
+
+## CLI 욜로(YOLO) 모드 명령어
+
+도구 실행과 파일 수정을 확인 프롬프트 없이 자동 승인하는 플래그입니다. 신뢰할 수 있거나 격리된 환경에서만 사용하세요.
+
+| 도구 | 명령어 | 비고 |
+| --- | --- | --- |
+| Antigravity CLI | `agy --dangerously-skip-permissions` | 샌드박스 내 자동 실행은 `agy --mode auto` |
+| Claude Code | `claude --dangerously-skip-permissions` | 모든 권한 확인 생략 |
+| OpenAI Codex CLI | `codex --yolo` | `--dangerously-bypass-approvals-and-sandbox` 단축 플래그 |
+| Gemini CLI | `gemini --yolo` | 권장: `gemini --approval-mode=yolo` (세션 중 `Ctrl+Y`) |
