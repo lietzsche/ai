@@ -11,6 +11,7 @@ AI로 할 수 있는 일을 재사용 가능한 스킬과 워크플로로 모으
 | [cli-guide](skills/cli-guide/SKILL.md) | 특정 CLI의 명령어를 공식 문서 기준으로 조사해 검색·펼쳐보기가 있는 단일 HTML 설명서로 정리 |
 | [skill-maker](skills/skill-maker/SKILL.md) | 아이디어나 반복 작업을 새로운 교차 호환 스킬로 설계·작성하거나 기존 스킬 수정 및 타 도구 워크플로 이식 |
 | [boost](skills/boost/SKILL.md) | 복잡한 버그·경쟁 상태·최적화 문제를 3단계 심층 추론(가설 수립 → 다각도 탐색·구현 → 독립 검증)으로 해결 |
+| [teamwork](skills/teamwork/SKILL.md) | 대규모 기능·마이그레이션·다중 모듈 작업을 4단계 에이전트 팀 협업(역할 분담·계약 합의 → 분할 실행 → 통합 검증)으로 수행 |
 
 ## 인터뷰 사용하기
 
@@ -101,6 +102,20 @@ $boost 간헐적으로 발생하는 결제 중복 처리 경쟁 상태 원인을
 ```
 
 위는 Codex(`$`나 `/skills`로 선택), 아래는 Claude Code 예시입니다. 진입 파일은 `.agents/skills/boost/SKILL.md`와 `.claude/skills/boost/SKILL.md`입니다.
+
+## 멀티에이전트 팀 협업(Teamwork) 사용하기
+
+`teamwork`는 Antigravity의 `/teamwork` 워크플로를 모티프로, 대규모 기능 개발·저장소 마이그레이션·다중 모듈 리팩터링을 4단계 팀 협업(팀 편성 및 소유 경로 배정 → 공통 인터페이스·계약 합의 → 역할별 병렬·분할 실행 → 통합 및 교차 검증)으로 수행합니다.
+
+```text
+$teamwork 저장소 전체의 REST API 클라이언트를 신규 SDK로 마이그레이션하고 테스트를 갱신해줘
+```
+
+```text
+/teamwork 백엔드 스키마, 프런트엔드 폼, 통합 테스트를 역할별로 나눠 다국어 프로필 기능을 구현해줘
+```
+
+위는 Codex(`$`나 `/skills`로 선택), 아래는 Claude Code 예시입니다. 진입 파일은 `.agents/skills/teamwork/SKILL.md`와 `.claude/skills/teamwork/SKILL.md`입니다.
 
 ## Claude Code에서 사용하기
 
