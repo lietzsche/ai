@@ -9,7 +9,7 @@ AI로 할 수 있는 일을 재사용 가능한 스킬과 워크플로로 모으
 | [grill-me](skills/grill-me/SKILL.md) | 한 번에 한 질문씩 인터뷰하여 아이디어를 목표·범위·제약·완료 기준으로 정리 |
 | [make-plan](skills/make-plan/SKILL.md) | 확정된 요구사항을 단계·산출물·검증·위험이 담긴 실행 계획으로 정리 |
 | [cli-guide](skills/cli-guide/SKILL.md) | 특정 CLI의 명령어를 공식 문서 기준으로 조사해 검색·펼쳐보기가 있는 단일 HTML 설명서로 정리 |
-| [skill-maker](skills/skill-maker/SKILL.md) | 새로운 스킬을 설계하거나 다른 도구의 내장 워크플로를 Codex·Claude Code 교차 호환 스킬로 이식·수정 |
+| [skill-maker](skills/skill-maker/SKILL.md) | 아이디어나 반복 작업을 새로운 교차 호환 스킬로 설계·작성하거나 기존 스킬 수정 및 타 도구 워크플로 이식 |
 
 ## 인터뷰 사용하기
 
@@ -73,16 +73,16 @@ $cli-guide Linux 파일·프로세스 관리 명령어
 
 위는 Codex(`$`나 `/skills`로 선택), 아래는 Claude Code 예시입니다. 진입 파일은 `.agents/skills/cli-guide/SKILL.md`와 `.claude/skills/cli-guide/SKILL.md`이며, 양식 견본은 `skills/cli-guide/assets/example.html`입니다.
 
-## 스킬 만들거나 이식하기
+## 스킬 만들기 및 수정하기
 
-`skill-maker`는 새 스킬을 설계하거나 특정 도구(예: Antigravity의 `/boost`, `/teamwork`)의 내장 워크플로를 Codex와 Claude Code 양쪽에서 동작하는 교차 호환 스킬로 옮길 때 사용합니다. 공통 원본(`skills/<name>/SKILL.md`)과 양쪽 진입 파일(`.agents/skills/<name>/SKILL.md`, `.claude/skills/<name>/SKILL.md`), 환경별 서브에이전트·도구 대체 동작, 문서 반영을 한 번에 구성합니다.
+`skill-maker`는 새로운 아이디어나 반복 작업을 Codex와 Claude Code 양쪽에서 동작하는 스킬로 처음부터 설계·작성할 때, 또는 기존 스킬을 다듬거나 다른 도구의 워크플로를 이식할 때 사용합니다. 공통 원본(`skills/<name>/SKILL.md`)과 양쪽 진입 파일(`.agents/skills/<name>/SKILL.md`, `.claude/skills/<name>/SKILL.md`), 필요한 보조 자산(`assets/`, `references/`, `scripts/`), 문서 반영을 한 번에 구성합니다.
 
 ```text
-$skill-maker Antigravity의 /boost를 Codex와 Claude Code에서 쓸 수 있는 스킬로 만들어줘
+$skill-maker PR 올리기 전에 변경 파일을 점검하고 체크리스트를 만드는 스킬 만들어줘
 ```
 
 ```text
-/skill-maker Antigravity의 /teamwork를 이 저장소 스킬로 이식해줘
+/skill-maker Antigravity의 /boost를 이 저장소 스킬로 만들어줘
 ```
 
 위는 Codex(`$`나 `/skills`로 선택), 아래는 Claude Code 예시입니다. 진입 파일은 `.agents/skills/skill-maker/SKILL.md`와 `.claude/skills/skill-maker/SKILL.md`입니다.
