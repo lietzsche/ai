@@ -4,14 +4,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Antigravity CLI 스킬 정리</title>
-<meta name="description" content="Google Antigravity CLI의 스킬 시스템 구조, 내장 슬래시 명령, 공개 스킬 예시와 이 저장소의 연결 방식을 정리한 문서">
+<meta name="description" content="Google Antigravity CLI의 스킬 시스템 구조, 스킬 경로와 플러그인, 기본 탑재 슬래시 명령 전체 목록을 공식 문서 기준으로 정리한 문서">
 <style>
   :root {
     --bg: #0b0d14; --bg2: #121624; --card: rgba(255,255,255,0.04);
     --line: rgba(255,255,255,0.09); --text: #e6e8f0; --muted: #9aa1b8;
-    --a1: #7c8cff; --a2: #3fd6c6; --warn: #f5b25a;
+    --a1: #7c8cff; --a2: #3fd6c6; --a3: #f58ab0; --warn: #f5b25a;
   }
   * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
   body {
     margin: 0; color: var(--text); line-height: 1.65;
     font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif;
@@ -19,7 +20,7 @@
                 radial-gradient(900px 500px at 110% 10%, #0f3b3a 0%, transparent 55%), var(--bg);
     min-height: 100vh;
   }
-  .wrap { max-width: 1080px; margin: 0 auto; padding: 56px 24px 80px; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 56px 24px 80px; }
   header h1 {
     font-size: clamp(2rem, 4vw, 2.8rem); margin: 0 0 8px;
     background: linear-gradient(90deg, var(--a1), var(--a2));
@@ -34,7 +35,7 @@
     transition: border-color .2s, transform .2s;
   }
   nav.toc a:hover { border-color: var(--a1); transform: translateY(-2px); }
-  section { margin-top: 48px; }
+  section { margin-top: 52px; }
   h2 { font-size: 1.5rem; margin: 0 0 6px; }
   h2 + .lead { color: var(--muted); margin: 0 0 20px; }
   .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
@@ -44,92 +45,105 @@
   }
   .card:hover { border-color: rgba(124,140,255,.5); transform: translateY(-3px); }
   .card h3 { margin: 0 0 8px; font-size: 1.1rem; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-  .card p, .card li { color: #c9cde0; font-size: .95rem; }
+  .card p, .card li { color: #c9cde0; font-size: .95rem; margin: 6px 0; }
   .card ul { padding-left: 18px; margin: 8px 0; }
   .src { display: inline-block; margin-top: 8px; font-size: .82rem; color: var(--a2); text-decoration: none; }
   .src:hover { text-decoration: underline; }
-  .badge { font-size: .72rem; padding: 2px 8px; border-radius: 999px; border: 1px solid; font-weight: 600; }
-  .ok { color: var(--a2); border-color: rgba(63,214,198,.4); }
-  .unv { color: var(--warn); border-color: rgba(245,178,90,.45); }
-  code { font-family: "JetBrains Mono", Consolas, monospace; font-size: .88em; background: rgba(255,255,255,.07); padding: 1px 6px; border-radius: 6px; }
-  pre { background: var(--bg2); border: 1px solid var(--line); border-radius: 10px; padding: 14px; overflow-x: auto; font-size: .85rem; }
+  .tag { font-size: .72rem; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); font-weight: 600; }
+  .paid { color: var(--a3); border-color: rgba(245,138,176,.45); }
+  .all { color: var(--a2); border-color: rgba(63,214,198,.4); }
+  .note { color: var(--warn); border-color: rgba(245,178,90,.45); }
+  code { font-family: "JetBrains Mono", Consolas, monospace; font-size: .88em; background: rgba(255,255,255,.07); padding: 1px 6px; border-radius: 6px; white-space: nowrap; }
+  pre { background: var(--bg2); border: 1px solid var(--line); border-radius: 10px; padding: 14px; overflow-x: auto; font-size: .85rem; margin: 8px 0; }
+  pre code { background: none; padding: 0; white-space: pre; }
   table { width: 100%; border-collapse: collapse; font-size: .92rem; }
   th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
-  th { color: var(--muted); font-weight: 600; }
+  th { color: var(--muted); font-weight: 600; position: sticky; top: 0; background: #151a2b; }
+  tbody tr { transition: background .15s; }
+  tbody tr:hover { background: rgba(124,140,255,.07); }
   .tablebox { background: var(--card); border: 1px solid var(--line); border-radius: 14px; overflow-x: auto; }
+  .filter { width: 100%; max-width: 360px; margin: 0 0 12px; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg2); color: var(--text); font: inherit; }
+  .filter:focus { outline: none; border-color: var(--a1); }
   footer { margin-top: 64px; color: var(--muted); font-size: .85rem; border-top: 1px solid var(--line); padding-top: 20px; }
+  footer a { color: var(--a2); }
 </style>
 </head>
 <body>
 <div class="wrap">
 <header>
   <h1>Antigravity CLI 스킬 정리</h1>
-  <p>스킬 시스템 구조 · 내장 슬래시 명령 · 공개 스킬 예시 · 이 저장소의 연결 방식</p>
-  <div class="meta">조사일: 2026-11-09 · <span class="badge ok">공식 확인</span> 공식 문서에서 확인 · <span class="badge unv">미확인</span> 검색 결과로만 확인</div>
+  <p>Google Antigravity CLI(<code>agy</code>)의 스킬 시스템과 기본 탑재 슬래시 명령을 공식 문서 기준으로 정리했습니다.</p>
+  <div class="meta">조사일: 2026-11-09 · 출처: antigravity.google 공식 문서 · 문서는 수시로 바뀔 수 있습니다.</div>
 </header>
 
 <nav class="toc" aria-label="목차">
-  <a href="#system">1. 스킬 시스템 구조</a>
-  <a href="#paths">2. CLI 스킬 경로</a>
-  <a href="#commands">3. 내장 슬래시 명령</a>
-  <a href="#community">4. 공개·커뮤니티 스킬</a>
-  <a href="#repo">5. 이 저장소의 연결</a>
+  <a href="#system">1. 스킬이란</a>
+  <a href="#paths">2. CLI에서 스킬 쓰기</a>
+  <a href="#workflow">3. 핵심 워크플로 명령</a>
+  <a href="#all">4. 전체 슬래시 명령</a>
 </nav>
 
 <main>
 <section id="system">
-  <h2>1. 스킬 시스템 구조</h2>
-  <p class="lead">스킬은 에이전트 능력을 확장하는 오픈 표준입니다. <code>SKILL.md</code>가 들어 있는 폴더 하나가 스킬 하나입니다.</p>
+  <h2>1. 스킬이란</h2>
+  <p class="lead">스킬은 에이전트 능력을 확장하는 오픈 표준입니다. <code>SKILL.md</code>가 들어 있는 폴더 하나가 스킬 하나이며, App·CLI·IDE에서 공통으로 쓰입니다.</p>
   <div class="grid">
     <article class="card">
-      <h3>폴더 구성 <span class="badge ok">공식 확인</span></h3>
-<pre>my-skill/
+      <h3>폴더 구성</h3>
+<pre><code>my-skill/
 ├── SKILL.md    # 필수: 지침과 메타데이터
 ├── scripts/    # 선택: 실행 스크립트
 ├── examples/   # 선택: 참고 구현
-└── resources/  # 선택: 템플릿·스키마·데이터</pre>
-      <a class="src" href="https://antigravity.google/docs/skills/" target="_blank" rel="noopener">출처: Agent skills 문서 ↗</a>
+└── resources/  # 선택: 템플릿·스키마·데이터</code></pre>
+      <a class="src" href="https://antigravity.google/docs/skills/" target="_blank" rel="noopener">출처: Agent skills ↗</a>
     </article>
     <article class="card">
-      <h3>Frontmatter <span class="badge ok">공식 확인</span></h3>
+      <h3>SKILL.md 형식</h3>
+<pre><code>---
+name: code-review
+description: Reviews code changes for bugs,
+  style issues, and best practices. Use when
+  reviewing pull requests.
+---
+# Code Review Skill
+...</code></pre>
       <ul>
-        <li><code>name</code> (선택): 소문자·하이픈 식별자. 없으면 폴더 이름</li>
-        <li><code>description</code> (필수): 무엇을 하고 언제 쓰는지. 에이전트가 이 값으로 사용 여부를 판단</li>
+        <li><code>name</code> (선택): 소문자·하이픈. 없으면 폴더 이름</li>
+        <li><code>description</code> (필수): 무엇을 하고 언제 쓰는지</li>
       </ul>
-      <p>설명은 3인칭으로, 인식에 도움이 되는 키워드를 넣도록 권장합니다.</p>
-      <a class="src" href="https://antigravity.google/docs/skills/" target="_blank" rel="noopener">출처: Agent skills 문서 ↗</a>
+      <a class="src" href="https://antigravity.google/docs/skills/" target="_blank" rel="noopener">출처: Agent skills ↗</a>
     </article>
     <article class="card">
-      <h3>점진적 공개 방식 <span class="badge ok">공식 확인</span></h3>
+      <h3>동작 방식 (점진적 공개)</h3>
       <ul>
         <li><b>발견</b>: 매 턴 스킬 이름·설명 목록만 봄</li>
         <li><b>활성화</b>: 관련 있어 보이면 <code>SKILL.md</code> 전체를 읽음</li>
         <li><b>실행</b>: 지침에 따라 작업</li>
       </ul>
-      <p>명시하지 않아도 맥락으로 판단하며, 이름을 언급하면 확실히 사용합니다.</p>
-      <a class="src" href="https://antigravity.google/docs/skills/" target="_blank" rel="noopener">출처: Agent skills 문서 ↗</a>
+      <p>따로 지시하지 않아도 맥락으로 판단하고, 이름을 언급하면 확실히 사용합니다.</p>
+      <a class="src" href="https://antigravity.google/docs/skills/" target="_blank" rel="noopener">출처: Agent skills ↗</a>
     </article>
     <article class="card">
-      <h3>작성 모범 사례 <span class="badge ok">공식 확인</span></h3>
+      <h3>작성 모범 사례</h3>
       <ul>
         <li>스킬 하나는 한 가지 일에 집중</li>
-        <li>구체적인 description 작성</li>
-        <li>스크립트는 블랙박스로: 먼저 <code>--help</code> 실행 권장</li>
+        <li>description은 3인칭으로, 키워드를 넣어 구체적으로</li>
+        <li>스크립트는 블랙박스로: 소스 대신 <code>--help</code> 먼저</li>
         <li>복잡한 스킬엔 의사결정 트리 추가</li>
       </ul>
-      <a class="src" href="https://antigravity.google/docs/skills/" target="_blank" rel="noopener">출처: Agent skills 문서 ↗</a>
+      <a class="src" href="https://antigravity.google/docs/skills/" target="_blank" rel="noopener">출처: Agent skills ↗</a>
     </article>
   </div>
 </section>
 
 <section id="paths">
-  <h2>2. CLI 스킬 경로와 호출</h2>
-  <p class="lead">CLI는 아래 위치에서 스킬을 읽고, 각 스킬을 슬래시 명령으로 자동 변환합니다.</p>
+  <h2>2. CLI에서 스킬 쓰기</h2>
+  <p class="lead">CLI가 스킬을 읽는 위치, 슬래시 명령 변환, 관리 명령입니다.</p>
   <div class="tablebox">
     <table>
       <thead><tr><th>위치</th><th>범위</th></tr></thead>
       <tbody>
-        <tr><td><code>&lt;workspace&gt;/.agents/skills/&lt;skill&gt;/</code></td><td>워크스페이스 전용 (상위 폴더의 <code>.agents/skills/</code>도 저장소 루트까지 탐색). 구버전 <code>.agent/skills</code>도 호환</td></tr>
+        <tr><td><code>&lt;workspace&gt;/.agents/skills/&lt;skill&gt;/</code></td><td>워크스페이스 전용. 상위 폴더의 <code>.agents/skills/</code>도 저장소 루트까지 탐색. 구버전 <code>.agent/skills</code> 호환</td></tr>
         <tr><td><code>~/.gemini/config/skills/&lt;skill&gt;/</code></td><td>전역 (Antigravity App과 공유)</td></tr>
         <tr><td><code>~/.gemini/config/plugins/&lt;plugin&gt;/skills/</code></td><td>플러그인이 제공하는 스킬</td></tr>
         <tr><td><code>~/.gemini/antigravity-cli/skills/</code>, <code>~/.gemini/skills/</code></td><td>CLI 전용 (App은 읽지 않음)</td></tr>
@@ -138,117 +152,142 @@
   </div>
   <div class="grid" style="margin-top:16px">
     <article class="card">
-      <h3>슬래시 명령 자동 변환 <span class="badge ok">공식 확인</span></h3>
-      <p>스킬 <code>deploy-staging</code>을 만들면 TUI에서 <code>/deploy-staging</code>을 쓸 수 있습니다. 실행 중 스킬을 추가했다면 <code>/skills reload</code>를 실행하거나 새 대화를 시작합니다.</p>
-      <a class="src" href="https://antigravity.google/docs/skills/" target="_blank" rel="noopener">출처: Agent skills 문서 (CLI 탭) ↗</a>
+      <h3>스킬 → 슬래시 명령 자동 변환</h3>
+      <p>스킬 <code>deploy-staging</code>을 만들면 TUI에서 <code>/deploy-staging</code>으로 호출할 수 있습니다.</p>
+      <a class="src" href="https://antigravity.google/docs/skills/" target="_blank" rel="noopener">출처: Agent skills (CLI) ↗</a>
     </article>
     <article class="card">
-      <h3>플러그인으로 관리 <span class="badge ok">공식 확인</span></h3>
-<pre>agy plugin list [--json]
+      <h3><code>/skills</code></h3>
+      <p>로드된 로컬·전역 스킬을 탐색합니다. 실행 중에 스킬을 추가했다면 <code>/skills reload</code>로 디스크에서 다시 읽거나 새 대화를 시작합니다.</p>
+      <a class="src" href="https://antigravity.google/docs/cli/reference/" target="_blank" rel="noopener">출처: CLI commands ↗</a>
+    </article>
+    <article class="card">
+      <h3><code>/learn [instruction]</code></h3>
+      <p>세션 중의 피드백·수정 사항을 영구 Rule이나 Skill로 바꿉니다. 검토 가능한 제안 형태로 만들어집니다.</p>
+      <a class="src" href="https://antigravity.google/docs/commands/learn/" target="_blank" rel="noopener">출처: /learn ↗</a>
+    </article>
+    <article class="card">
+      <h3>플러그인으로 스킬 설치</h3>
+<pre><code>agy plugin list [--json]
 agy plugin install &lt;plugin-name&gt;
 agy plugin install https://github.com/&lt;owner&gt;/&lt;repo&gt;
-agy plugin install ./my-skills-plugin</pre>
-      <p>기본 마켓플레이스는 <code>@antigravity-plugins-official</code>입니다.</p>
-      <a class="src" href="https://antigravity.google/docs/skills/" target="_blank" rel="noopener">출처: Agent skills 문서 (CLI 탭) ↗</a>
+agy plugin install ./my-skills-plugin</code></pre>
+      <p>기본 마켓플레이스는 <code>@antigravity-plugins-official</code>입니다. TUI에서는 <code>/plugin</code>(별칭 <code>/plugins</code>)으로 관리합니다.</p>
+      <a class="src" href="https://antigravity.google/docs/plugins/" target="_blank" rel="noopener">출처: Plugins ↗</a>
     </article>
   </div>
 </section>
 
-<section id="commands">
-  <h2>3. 내장 슬래시 명령</h2>
-  <p class="lead">프롬프트에서 <code>/</code>를 입력하면 나타나는 기본 명령입니다. 명령 목록 페이지는 자동 조회가 막혀(403) 일부는 검색 요약에 의존했습니다.</p>
+<section id="workflow">
+  <h2>3. 핵심 워크플로 명령</h2>
+  <p class="lead">공식 문서의 "Slash commands overview"에 실린 공개 워크플로 명령입니다. App과 CLI에서 동일하게 동작합니다.</p>
   <div class="grid">
-    <article class="card">
-      <h3><code>/grill-me</code> <span class="badge ok">공식 확인</span></h3>
-      <p>바로 실행하지 않고 한 번에 한 질문씩 사용자를 인터뷰해, 추천 답과 함께 요구사항을 정리합니다. 모호한 작업에 적합합니다.</p>
-      <a class="src" href="https://antigravity.google/docs/commands/grill-me/" target="_blank" rel="noopener">출처: /grill-me 문서 ↗</a>
-    </article>
-    <article class="card">
-      <h3><code>/goal</code> <span class="badge unv">미확인</span></h3>
-      <p>목표가 완전히 달성될 때까지 중간 확인 없이 자율 실행합니다. 대규모 리팩터링·마이그레이션용. <code>/grill-me</code>로 범위를 정한 뒤 넘기는 패턴이 소개됩니다.</p>
-      <a class="src" href="https://antigravity.google/docs/" target="_blank" rel="noopener">출처: 웹 검색 요약 (공식 문서 직접 미확인) ↗</a>
-    </article>
-    <article class="card">
-      <h3><code>/schedule</code> <span class="badge unv">미확인</span></h3>
-      <p>지시를 일회성 타이머나 반복 cron으로 예약해 현재 대화에서 에이전트를 깨웁니다.</p>
-      <a class="src" href="https://antigravity.google/docs/" target="_blank" rel="noopener">출처: 웹 검색 요약 ↗</a>
-    </article>
-    <article class="card">
-      <h3><code>/browser</code> <span class="badge unv">미확인</span></h3>
-      <p>웹 조사와 UI 점검을 위한 샌드박스 브라우저 서브에이전트를 실행합니다.</p>
-      <a class="src" href="https://antigravity.google/docs/" target="_blank" rel="noopener">출처: 웹 검색 요약 ↗</a>
-    </article>
-    <article class="card">
-      <h3><code>/teamwork-preview</code> <span class="badge unv">미확인</span></h3>
-      <p>여러 에이전트 팀이 대형 프로젝트를 자율 협업으로 처리합니다. 유료 플랜이 필요하다는 언급이 있습니다.</p>
-      <a class="src" href="https://antigravity.google/docs/subagents/" target="_blank" rel="noopener">출처: 웹 검색 요약 ↗</a>
-    </article>
-    <article class="card">
-      <h3><code>/skills</code> <span class="badge ok">공식 확인</span></h3>
-      <p>스킬 관련 명령. 공식 문서에서는 <code>/skills reload</code>로 새 스킬을 반영하는 용도가 확인됩니다.</p>
-      <a class="src" href="https://antigravity.google/docs/skills/" target="_blank" rel="noopener">출처: Agent skills 문서 ↗</a>
-    </article>
+    <article class="card"><h3><code>/boost</code> <span class="tag">Reasoning</span><span class="tag paid">유료</span></h3>
+      <p>멀티 에이전트 심층 추론(Orchestrator → DeepCoder/DeepInvestigator → 작업자). 복잡한 버그·경쟁 상태·알고리즘에 적합. 수 초~수 시간.</p></article>
+    <article class="card"><h3><code>/teamwork</code> <span class="tag">Reasoning</span><span class="tag paid">유료</span></h3>
+      <p>협업 에이전트 팀으로 저장소 규모 마이그레이션·시뮬레이션·연구를 수행. 수 시간~수 일. <span class="tag note">일부 환경에선 <code>/teamwork-preview</code>로 표시</span></p></article>
+    <article class="card"><h3><code>/goal</code> <span class="tag">Reasoning</span><span class="tag all">전 플랜</span></h3>
+      <p>목표 달성이 검증될 때까지 중간 멈춤 없이 자율 실행. 수 분~수 시간.</p>
+      <a class="src" href="https://antigravity.google/docs/commands/goal/" target="_blank" rel="noopener">출처: /goal ↗</a></article>
+    <article class="card"><h3><code>/plan</code> <span class="tag">Planning</span><span class="tag all">전 플랜</span></h3>
+      <p>코드를 조사하고 요구사항을 인터뷰한 뒤 검토 가능한 구현 계획 아티팩트를 작성.</p></article>
+    <article class="card"><h3><code>/grill-me</code> <span class="tag">Planning</span><span class="tag all">전 플랜</span></h3>
+      <p>작업 전에 한 번에 한 질문씩, 추천 답과 함께 인터뷰해 설계 세부와 엣지 케이스를 맞춤.</p>
+      <a class="src" href="https://antigravity.google/docs/commands/grill-me/" target="_blank" rel="noopener">출처: /grill-me ↗</a></article>
+    <article class="card"><h3><code>/learn</code> <span class="tag">Customization</span><span class="tag all">전 플랜</span></h3>
+      <p>세션 피드백을 영구 Rule·Skill로 정리.</p>
+      <a class="src" href="https://antigravity.google/docs/commands/learn/" target="_blank" rel="noopener">출처: /learn ↗</a></article>
+    <article class="card"><h3><code>/plugin</code> <span class="tag">Customization</span><span class="tag all">전 플랜</span></h3>
+      <p>플러그인 관리자를 열거나 플러그인을 설치·관리·생성.</p></article>
+    <article class="card"><h3><code>/schedule</code> <span class="tag">Automation</span><span class="tag all">전 플랜</span></h3>
+      <p>지시를 일회성 타이머나 반복 cron으로 예약해 에이전트를 깨움.</p>
+      <a class="src" href="https://antigravity.google/docs/commands/schedule/" target="_blank" rel="noopener">출처: /schedule ↗</a></article>
+    <article class="card"><h3><code>/browser</code> <span class="tag">Tools</span><span class="tag all">전 플랜</span></h3>
+      <p>샌드박스 브라우저 서브에이전트로 웹 조사·UI 점검·브라우저 디버깅.</p>
+      <a class="src" href="https://antigravity.google/docs/commands/browser/" target="_blank" rel="noopener">출처: /browser ↗</a></article>
+    <article class="card"><h3><code>/btw</code> <span class="tag">Tools</span><span class="tag all">전 플랜</span></h3>
+      <p>작업을 멈추지 않고 백그라운드에서 짧은 곁가지 질문.</p></article>
+    <article class="card"><h3><code>/generative_ui</code> <span class="tag">Tools</span><span class="tag note">App 전용</span></h3>
+      <p>다이어그램·차트 등 인터랙티브 위젯을 HTML 아티팩트로 생성. CLI에서는 사용할 수 없음.</p></article>
   </div>
+  <a class="src" href="https://antigravity.google/docs/slash-commands/" target="_blank" rel="noopener">출처: Slash commands overview ↗</a>
 </section>
 
-<section id="community">
-  <h2>4. 공개·커뮤니티 스킬 예시</h2>
-  <p class="lead">아래 저장소는 웹 검색 요약에서 발견했으며, 내용과 유지 상태는 직접 검증하지 않았습니다. 설치 전 코드와 스크립트를 반드시 확인하세요.</p>
-  <div class="grid">
-    <article class="card">
-      <h3>공식 플러그인 마켓플레이스 <span class="badge ok">공식 확인</span></h3>
-      <p><code>agy plugin install &lt;name&gt;</code>으로 <code>@antigravity-plugins-official</code>의 스킬 번들을 설치합니다.</p>
-      <a class="src" href="https://antigravity.google/docs/skills/" target="_blank" rel="noopener">출처: Agent skills 문서 ↗</a>
-    </article>
-    <article class="card">
-      <h3>sickn33/agentic-awesome-skills <span class="badge unv">미확인</span></h3>
-      <p>여러 도구(Antigravity, Claude Code, Codex 등)를 지원하는 대형 <code>SKILL.md</code> 모음으로 소개됩니다.</p>
-      <a class="src" href="https://github.com/sickn33" target="_blank" rel="noopener">github.com/sickn33 ↗</a>
-    </article>
-    <article class="card">
-      <h3>rmyndharis/antigravity-skills <span class="badge unv">미확인</span></h3>
-      <p>Antigravity용으로 정리·이식한 스킬 모음으로 소개됩니다.</p>
-      <a class="src" href="https://github.com/rmyndharis/antigravity-skills" target="_blank" rel="noopener">github.com/rmyndharis/antigravity-skills ↗</a>
-    </article>
-    <article class="card">
-      <h3>krishnakanthb13/antigravity_global_skills <span class="badge unv">미확인</span></h3>
-      <p>코드 리뷰, 보안 점검, 릴리스 관리 등 전역 워크플로 스킬로 소개됩니다.</p>
-      <a class="src" href="https://github.com/krishnakanthb13/antigravity_global_skills" target="_blank" rel="noopener">github.com/krishnakanthb13/antigravity_global_skills ↗</a>
-    </article>
-  </div>
-</section>
-
-<section id="repo">
-  <h2>5. 이 저장소(lietzsche/ai)의 연결</h2>
-  <p class="lead">공통 원본은 <code>skills/</code>에 두고, 도구별로 얇은 진입점을 둡니다.</p>
+<section id="all">
+  <h2>4. CLI 전체 슬래시 명령</h2>
+  <p class="lead">공식 "CLI commands" 레퍼런스의 TUI 슬래시 명령 전체 목록입니다. 프롬프트에서 <code>/</code>를 입력하면 자동완성 메뉴가 열립니다.</p>
+  <input class="filter" id="cmd-filter" type="search" placeholder="명령·분류·설명 검색..." aria-label="슬래시 명령 검색">
   <div class="tablebox">
-    <table>
-      <thead><tr><th>경로</th><th>역할</th></tr></thead>
+    <table id="cmd-table">
+      <thead><tr><th>명령</th><th>분류</th><th>별칭</th><th>설명</th></tr></thead>
       <tbody>
-        <tr><td><code>skills/&lt;name&gt;/SKILL.md</code></td><td>공통 원본 (실제 지침)</td></tr>
-        <tr><td><code>.agents/skills/&lt;name&gt;/SKILL.md</code></td><td>Codex 진입점이면서 Antigravity의 기본 워크스페이스 경로 → <code>/grill-me</code>, <code>/make-plan</code>으로 노출</td></tr>
-        <tr><td><code>.claude/skills/&lt;name&gt;/SKILL.md</code></td><td>Claude Code 진입점</td></tr>
+        <tr><td><code>/add-dir &lt;path&gt;</code></td><td>Utilities</td><td></td><td>워크스페이스에 디렉터리 추가</td></tr>
+        <tr><td><code>/agents</code></td><td>Tools &amp; Tasks</td><td></td><td>에이전트 관리자: 커스텀 에이전트 전환, 서브에이전트 모니터링</td></tr>
+        <tr><td><code>/artifact</code></td><td>Tools &amp; Tasks</td><td></td><td>아티팩트 검토 패널 열기</td></tr>
+        <tr><td><code>/boost &lt;task&gt;</code></td><td>Reasoning</td><td></td><td>온디맨드 멀티 에이전트 심층 추론</td></tr>
+        <tr><td><code>/browser &lt;task&gt;</code></td><td>Tools &amp; Tasks</td><td></td><td>브라우저 서브에이전트에 웹 탐색·UI 검증 위임</td></tr>
+        <tr><td><code>/btw &lt;query&gt;</code></td><td>Utilities</td><td></td><td>대화를 끊지 않고 백그라운드 곁가지 질문</td></tr>
+        <tr><td><code>/changelog</code></td><td>Utilities</td><td></td><td>릴리스 노트 뷰어</td></tr>
+        <tr><td><code>/clear</code></td><td>Utilities</td><td><code>/new</code></td><td>터미널 정리와 대화 컨텍스트 초기화</td></tr>
+        <tr><td><code>/codesearch &lt;query&gt;</code></td><td>Utilities</td><td><code>/cs</code>, <code>/search</code></td><td>워크스페이스 코드 검색 패널</td></tr>
+        <tr><td><code>/config</code></td><td>Configurations</td><td><code>/settings</code></td><td>설정 편집기</td></tr>
+        <tr><td><code>/context</code></td><td>Utilities</td><td></td><td>컨텍스트 사용량 시각화</td></tr>
+        <tr><td><code>/copy [n|btw]</code></td><td>Utilities</td><td></td><td>마지막·n번째 응답 또는 최근 <code>/btw</code> 답변 복사</td></tr>
+        <tr><td><code>/credits</code></td><td>Account</td><td></td><td>남은 크레딧과 구매 링크</td></tr>
+        <tr><td><code>/diff</code></td><td>Utilities</td><td></td><td>변경·턴·커밋 diff 뷰어</td></tr>
+        <tr><td><code>/effort [level]</code></td><td>Configurations</td><td></td><td>모델 추론 강도 설정(low~max)</td></tr>
+        <tr><td><code>/exit</code></td><td>Core</td><td><code>/quit</code></td><td>TUI 종료</td></tr>
+        <tr><td><code>/feedback</code></td><td>Utilities</td><td></td><td>피드백 제출</td></tr>
+        <tr><td><code>/fork</code></td><td>Conversations</td><td><code>/branch</code></td><td>현재 대화를 새 병렬 세션으로 복제</td></tr>
+        <tr><td><code>/goal &lt;objective&gt;</code></td><td>Reasoning</td><td></td><td>목표 완료가 검증될 때까지 자율 실행</td></tr>
+        <tr><td><code>/grill-me [task]</code></td><td>Planning</td><td></td><td>작업 전 한 질문씩 추천 답과 함께 인터뷰</td></tr>
+        <tr><td><code>/help</code></td><td>Utilities</td><td></td><td>명령·단축키 도움말</td></tr>
+        <tr><td><code>/hooks</code></td><td>Tools &amp; Tasks</td><td></td><td>활성 스크립트 훅 탐색</td></tr>
+        <tr><td><code>/keybindings</code></td><td>Configurations</td><td></td><td>단축키 편집기</td></tr>
+        <tr><td><code>/learn [instruction]</code></td><td>Tools &amp; Tasks</td><td></td><td>세션 수정 사항을 Rule·Skill로 저장(검토 제안)</td></tr>
+        <tr><td><code>/logout</code></td><td>Account</td><td></td><td>로그아웃과 인증 토큰 삭제</td></tr>
+        <tr><td><code>/mcp</code></td><td>Tools &amp; Tasks</td><td></td><td>MCP 서버 관리자</td></tr>
+        <tr><td><code>/model</code></td><td>Configurations</td><td></td><td>기본 모델 선택. <code>/model &lt;model&gt; &lt;prompt&gt;</code>로 1회만 다른 모델 사용</td></tr>
+        <tr><td><code>/open &lt;path&gt;</code></td><td>Utilities</td><td></td><td>경로를 기본 에디터로 열기</td></tr>
+        <tr><td><code>/permissions</code></td><td>Configurations</td><td></td><td>도구 권한 관리자</td></tr>
+        <tr><td><code>/plan [task]</code></td><td>Planning</td><td></td><td>코드 조사·요구사항 정리 후 구현 계획 작성</td></tr>
+        <tr><td><code>/plugin</code></td><td>Tools &amp; Tasks</td><td><code>/plugins</code></td><td>플러그인 관리자, install·uninstall·enable·disable·list</td></tr>
+        <tr><td><code>/rename &lt;name&gt;</code></td><td>Conversations</td><td></td><td>세션 이름 변경</td></tr>
+        <tr><td><code>/remote-control [on/off]</code></td><td>Utilities</td><td></td><td>원격 제어 켜기·끄기</td></tr>
+        <tr><td><code>/resume</code></td><td>Conversations</td><td><code>/switch</code>, <code>/conversation</code></td><td>이전 대화 선택·불러오기</td></tr>
+        <tr><td><code>/rewind</code></td><td>Conversations</td><td><code>/undo</code></td><td>이전 메시지 시점으로 되돌리기</td></tr>
+        <tr><td><code>/schedule &lt;when&gt; &lt;task&gt;</code></td><td>Tools &amp; Tasks</td><td></td><td>일회성 타이머·반복 cron 예약</td></tr>
+        <tr><td><code>/skills</code></td><td>Tools &amp; Tasks</td><td></td><td>로드된 스킬 탐색, <code>/skills reload</code>로 다시 읽기</td></tr>
+        <tr><td><code>/statusline</code></td><td>Configurations</td><td></td><td>상태 표시줄 사용자화</td></tr>
+        <tr><td><code>/tasks</code></td><td>Tools &amp; Tasks</td><td></td><td>백그라운드 셸 작업 로그 모니터링</td></tr>
+        <tr><td><code>/teamwork &lt;task&gt;</code></td><td>Reasoning</td><td></td><td>장기 프로젝트용 멀티 에이전트 팀(유료)</td></tr>
+        <tr><td><code>/title [on/off]</code></td><td>Configurations</td><td></td><td>터미널 창 제목 갱신 설정</td></tr>
+        <tr><td><code>/usage</code></td><td>Utilities</td><td><code>/quota</code></td><td>모델 할당량 사용량</td></tr>
+        <tr><td><code>/voice</code></td><td>Utilities</td><td></td><td>음성 대화(<code>/voice live</code>)·받아쓰기(<code>/voice dictate</code>)</td></tr>
       </tbody>
     </table>
   </div>
-  <div class="grid" style="margin-top:16px">
-    <article class="card">
-      <h3><code>grill-me</code></h3>
-      <p>아이디어를 한 번에 한 질문씩 인터뷰해 요구사항으로 정리합니다. Antigravity 내장 <code>/grill-me</code>와 이름이 같으므로 어느 쪽이 호출되는지는 실제 클라이언트에서 확인이 필요합니다.</p>
-    </article>
-    <article class="card">
-      <h3><code>make-plan</code></h3>
-      <p>확정된 요구사항을 단계·산출물·검증·위험이 담긴 실행 계획으로 만듭니다. grill-me 요약에서 이어지는 체인을 지원합니다.</p>
-    </article>
-  </div>
+  <p class="lead" style="margin-top:12px">여기에 더해, 설치된 스킬마다 <code>/&lt;skill-name&gt;</code> 명령이 자동으로 추가됩니다.</p>
+  <a class="src" href="https://antigravity.google/docs/cli/reference/" target="_blank" rel="noopener">출처: CLI commands 레퍼런스 ↗</a>
 </section>
 </main>
 
 <footer>
-  주요 출처: <a class="src" href="https://antigravity.google/docs/skills/" target="_blank" rel="noopener">Agent skills</a> ·
-  <a class="src" href="https://antigravity.google/docs/commands/grill-me/" target="_blank" rel="noopener">/grill-me</a>.
-  "미확인" 항목은 2026-11-09 웹 검색 요약 기준이며, 공식 문서가 바뀔 수 있습니다.
+  주요 출처:
+  <a href="https://antigravity.google/docs/skills/" target="_blank" rel="noopener">Agent skills</a> ·
+  <a href="https://antigravity.google/docs/slash-commands/" target="_blank" rel="noopener">Slash commands overview</a> ·
+  <a href="https://antigravity.google/docs/cli/reference/" target="_blank" rel="noopener">CLI commands</a> ·
+  <a href="https://antigravity.google/docs/plugins/" target="_blank" rel="noopener">Plugins</a>.
+  2026-11-09에 조사한 내용입니다.
 </footer>
 </div>
+<script>
+  document.getElementById('cmd-filter').addEventListener('input', function (e) {
+    var q = e.target.value.trim().toLowerCase();
+    document.querySelectorAll('#cmd-table tbody tr').forEach(function (tr) {
+      tr.style.display = tr.textContent.toLowerCase().indexOf(q) === -1 ? 'none' : '';
+    });
+  });
+</script>
 </body>
 </html>
