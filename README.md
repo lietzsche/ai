@@ -88,11 +88,10 @@ $cli-guide Linux 파일·프로세스 관리 명령어
 
 ## CLI 욜로(YOLO) 모드 명령어
 
-도구 실행과 파일 수정을 확인 프롬프트 없이 자동 승인하는 플래그입니다. 신뢰할 수 있거나 격리된 환경에서만 사용하세요.
+확인 프롬프트 없이 도구 실행과 파일 수정을 자동 승인하는 네이티브 플래그입니다.
 
-| 도구 | 명령어 | 비고 |
-| --- | --- | --- |
-| Antigravity CLI | `agy --dangerously-skip-permissions` | 샌드박스 내 자동 실행은 `agy --mode auto` |
-| Claude Code | `claude --dangerously-skip-permissions` | 모든 권한 확인 생략 |
-| OpenAI Codex CLI | `codex --yolo` | `--dangerously-bypass-approvals-and-sandbox` 단축 플래그 |
-| Gemini CLI | `gemini --yolo` | 권장: `gemini --approval-mode=yolo` (세션 중 `Ctrl+Y`) |
+| 도구 | 명령어 |
+| --- | --- |
+| Antigravity CLI | `agy --dangerously-skip-permissions` |
+| Claude Code | `claude --dangerously-skip-permissions` |
+| OpenAI Codex CLI | `codex --dangerously-bypass-approvals-and-sandbox` |
