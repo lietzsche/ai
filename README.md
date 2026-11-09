@@ -12,6 +12,7 @@ AI로 할 수 있는 일을 재사용 가능한 스킬과 워크플로로 모으
 | [skill-maker](skills/skill-maker/SKILL.md) | 아이디어나 반복 작업을 새로운 교차 호환 스킬로 설계·작성하거나 기존 스킬 수정 및 타 도구 워크플로 이식 |
 | [boost](skills/boost/SKILL.md) | 복잡한 버그·경쟁 상태·최적화 문제를 3단계 심층 추론(가설 수립 → 다각도 탐색·구현 → 독립 검증)으로 해결 |
 | [teamwork](skills/teamwork/SKILL.md) | 대규모 기능·마이그레이션·다중 모듈 작업을 4단계 에이전트 팀 협업(역할 분담·계약 합의 → 분할 실행 → 통합 검증)으로 수행 |
+| [docfig](skills/docfig/SKILL.md) | HTML 문서에 외부 의존성 없는 인라인 SVG 흐름도·구조도·매핑(격자) 그림을 넣고 밝은·어두운 화면과 접근성·링크를 점검 |
 
 ## 인터뷰 사용하기
 
@@ -116,6 +117,20 @@ $teamwork 저장소 전체의 REST API 클라이언트를 신규 SDK로 마이�
 ```
 
 위는 Codex(`$`나 `/skills`로 선택), 아래는 Claude Code 예시입니다. 진입 파일은 `.agents/skills/teamwork/SKILL.md`와 `.claude/skills/teamwork/SKILL.md`입니다.
+
+## HTML 문서에 그림 넣기(docfig)
+
+`docfig`는 HTML 문서에 외부 라이브러리나 이미지 없이 오프라인·폐쇄망에서도 열리는 인라인 SVG 그림(흐름도·구조도 `Flow`, 다대다 매핑 격자 `matrix`)을 생성해 넣고, `skills/docfig/scripts/figlib.py`로 접근성·링크(`check`)와 밝은·어두운 화면 렌더링(`shot`)을 점검합니다.
+
+```text
+$docfig docs/deploy-guide.html의 배포 절차를 흐름도로 그려서 넣어줘
+```
+
+```text
+/docfig docs/architecture.html의 단계별 테이블 읽기·쓰기 관계를 매핑 그림으로 추가해줘
+```
+
+위는 Codex(`$`나 `/skills`로 선택), 아래는 Claude Code 예시입니다. 진입 파일은 `.agents/skills/docfig/SKILL.md`와 `.claude/skills/docfig/SKILL.md`이며, 보조 스크립트는 `skills/docfig/scripts/figlib.py`입니다.
 
 ## Claude Code에서 사용하기
 
