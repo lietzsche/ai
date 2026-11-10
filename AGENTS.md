@@ -51,3 +51,5 @@ When the user requests `boost`, `/boost`, or multi-hypothesis deep reasoning on 
 When the user requests `teamwork`, `/teamwork`, or multi-agent role-based collaboration on a multi-module task or migration, read `skills/teamwork/SKILL.md` and follow it.
 
 When the user requests `docfig`, `/docfig`, or asks to add or update inline SVG flowcharts, architecture diagrams, or matrix mapping figures in an HTML document, read `skills/docfig/SKILL.md` and follow it.
+
+When the user requests `feel`, `/feel`, 체감 점검, or asks to find and fix perceived performance or UX problems (slowness, jank, flicker, layout shift, sluggish CLI or API responses), read `skills/feel/SKILL.md` and follow it.

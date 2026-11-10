@@ -13,6 +13,7 @@ AI로 할 수 있는 일을 재사용 가능한 스킬과 워크플로로 모으
 | [boost](skills/boost/SKILL.md) | 복잡한 버그·경쟁 상태·최적화 문제를 3단계 심층 추론(가설 수립 → 다각도 탐색·구현 → 독립 검증)으로 해결 |
 | [teamwork](skills/teamwork/SKILL.md) | 대규모 기능·마이그레이션·다중 모듈 작업을 4단계 에이전트 팀 협업(역할 분담·계약 합의 → 분할 실행 → 통합 검증)으로 수행 |
 | [docfig](skills/docfig/SKILL.md) | HTML 문서에 외부 의존성 없는 인라인 SVG 흐름도·구조도·매핑(격자) 그림을 넣고 밝은·어두운 화면과 접근성·링크를 점검 |
+| [feel](skills/feel/SKILL.md) | 체감 점검: 웹·앱·CLI·API의 느림·버벅임·깜빡임 같은 체감 문제를 메인·검수·평가 3세션으로 찾아 고치고 전후 측정으로 검증 |
 
 ## 인터뷰 사용하기
 
@@ -131,6 +132,20 @@ $docfig docs/deploy-guide.html의 배포 절차를 흐름도로 그려서 넣어
 ```
 
 위는 Codex(`$`나 `/skills`로 선택), 아래는 Claude Code 예시입니다. 진입 파일은 `.agents/skills/docfig/SKILL.md`와 `.claude/skills/docfig/SKILL.md`이며, 보조 스크립트는 `skills/docfig/scripts/figlib.py`입니다.
+
+## 체감 점검(feel)
+
+`feel`은 오류는 없지만 써 보면 느리거나 어색한 문제(느린 반응, 버벅임, 깜빡임, 레이아웃 밀림, 답답한 CLI·API 응답)를 다룹니다. 메인이 범위와 지표를 정하고, 원인을 찾는 검수 세션과 사용자 관점에서 측정하는 평가 세션을 서로 독립적으로 돌린 뒤, 수정 → 교차 검증 → 전후 비교표로 마무리합니다. 웹·모바일·데스크톱·CLI·백엔드 등 프로젝트 종류를 먼저 파악해 그에 맞는 지표와 측정 도구를 고르며, 서브에이전트가 없으면 한 세션이 역할을 바꿔 가며 수행합니다.
+
+```text
+$feel 검색어를 입력하면 결과 목록이 늦게 뜨고 깜빡여
+```
+
+```text
+/feel 우리 CLI의 build 명령이 왠지 답답하게 느려
+```
+
+위는 Codex(`$`나 `/skills`로 선택), 아래는 Claude Code 예시입니다. 진입 파일은 `.agents/skills/feel/SKILL.md`와 `.claude/skills/feel/SKILL.md`입니다.
 
 ## Claude Code에서 사용하기
 
