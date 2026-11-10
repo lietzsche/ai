@@ -53,3 +53,10 @@ When the user requests `teamwork`, `/teamwork`, or multi-agent role-based collab
 When the user requests `docfig`, `/docfig`, or asks to add or update inline SVG flowcharts, architecture diagrams, or matrix mapping figures in an HTML document, read `skills/docfig/SKILL.md` and follow it.
 
 When the user requests `feel`, `/feel`, 체감 점검, or asks to find and fix perceived performance or UX problems (slowness, jank, flicker, layout shift, sluggish CLI or API responses), read `skills/feel/SKILL.md` and follow it.
+
+## Windows 브라우저 자동화와 계정 잠금
+
+- Windows Chrome·Edge를 새 임시 프로필로 반복 실행하면 OS의 빈 암호 확인 때문에 로그인 계정이 잠길 수 있다. Lighthouse·Puppeteer·Playwright·스크린샷과 WSL/Git Bash에서 Windows 브라우저를 실행하는 경우에도 적용한다.
+- 브라우저 작업을 서브에이전트에 위임할 때 이 규칙과 사용할 프로필 경로를 함께 전달한다. 같은 프로필의 준비·사용은 직렬화하고, 여러 작업은 서로 다른 측정 전용 고정 프로필을 사용한다.
+- feel 측정은 `skills/feel/SKILL.md`의 Windows 실행 조건과 `skills/feel/scripts/prepare_browser_profile.py`를 따른다. docfig 스크린샷은 `python skills/docfig/scripts/figlib.py shot ...`을 사용한다. docfig 실행도 같은 프로필로 병렬 수행하지 않는다.
+- 캐시 준비가 실패하거나 안전한 실행 경로가 없으면 임시 프로필로 우회·재시도하지 말고 브라우저 측정을 미측정으로 남긴다. 실제 사용자 프로필을 직접 자동화하거나 계정 잠금 정책을 완화하지 않는다.

@@ -25,6 +25,18 @@ description: 오류는 없지만 써 보면 느리거나 어색한 체감 성능
   - **사용 가능한 측정 도구**: 브라우저 자동화·DevTools, 프로파일러, 벤치마크 도구, 로그
 - 대상이나 증상이 전혀 특정되지 않을 때만 한 번에 한 질문씩 묻는다. 선택지를 제시할 때는 현재 저장소에 `skills/grill-me/SKILL.md`가 있으면 그 선택형 질문 UI 지침을 따르고, 없으면 호스트의 질문 도구(Claude Code `AskUserQuestion`, Codex `request_user_input`)를 쓰거나 추천안을 맨 앞에 둔 번호 목록으로 묻는다.
 
+## Windows 브라우저 측정: 계정 잠금 예방
+
+Windows에서 Chrome·Edge를 새 임시 프로필로 반복 실행하면 빈 암호 확인(`LogonUser`, 이벤트 4625)이 누적되어 윈도우 로그인 계정이 잠길 수 있다. Lighthouse·Puppeteer·Playwright 및 headless/headed 실행 모두에 적용한다. WSL·Git Bash에서 Windows 브라우저를 실행할 때도 같다.
+
+- 브라우저 실행 전에 `python skills/feel/scripts/prepare_browser_profile.py --browser chrome`을 실행한다(Edge는 `--browser edge`). 이 스크립트는 docfig의 예방 방식을 따라 측정 전용 고정 프로필에 기존 브라우저의 암호 확인 캐시 두 값만 반영한다. 출력된 절대 경로를 이후 실행에 반드시 전달한다. 실제 사용자 프로필을 자동화에 직접 사용하지 않는다.
+- 캐시 누락·읽기 실패·스크립트 실패 시 브라우저를 실행하거나 임시 프로필로 재시도하지 않는다. 고정 경로만 지정하거나 `--no-first-run`을 붙이는 것으로 대체하지 않는다. 정적 분석·HTTP 타이밍 등으로 전환하고 브라우저 지표는 미측정으로 보고한다. 캐시를 임의의 시각으로 만들어 넣지 않는다.
+- Puppeteer는 `puppeteer.launch({executablePath, userDataDir: profilePath, headless: true})`, Playwright는 `chromium.launchPersistentContext(profilePath, {executablePath, headless: true})`로 실행한다. 해당 브라우저와 준비한 캐시의 종류를 일치시킨다.
+- Lighthouse는 `chrome-launcher.launch({chromePath, userDataDir: profilePath, chromeFlags: ['--headless=new']})`로 브라우저를 한 번 열고, `lighthouse(url, {port: chrome.port, ...options})`로 기존 브라우저에 연결하여 반복 측정한다. 기본 임시 프로필을 만드는 Lighthouse CLI 반복 실행은 하지 않는다. 종료 시 자신이 시작한 브라우저만 닫는다.
+- 준비 스크립트는 측정 브라우저가 닫힌 상태에서 실행한다. 준비부터 브라우저 종료까지 같은 프로필 사용은 한 번에 한 세션으로 직렬화한다. 여러 프로젝트·서브에이전트가 동시에 측정하면 서로 다른 고정 프로필 경로를 `--profile`로 지정하여 각각 준비한다. 측정 사이에 프로필을 삭제하지 않는다.
+- 메인은 2·4단계 평가 위임 시 이 절의 규칙과 준비 스크립트 경로를 반드시 전달한다. 위임받은 세션은 첫 브라우저 실행 전에 준비 성공과 실행 코드의 프로필 전달을 확인한다. 최소 3회 반복 규칙보다 이 실행 조건이 우선한다.
+- OS 인증 실패·계정 잠금 징후가 생기면 브라우저 측정을 즉시 중단하고 보고한다. 재현을 위한 반복 실행이나 계정 잠금 정책 완화를 하지 않는다. 캐시 방식은 Chromium 구현에 의존하므로 모든 버전에서 예방된다고 단정하지 않는다.
+
 ## 실행 단계
 
 ### 1단계 — 범위와 기준 정하기 (메인)
