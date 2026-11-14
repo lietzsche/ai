@@ -24,6 +24,7 @@ $find-skills PR 리뷰                     # Codex (/skills 목록에서도 선�
 | 스킬 | 출처 | 라이선스 |
 | --- | --- | --- |
 | [find-skills](.agents/skills/find-skills/SKILL.md) | [vercel-labs/skills](https://github.com/vercel-labs/skills) | MIT |
+| [handoff](.agents/skills/handoff/SKILL.md) | [mattpocock/skills](https://github.com/mattpocock/skills) | MIT |
 
 새 스킬을 설치하면 이 표와 [docs/find-skills-guide.html](docs/find-skills-guide.html)의 "설치한 스킬" 섹션, [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)에 추가합니다.
 
@@ -38,3 +39,7 @@ $find-skills PR 리뷰                     # Codex (/skills 목록에서도 선�
 | [antigravity-cli-skills.html](docs/antigravity-cli-skills.html) | Antigravity CLI 스킬과 슬래시 명령 |
 
 HTML 파일은 브라우저로 엽니다. 리눅스에서는 `xdg-open docs/linux-cli-guide.html`, 윈도우에서는 `start docs\linux-cli-guide.html`을 씁니다.
+
+### 세션 인계: handoff
+
+Claude Code에서는 `/handoff 다음 세션의 목적`, Codex에서는 `$handoff 다음 세션의 목적` 또는 `/skills`에서 선택합니다. 대화 요약을 OS 임시 폴더에 저장하며, 새 세션에서 해당 파일을 읽고 이어가도록 요청합니다. 자동 재개 훅은 포함하지 않습니다. 실제 클라이언트의 발견·호출은 아직 확인하지 않았습니다.

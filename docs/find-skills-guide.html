@@ -245,8 +245,24 @@ npx skills add &lt;owner/repo&gt; --skill &lt;name&gt; \
         <li>용도: 필요한 기능에 맞는 스킬 검색·품질 확인·설치 제안</li>
         <li>사용 예: "테스트 자동화 스킬 찾아줘"</li>
       </ul>
-      <p><span class="tag note">설치 방식</span> 이 저장소에는 공식 <code>SKILL.md</code>를 그대로 복사해 두었습니다. CLI로 설치하지 않아 <code>skills-lock.json</code>이 없으므로, 2장의 명령으로 다시 설치하면 CLI가 관리하는 상태가 됩니다.</p>
+      <p><span class="tag note">설치 방식</span> 이 저장소에는 공식 <code>SKILL.md</code>를 그대로 복사해 두었습니다. find-skills 자체는 CLI 잠금 파일에 기록되지 않았으므로, 2장의 명령으로 다시 설치하면 CLI가 관리하는 상태가 됩니다.</p>
       <a class="src" href="https://skills.sh/vercel-labs/skills/find-skills" target="_blank" rel="noopener">skills.sh 페이지 ↗</a>
+    </article>
+    <article class="card">
+      <h3><code>handoff</code> <span class="tag all">MIT</span><span class="tag">세션 인계</span></h3>
+      <ul>
+        <li>출처: Matt Pocock · <code>mattpocock/skills</code> · 커밋 <code>5863806</code> (2026-11-14 설치)</li>
+        <li>위치: <code>.agents/skills/handoff/</code>, <code>.claude/skills/handoff</code>(링크)</li>
+        <li>용도: 현재 대화를 인계 문서로 요약해 새 세션에서 작업을 이어가기</li>
+        <li>OS 임시 폴더에 저장하며 기존 명세·계획·커밋은 참조하고 민감한 정보는 제거합니다.</li>
+      </ul>
+      <pre><code>npx skills add mattpocock/skills --skill handoff -a claude-code -a codex
+/handoff 다음 세션에서 로그인 오류 수정    # Claude Code
+$handoff 다음 세션에서 로그인 오류 수정    # Codex</code></pre>
+      <p>Codex는 <code>/skills</code>에서도 선택할 수 있습니다. 생성된 경로를 확인하고 새 세션에 “이 파일을 읽고 이어가 줘”라고 요청하세요. 자동 재개 훅은 포함하지 않습니다. 실제 클라이언트 호출은 미검증입니다.</p>
+      <p>설치 시 공개 목록은 약 110만 설치, 저장소 약 32만 스타로 표시했습니다. 숫자는 변동하는 참고값입니다. CLI 잠금 파일을 함께 기록했습니다.</p>
+      <a class="src" href="https://skills.sh/mattpocock/skills/handoff" target="_blank" rel="noopener">skills.sh 페이지 ↗</a>
+      <a class="src" href="https://github.com/mattpocock/skills/blob/5863806dd4e15c63174bee4e7515a4256792ecfa/skills/productivity/handoff/SKILL.md" target="_blank" rel="noopener">설치 원문 ↗</a>
     </article>
   </div>
 </section>
