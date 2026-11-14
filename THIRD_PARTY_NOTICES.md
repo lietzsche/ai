@@ -62,12 +62,3 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
-
-## web-design-guidelines
-
-- 경로: `.agents/skills/web-design-guidelines/SKILL.md` (`.claude/skills/web-design-guidelines`는 심볼릭 링크)
-- 출처: https://github.com/vercel-labs/agent-skills/tree/1a2c79d4e6c4a2283dc2c614b6538cbe1ed5ca62/skills/web-design-guidelines
-- 커밋: `1a2c79d4e6c4a2283dc2c614b6538cbe1ed5ca62` (2026-10-27, 설치 파일과 원본 일치 확인)
-- 라이선스: MIT (저장소 README의 License 절 기준. 이 커밋에는 별도 LICENSE 파일이 없음)
-- 설치: `npx skills add vercel-labs/agent-skills --skill web-design-guidelines -a claude-code -a codex -y`
-- 실행 시 가이드라인 원문 https://raw.githubusercontent.com/vercel-labs/web-interface-guidelines/main/command.md 를 내려받는다.

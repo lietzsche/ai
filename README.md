@@ -17,7 +17,6 @@ AI 스킬과 CLI 명령어를 모으고 설명하는 저장소입니다. 공통 
 | --- | --- | --- |
 | [find-skills](.agents/skills/find-skills/SKILL.md) | [vercel-labs/skills](https://github.com/vercel-labs/skills) | MIT |
 | [handoff](.agents/skills/handoff/SKILL.md) | [mattpocock/skills](https://github.com/mattpocock/skills) | MIT |
-| [web-design-guidelines](.agents/skills/web-design-guidelines/SKILL.md) | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills) | MIT (README 표기) |
 
 새 스킬은 find-skills로 찾고 프로젝트 범위로 양쪽 에이전트에 설치합니다. 설치한 모든 스킬은 [스킬 통합 가이드](docs/skills-guide.html#installed)와 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)에 기록합니다.
 
@@ -31,8 +30,6 @@ npx skills add <owner/repo> --skill <name> -a claude-code -a codex
 $find-skills PR 리뷰                     # Codex (/skills에서도 선택)
 /handoff 다음 세션에서 로그인 오류 수정  # Claude Code
 $handoff 다음 세션에서 로그인 오류 수정  # Codex
-/web-design-guidelines docs/skills-guide.html  # Claude Code
-$web-design-guidelines docs/skills-guide.html  # Codex
 ```
 
 설치 원본은 `.agents/skills/<name>/`, Claude Code 연결은 `.claude/skills/<name>`에 있습니다. handoff는 인계서를 OS 임시 폴더에 저장하며 자동 재개 훅은 없습니다. 실제 클라이언트에서 모든 스킬의 발견·호출·자동완성까지 검증한 것은 아닙니다.
