@@ -120,11 +120,11 @@ tbody tr.cmd{content-visibility:auto;contain-intrinsic-size:auto 46px}
 <header>
   <h1>스킬 통합 가이드</h1>
   <p>이 프로젝트에 설치한 모든 스킬의 설치·호출·사용법과 오픈소스 참고 자료를 한곳에서 봅니다. 새 스킬은 find-skills로 찾고 이 문서에 추가합니다.</p>
-  <div class="meta">조사일: 2026-11-14 · 출처: Vercel Skills, Matt Pocock Skills, Visual Explainer의 원문과 공식 문서 (각 카드에 커밋 기록) · CLI는 자주 바뀌므로 <code translate="no">npx skills --help</code>로 최신 옵션을 확인하세요.</div>
+  <div class="meta">조사일: 2026-11-14 · 출처: Vercel Skills, Matt Pocock Skills, Visual Explainer, samber/cc-skills의 원문과 공식 문서 (각 카드에 커밋 기록) · CLI는 자주 바뀌므로 <code translate="no">npx skills --help</code>로 최신 옵션을 확인하세요.</div>
 </header>
 
 <nav class="toc" aria-label="목차">
-  <a href="#installed">설치된 스킬 3개</a>
+  <a href="#installed">설치된 스킬 4개</a>
   <a href="#about">스킬 찾기</a>
   <a href="#install">설치</a>
   <a href="#usage">사용법</a>
@@ -184,6 +184,22 @@ $visual-explainer 캐시 동작을 SVG 흐름도와 차트 중심으로 설명�
       <p>설치 당시 공개 목록은 874회 설치, 저장소 약 1.1만 스타로 표시됐습니다. 파일 원본·링크·잠금 해시는 확인했으며 실제 클라이언트의 스킬 호출과 생성 결과는 아직 검증하지 않았습니다.</p>
       <a class="src" href="https://skills.sh/nicobailon/visual-explainer/visual-explainer" target="_blank" rel="noopener">skills.sh 페이지 ↗</a>
       <a class="src" href="https://github.com/nicobailon/visual-explainer/tree/9d5f880b7e8e0a9a80c890b8e1bb6918b68481ad/plugins/visual-explainer" target="_blank" rel="noopener">설치 원문 ↗</a>
+    </article>
+    <article class="card">
+      <h3 id="skill-deep-research"><code translate="no">deep-research</code> <span class="tag all">MIT</span><span class="tag">딥리서치</span></h3>
+      <ul><li>출처: Samuel Berthe · <code translate="no">samber/cc-skills</code> · 커밋 <code translate="no">50a3383</code> (2026-11-14 설치)</li>
+      <li>위치: <code translate="no">.agents/skills/deep-research/</code>, <code translate="no">.claude/skills/deep-research</code>(링크)</li>
+      <li>용도: 여러 출처를 교차 검증해 인용이 달린 Markdown 조사 보고서 작성. Gemini·ChatGPT 딥리서치를 대신하는 용도</li>
+      <li>범위 인터뷰 → 서브에이전트 3~20개 병렬 웹 검색 → 종합 → 보고서 순서로 진행합니다. 깊이는 Quick·Standard·Deep, 조사 유형은 시장·기술·경쟁·학술·법률 등 11가지입니다.</li>
+      <li>검증 규칙: 모든 주장에 출처 URL을 붙이고, 핵심 주장은 독립 출처 2개 이상이 없으면 신뢰도 Low로 표시하며, 출처 간 충돌과 근거 없는 항목을 숨기지 않습니다.</li>
+      <li>과금: 에이전트 기본 웹 검색·페이지 읽기만 써서 별도 API 키나 유료 서비스가 필요 없습니다. 서브에이전트를 많이 띄우므로 구독 사용량은 많이 씁니다.</li></ul>
+      <pre translate="no"><code translate="no">npx skills add samber/cc-skills --skill deep-research -a claude-code -a codex
+/deep-research 2026년 로컬 LLM 추론 엔진 비교, 성능·라이선스 중심    # Claude Code
+$deep-research 2026년 로컬 LLM 추론 엔진 비교, 성능·라이선스 중심    # Codex</code></pre>
+      <p>Codex는 <code translate="no">/skills</code>에서도 선택합니다. 정확도가 중요하면 “Deep 모드로”라고 지정하세요. PDF 변환은 <code translate="no">pandoc</code>이나 <code translate="no">md-to-pdf</code>가 있을 때만 동작하며, 설치되어 있지 않으면 Markdown으로만 받습니다. Claude Code의 내장 <code translate="no">anthropic-skills:deep-research</code>와 이름이 비슷하니 <code translate="no">/deep-research</code>로 직접 호출하는 편이 확실합니다.</p>
+      <p>설치 당시 공개 목록은 약 5.6천 설치, 저장소 243 스타였습니다. skills CLI 보안 평가는 Gen Safe·Socket 0건·Snyk Med Risk였으며, <code translate="no">curl</code>·<code translate="no">pandoc</code> 실행 권한 외에 스크립트나 실행 파일은 없음을 확인했습니다. 설치 파일 18개가 원본 커밋과 일치하고 Claude Code 스킬 목록에 나타나는 것까지 확인했습니다. 실제 호출과 보고서 생성, Codex 쪽 발견은 아직 검증하지 않았습니다.</p>
+      <a class="src" href="https://skills.sh/samber/cc-skills/deep-research" target="_blank" rel="noopener">skills.sh 페이지 ↗</a>
+      <a class="src" href="https://github.com/samber/cc-skills/tree/50a33836b20f690c668af557bd9ef9d07a8c7ef2/skills/deep-research" target="_blank" rel="noopener">설치 원문 ↗</a>
     </article>
   </div>
 </section>
@@ -343,7 +359,7 @@ npx skills add &lt;owner/repo&gt; --skill &lt;name&gt; \
       <p>직접 수정하면 <code translate="no">skills-lock.json</code>의 해시와 달라져 <code translate="no">list</code>에서 <code translate="no">modified</code>로 표시되고 <code translate="no">check</code>가 실패합니다. 바꿔야 하면 업데이트나 재설치로 처리합니다.</p></article>
   </div>
 </section>
-<section id="references"><h2>오픈소스 참고와 세션 인계 조사</h2><p class="lead">2026-11-14 조사 자료입니다. 아래 외부 후보와 과거 스킬 이름은 현재 설치 목록과 구분합니다. 실제 설치 상태는 맨 위 카드 3개를 기준으로 봅니다.</p><section id="ref-development"><h3>02 · 개발 관련 오픈소스 레퍼런스</h3><p>아래 프로젝트를 모두 설치했다는 뜻은 아닙니다. 앞선 조사에서 찾은 외부 레퍼런스를 최초 조사 당시 로컬 스킬과 비교한 목록입니다. 인기도는 설치 수·스타라는 서로 다른 지표를 섞어 단일 순위로 만들지 않았습니다.</p>
+<section id="references"><h2>오픈소스 참고와 세션 인계 조사</h2><p class="lead">2026-11-14 조사 자료입니다. 아래 외부 후보와 과거 스킬 이름은 현재 설치 목록과 구분합니다. 실제 설치 상태는 맨 위 카드 4개를 기준으로 봅니다.</p><section id="ref-development"><h3>02 · 개발 관련 오픈소스 레퍼런스</h3><p>아래 프로젝트를 모두 설치했다는 뜻은 아닙니다. 앞선 조사에서 찾은 외부 레퍼런스를 최초 조사 당시 로컬 스킬과 비교한 목록입니다. 인기도는 설치 수·스타라는 서로 다른 지표를 섞어 단일 순위로 만들지 않았습니다.</p>
 <div class="grid">
 <article><span class="tag">MIT · 추가 참고 후보</span><h4>Matt Pocock Skills</h4><p>인터뷰, 설계 검토, 구현·코드 리뷰를 작고 조합 가능한 스킬로 구성합니다. 공개 <code translate="no">grill-me</code>는 현재 실제 인터뷰 스킬 <code translate="no">grilling</code>을 부르는 진입점입니다.</p><p>우리 <code translate="no">grill-me</code>·<code translate="no">make-plan</code>과 비교하기 좋습니다. <code translate="no">grill-with-docs</code>도 문서 기반 검토 후보입니다.</p><p><a href="https://github.com/mattpocock/skills">저장소·라이선스</a> · <a href="https://github.com/mattpocock/skills/blob/main/skills/productivity/grill-me/SKILL.md">grill-me 원문</a></p></article>
 <article><span class="tag">MIT · 추가 참고 후보</span><h4>Obra Superpowers</h4><p>브레인스토밍, 계획, TDD, 근본 원인 디버깅, 리뷰와 완료 검증을 연결하는 개발 방법론입니다.</p><p>우리 <code translate="no">boost</code>·<code translate="no">teamwork</code>·<code translate="no">make-plan</code>의 단계 연결과 완료 조건을 비교할 때 유용합니다. 스킬 전체를 도입하기 전, 중복되는 규칙을 살펴보는 편이 좋습니다.</p><p><a href="https://github.com/obra/superpowers">저장소·스킬 목록</a></p></article>

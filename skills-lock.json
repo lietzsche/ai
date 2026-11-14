@@ -1,6 +1,12 @@
 {
   "version": 2,
   "skills": {
+    "deep-research": {
+      "source": "samber/cc-skills",
+      "sourceType": "github",
+      "skillPath": "skills/deep-research/SKILL.md",
+      "computedHash": "88db483ff93c88cba4040262aad69aec8a96e091bd94467e6cfa4d8a72c6d273"
+    },
     "handoff": {
       "source": "mattpocock/skills",
       "sourceType": "github",
