@@ -1,0 +1,848 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b0d14"><title>CLI 통합 가이드</title><style>
+  :root {
+    --bg: #0b0d14; --bg2: #121624; --card: rgba(255,255,255,0.04);
+    --line: rgba(255,255,255,0.09); --text: #e6e8f0; --muted: #9aa1b8;
+    --a1: #7c8cff; --a2: #3fd6c6; --a3: #f58ab0; --warn: #f5b25a;
+  }
+  * { box-sizing: border-box; }
+  html { color-scheme: dark; -webkit-text-size-adjust: 100%; }
+  @media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+  body {
+    margin: 0; color: var(--text); line-height: 1.65;
+    font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif;
+    background: radial-gradient(1200px 600px at 10% -10%, #1e2350 0%, transparent 60%),
+                radial-gradient(900px 500px at 110% 10%, #0f3b3a 0%, transparent 55%), var(--bg);
+    min-height: 100vh;
+  }
+  a, button, input { touch-action: manipulation; -webkit-tap-highlight-color: rgba(124,140,255,.25); }
+  :focus-visible { outline: 2px solid var(--a2); outline-offset: 2px; }
+  main:focus:not(:focus-visible) { outline: none; }
+  [id] { scroll-margin-top: 16px; }
+  .skip {
+    position: absolute; left: 16px; top: -60px; z-index: 10; padding: 8px 14px; border-radius: 8px;
+    background: var(--a1); color: #0b0d14; font-weight: 700; text-decoration: none; transition: top .15s;
+  }
+  .skip:focus { top: 12px; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 56px 24px 80px; }
+  h1, h2, h3 { text-wrap: balance; }
+  p, li { text-wrap: pretty; }
+  h1, h2, h3, p, li, td, th { word-break: keep-all; overflow-wrap: break-word; }
+  header h1 {
+    font-size: clamp(2rem, 4vw, 2.8rem); margin: 0 0 8px;
+    background: linear-gradient(90deg, var(--a1), var(--a2));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  header p { color: var(--muted); margin: 0; }
+  .meta { margin-top: 12px; font-size: .85rem; color: var(--muted); }
+  nav.toc { display: flex; flex-wrap: wrap; gap: 8px; margin: 28px 0 8px; }
+  nav.toc a {
+    padding: 6px 14px; border: 1px solid var(--line); border-radius: 999px;
+    color: var(--text); text-decoration: none; font-size: .9rem; background: var(--card);
+    transition: border-color .2s, transform .2s;
+  }
+  nav.toc a:hover { border-color: var(--a1); transform: translateY(-2px); }
+  section { margin-top: 52px; }
+  h2 { font-size: 1.5rem; margin: 0 0 6px; }
+  h2 + .lead { color: var(--muted); margin: 0 0 20px; }
+  .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr)); }
+  .card {
+    min-width: 0; background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+    padding: 20px; backdrop-filter: blur(6px); transition: border-color .25s, transform .25s;
+  }
+  .card:hover { border-color: rgba(124,140,255,.5); transform: translateY(-3px); }
+  .card h3 { margin: 0 0 8px; font-size: 1.1rem; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .card p, .card li { color: #c9cde0; font-size: .95rem; margin: 6px 0; }
+  .card ul { padding-left: 18px; margin: 8px 0; }
+  .src { display: inline-block; margin-top: 8px; font-size: .82rem; color: var(--a2); text-decoration: none; }
+  .src:hover { text-decoration: underline; }
+  .tag { font-size: .72rem; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); font-weight: 600; }
+  .paid { color: var(--a3); border-color: rgba(245,138,176,.45); }
+  .all { color: var(--a2); border-color: rgba(63,214,198,.4); }
+  .note { color: var(--warn); border-color: rgba(245,178,90,.45); }
+  code { font-family: "JetBrains Mono", Consolas, monospace; font-size: .88em; background: rgba(255,255,255,.07); padding: 1px 6px; border-radius: 6px; overflow-wrap: break-word; }
+  pre { background: var(--bg2); border: 1px solid var(--line); border-radius: 10px; padding: 14px; overflow-x: auto; font-size: .85rem; margin: 8px 0; }
+  pre code { background: none; padding: 0; white-space: pre; }
+  table { width: 100%; border-collapse: collapse; font-size: .92rem; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; background: #151a2b; }
+  tbody tr { transition: background-color .15s; }
+  tbody tr:hover { background: rgba(124,140,255,.07); }
+  .tablebox { background: var(--card); border: 1px solid var(--line); border-radius: 14px; overflow-x: auto; }
+  .filter { width: 100%; max-width: 360px; margin: 0 0 8px; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg2); color: var(--text); font: inherit; }
+  .filter:hover { border-color: rgba(124,140,255,.5); }
+  .filter:focus-visible { border-color: var(--a1); }
+  .filter::placeholder { color: var(--muted); }
+  .count { font-size: .85rem; color: var(--muted); margin: 0 0 6px; font-variant-numeric: tabular-nums; }
+  footer { margin-top: 64px; color: var(--muted); font-size: .85rem; border-top: 1px solid var(--line); padding-top: 20px; }
+  footer a { color: var(--a2); }
+  [data-command-table] tbody tr.cmd { cursor: pointer; }
+  [data-command-table] .toggle {
+    appearance: none; background: none; border: 0; padding: 2px 4px 2px 0; margin: 0; border-radius: 6px;
+    font: inherit; color: inherit; text-align: left; cursor: pointer;
+  }
+  [data-command-table] .toggle::before { content: "▸"; display: inline-block; width: 1em; color: var(--muted); transition: transform .2s; }
+  [data-command-table] .toggle:hover code { background: rgba(124,140,255,.2); }
+  [data-command-table] tr.cmd.open .toggle::before { transform: rotate(90deg); color: var(--a1); }
+  [data-command-table] tbody tr.cmd.open { background: rgba(124,140,255,.1); }
+  [data-command-table] tr.detail td { background: rgba(18,22,36,.85); border-left: 3px solid var(--a1); padding: 14px 18px; animation: fadein .25s ease; }
+  [data-command-table] tr.detail p { margin: 0 0 8px; color: #c9cde0; }
+  [data-command-table] tr.detail .ex { margin: 6px 0; }
+  [data-command-table] tr.empty td { color: var(--muted); text-align: center; padding: 20px; }
+  @keyframes fadein { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+  .hint { font-size: .85rem; color: var(--muted); margin: 0 0 10px; }
+  @media (max-width: 600px) {
+    .wrap { padding: 32px 16px 56px; }
+    th, td { padding: 8px 10px; }
+    .card { padding: 16px; }
+    .tablebox table { min-width: 680px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+    .card:hover, nav.toc a:hover { transform: none; }
+  }
+
+tbody tr.cmd{content-visibility:auto;contain-intrinsic-size:auto 46px}
+.box{background:var(--card);border:1px solid var(--line);padding:20px;border-radius:14px;margin:20px 0;overflow-wrap:anywhere}.notice{border-left:3px solid var(--warn)}.scroll{overflow:auto}a{color:var(--a2)}a:hover{text-decoration:underline}p,li,td{overflow-wrap:anywhere}.card{min-width:0}code,pre{font-variant-ligatures:none}details summary{cursor:pointer;padding:8px}details summary:hover{color:var(--a2)}[hidden]{display:none!important}
+</style></head><body><a class="skip" href="#main">본문으로 건너뛰기</a><div class="wrap"><header><h1>CLI 통합 가이드</h1><p>Linux와 Windows PowerShell의 명령을 한 문서에서 찾아봅니다. 각 운영체제의 검색창에서 명령·설명·예시를 검색하고 버튼으로 상세 내용을 펼칠 수 있습니다.</p><div class="meta">조사일: 2026-11-14 · 각 절의 기존 공식 출처·명령·상세 설명을 보존했습니다.</div></header><nav class="toc" aria-label="목차"><a href="#linux">Linux · Bash</a><a href="#linux-all">Linux 명령 검색</a><a href="#windows">Windows PowerShell</a><a href="#windows-all">PowerShell 명령 검색</a><a href="skills-guide.html">스킬 통합 가이드</a></nav><main id="main" tabindex="-1"><section id="linux"><h2>Linux · Ubuntu · Bash</h2>
+<section id="linux-open">
+  <h3>1. 파일을 기본 앱으로 열기 (<code translate="no">start</code> 대응)</h3>
+  <p class="lead">리눅스 데스크톱에서는 <code translate="no">xdg-open</code>이 윈도우의 <code translate="no">start</code> 역할을 합니다. 파일 형식에 연결된 기본 앱으로 엽니다.</p>
+  <div class="tablebox">
+    <table>
+      <thead><tr><th>윈도우</th><th>리눅스</th><th>동작</th></tr></thead>
+      <tbody>
+        <tr><td><code translate="no">start file.html</code></td><td><code translate="no">xdg-open file.html</code></td><td>기본 브라우저로 HTML 파일 열기</td></tr>
+        <tr><td><code translate="no">start https://example.com</code></td><td><code translate="no">xdg-open https://example.com</code></td><td>기본 브라우저로 URL 열기</td></tr>
+        <tr><td><code translate="no">start .</code></td><td><code translate="no">xdg-open .</code></td><td>현재 폴더를 파일 관리자로 열기</td></tr>
+        <tr><td><code translate="no">start report.pdf</code></td><td><code translate="no">xdg-open report.pdf</code></td><td>PDF 뷰어 등 연결된 앱으로 열기</td></tr>
+        <tr><td><code translate="no">start chrome file.html</code></td><td><code translate="no">google-chrome file.html</code>, <code translate="no">firefox file.html</code></td><td>브라우저를 직접 지정해 열기(해당 브라우저가 설치된 경우)</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="grid" style="margin-top:16px">
+    <article class="card">
+      <h4><code translate="no">xdg-open</code> <span class="tag all">표준</span></h4>
+      <p>파일이나 URL을 사용자가 지정한 기본 앱으로 엽니다. GNOME·KDE 등 데스크톱 환경을 가리지 않는 freedesktop 표준 도구입니다.</p>
+<pre translate="no"><code translate="no">xdg-open file.html
+xdg-open ~/Downloads</code></pre>
+      <a class="src" href="https://portland.freedesktop.org/doc/xdg-open.html" target="_blank" rel="noopener">출처: xdg-open ↗</a>
+    </article>
+    <article class="card">
+      <h4><code translate="no">open</code> <span class="tag note">Ubuntu</span></h4>
+      <p>Ubuntu에서는 <code translate="no">open</code>이 <code translate="no">xdg-open</code>으로 연결되어 있어 macOS처럼 <code translate="no">open file.html</code>도 됩니다. 이 PC에서 <code translate="no">readlink -f $(command -v open)</code> 결과가 <code translate="no">/usr/bin/xdg-open</code>인 것을 확인했습니다. 다른 배포판에서는 다를 수 있습니다.</p>
+    </article>
+    <article class="card">
+      <h4><code translate="no">gio open</code> <span class="tag">GNOME</span></h4>
+      <p>GNOME의 GIO 도구로 기본 앱에서 엽니다. 파일 형식에 등록된 기본 앱을 사용한다는 점은 <code translate="no">xdg-open</code>과 같습니다.</p>
+<pre translate="no"><code translate="no">gio open file.html</code></pre>
+      <a class="src" href="https://manpages.ubuntu.com/manpages/noble/en/man1/gio.1.html" target="_blank" rel="noopener">출처: gio(1) ↗</a>
+    </article>
+    <article class="card">
+      <h4>WSL에서 열기 <span class="tag note">WSL</span></h4>
+      <p>WSL 안에서는 윈도우 실행 파일을 그대로 부를 수 있어 <code translate="no">explorer.exe .</code>로 현재 폴더를 윈도우 탐색기로 엽니다. wslu 패키지의 <code translate="no">wslview file.html</code>도 쓰이지만 공식 문서로는 확인하지 못했습니다. <span class="tag note">wslview 미확인</span></p>
+      <a class="src" href="https://learn.microsoft.com/en-us/windows/wsl/filesystems" target="_blank" rel="noopener">출처: WSL 파일 시스템 ↗</a>
+    </article>
+    <article class="card">
+      <h4>터미널 기본 요령</h4>
+      <ul>
+        <li><code translate="no">Tab</code>: 명령·파일 이름 자동완성</li>
+        <li><code translate="no">↑</code>/<code translate="no">↓</code>: 이전 명령 불러오기, <code translate="no">Ctrl+R</code>: 기록 검색</li>
+        <li><code translate="no">Ctrl+C</code>: 실행 중인 명령 중단</li>
+        <li><code translate="no">~</code>는 홈 폴더, <code translate="no">.</code>은 현재, <code translate="no">..</code>은 상위 폴더</li>
+        <li><code translate="no">./script.sh</code>: 현재 폴더의 실행 파일 실행</li>
+      </ul>
+      <a class="src" href="https://www.gnu.org/software/bash/manual/bash.html" target="_blank" rel="noopener">출처: GNU Bash 매뉴얼 ↗</a>
+    </article>
+    <article class="card">
+      <h4>도움말 보기</h4>
+      <p>윈도우의 <code translate="no">help</code>, <code translate="no">명령 /?</code>에 해당합니다. <code translate="no">man 명령</code>은 전체 매뉴얼(<code translate="no">q</code>로 종료), <code translate="no">명령 --help</code>는 짧은 사용법, bash 내장 명령은 <code translate="no">help cd</code>처럼 봅니다.</p>
+<pre translate="no"><code translate="no">man ls
+ls --help
+help cd</code></pre>
+    </article>
+  </div>
+</section>
+
+<section id="linux-core">
+  <h3>2. 핵심 명령</h3>
+  <p class="lead">처음 리눅스 터미널을 쓸 때 가장 자주 쓰는 명령입니다. 태그는 윈도우 대응 명령입니다.</p>
+  <div class="grid">
+    <article class="card"><h4><code translate="no">ls</code> <span class="tag">dir</span></h4>
+      <p>폴더 내용 보기. <code translate="no">ls -l</code> 자세히, <code translate="no">ls -a</code> 숨김 파일 포함, <code translate="no">ls -lh</code> 크기를 읽기 쉽게.</p></article>
+    <article class="card"><h4><code translate="no">cd</code> <span class="tag">cd</span></h4>
+      <p>폴더 이동. <code translate="no">cd ..</code> 상위, <code translate="no">cd ~</code> 또는 <code translate="no">cd</code> 홈, <code translate="no">cd -</code> 직전 폴더.</p></article>
+    <article class="card"><h4><code translate="no">cp</code> · <code translate="no">mv</code> · <code translate="no">rm</code> <span class="tag">copy · move · del</span></h4>
+      <p>복사·이동(이름 변경)·삭제. 폴더는 <code translate="no">cp -r</code>, <code translate="no">rm -r</code>. <span class="tag note">rm은 휴지통을 거치지 않음</span></p></article>
+    <article class="card"><h4><code translate="no">mkdir</code> <span class="tag">mkdir</span></h4>
+      <p>폴더 만들기. <code translate="no">mkdir -p a/b/c</code>로 중간 폴더까지 한 번에.</p></article>
+    <article class="card"><h4><code translate="no">cat</code> · <code translate="no">less</code> <span class="tag">type · more</span></h4>
+      <p>파일 내용 보기. 긴 파일은 <code translate="no">less</code>로 페이지 단위로 보고 <code translate="no">q</code>로 나옵니다.</p></article>
+    <article class="card"><h4><code translate="no">grep</code> <span class="tag">findstr</span></h4>
+      <p>텍스트 검색. <code translate="no">grep -rn "TODO" .</code>로 하위 폴더까지 줄 번호와 함께 찾기.</p></article>
+    <article class="card"><h4><code translate="no">find</code> <span class="tag">dir /s</span></h4>
+      <p>파일 찾기. <code translate="no">find . -name "*.html"</code>로 현재 폴더 아래 HTML 파일 찾기.</p></article>
+    <article class="card"><h4><code translate="no">sudo</code> <span class="tag">관리자 권한 실행</span></h4>
+      <p>다른 사용자(기본 root) 권한으로 명령 실행. 패키지 설치·시스템 설정 변경에 필요.</p></article>
+    <article class="card"><h4><code translate="no">apt</code> <span class="tag">winget</span></h4>
+      <p>Ubuntu 패키지 관리. <code translate="no">sudo apt update</code> 후 <code translate="no">sudo apt install tree</code>.</p></article>
+    <article class="card"><h4><code translate="no">ps</code> · <code translate="no">kill</code> <span class="tag">tasklist · taskkill</span></h4>
+      <p>프로세스 목록과 종료. <code translate="no">ps aux</code>로 전체를 보고 <code translate="no">kill PID</code>로 종료.</p></article>
+    <article class="card"><h4><code translate="no">ip</code> · <code translate="no">ss</code> <span class="tag">ipconfig · netstat</span></h4>
+      <p><code translate="no">ip addr</code>로 IP 주소, <code translate="no">ss -tlnp</code>로 열린 TCP 포트와 프로세스 확인.</p></article>
+    <article class="card"><h4><code translate="no">df</code> · <code translate="no">du</code> · <code translate="no">free</code> <span class="tag">작업 관리자</span></h4>
+      <p>디스크 여유 공간(<code translate="no">df -h</code>), 폴더 크기(<code translate="no">du -sh 폴더</code>), 메모리(<code translate="no">free -h</code>).</p></article>
+  </div>
+</section>
+
+<section id="linux-all">
+  <h3>3. 전체 명령</h3>
+  <p class="lead">분류별로 자주 쓰는 명령입니다. “윈도우 대응”은 cmd 기준이며 PowerShell 명령은 PS로 표시했고, 동작이 정확히 같지는 않습니다.</p>
+  <input class="filter" id="linux-cmd-filter" type="search" name="q" autocomplete="off" spellcheck="false" placeholder="명령·분류·윈도우 명령·설명 검색…" aria-label="리눅스 명령 검색">
+  <p class="count" id="linux-cmd-count" aria-live="polite"></p>
+  <p class="hint">명령을 클릭하거나 Tab으로 이동해 Enter를 누르면 자세한 설명과 사용 예, 공식 문서 링크가 펼쳐집니다. 검색어와 펼친 항목은 주소에 남아 그대로 공유할 수 있습니다.</p>
+  <div class="tablebox">
+    <table data-command-table id="linux-cmd-table">
+      <thead><tr><th>명령</th><th>분류</th><th>윈도우 대응</th><th>설명</th></tr></thead>
+      <tbody>
+        <tr><td><code translate="no">xdg-open &lt;파일|URL&gt;</code></td><td>열기</td><td><code translate="no">start</code></td><td>기본 앱으로 파일·URL 열기</td></tr>
+        <tr><td><code translate="no">gio open &lt;파일&gt;</code></td><td>열기</td><td><code translate="no">start</code></td><td>GNOME 도구로 기본 앱 열기</td></tr>
+        <tr><td><code translate="no">sensible-browser &lt;URL&gt;</code></td><td>열기</td><td><code translate="no">start</code></td><td>Debian·Ubuntu 기본 웹 브라우저 실행</td></tr>
+        <tr><td><code translate="no">pwd</code></td><td>폴더·파일</td><td><code translate="no">cd</code></td><td>현재 폴더 경로 출력</td></tr>
+        <tr><td><code translate="no">cd &lt;폴더&gt;</code></td><td>폴더·파일</td><td><code translate="no">cd</code></td><td>폴더 이동</td></tr>
+        <tr><td><code translate="no">ls [옵션] [경로]</code></td><td>폴더·파일</td><td><code translate="no">dir</code></td><td>폴더 내용 목록</td></tr>
+        <tr><td><code translate="no">tree</code></td><td>폴더·파일</td><td><code translate="no">tree</code></td><td>폴더 구조를 나무 모양으로 출력(별도 설치)</td></tr>
+        <tr><td><code translate="no">mkdir &lt;폴더&gt;</code></td><td>폴더·파일</td><td><code translate="no">mkdir</code></td><td>폴더 만들기</td></tr>
+        <tr><td><code translate="no">rmdir &lt;폴더&gt;</code></td><td>폴더·파일</td><td><code translate="no">rmdir</code></td><td>빈 폴더 삭제</td></tr>
+        <tr><td><code translate="no">touch &lt;파일&gt;</code></td><td>폴더·파일</td><td><code translate="no">type nul &gt; 파일</code></td><td>빈 파일 만들기, 수정 시각 갱신</td></tr>
+        <tr><td><code translate="no">cp &lt;원본&gt; &lt;대상&gt;</code></td><td>폴더·파일</td><td><code translate="no">copy</code>, <code translate="no">xcopy</code></td><td>파일·폴더 복사</td></tr>
+        <tr><td><code translate="no">mv &lt;원본&gt; &lt;대상&gt;</code></td><td>폴더·파일</td><td><code translate="no">move</code>, <code translate="no">ren</code></td><td>이동·이름 변경</td></tr>
+        <tr><td><code translate="no">rm &lt;파일&gt;</code></td><td>폴더·파일</td><td><code translate="no">del</code>, <code translate="no">rmdir /s</code></td><td>파일·폴더 삭제(복구 불가)</td></tr>
+        <tr><td><code translate="no">ln -s &lt;대상&gt; &lt;링크&gt;</code></td><td>폴더·파일</td><td><code translate="no">mklink</code></td><td>심볼릭 링크 만들기</td></tr>
+        <tr><td><code translate="no">stat &lt;파일&gt;</code></td><td>폴더·파일</td><td>PS <code translate="no">Get-Item</code></td><td>크기·권한·시각 등 상세 정보</td></tr>
+        <tr><td><code translate="no">file &lt;파일&gt;</code></td><td>폴더·파일</td><td>—</td><td>파일 형식 판별</td></tr>
+        <tr><td><code translate="no">find &lt;경로&gt; [조건]</code></td><td>검색</td><td><code translate="no">dir /s</code></td><td>조건으로 파일 찾기</td></tr>
+        <tr><td><code translate="no">grep &lt;패턴&gt; [파일]</code></td><td>검색</td><td><code translate="no">findstr</code></td><td>텍스트에서 패턴 검색</td></tr>
+        <tr><td><code translate="no">which &lt;명령&gt;</code></td><td>검색</td><td><code translate="no">where</code></td><td>실행 파일 위치 찾기</td></tr>
+        <tr><td><code translate="no">type &lt;명령&gt;</code></td><td>검색</td><td>PS <code translate="no">Get-Command</code></td><td>명령이 별칭·내장·파일 중 무엇인지 확인</td></tr>
+        <tr><td><code translate="no">cat &lt;파일&gt;</code></td><td>내용 보기</td><td><code translate="no">type</code></td><td>파일 내용 출력·이어 붙이기</td></tr>
+        <tr><td><code translate="no">less &lt;파일&gt;</code></td><td>내용 보기</td><td><code translate="no">more</code></td><td>페이지 단위로 보기</td></tr>
+        <tr><td><code translate="no">head &lt;파일&gt;</code></td><td>내용 보기</td><td>PS <code translate="no">Get-Content -Head</code></td><td>앞부분 보기(기본 10줄)</td></tr>
+        <tr><td><code translate="no">tail &lt;파일&gt;</code></td><td>내용 보기</td><td>PS <code translate="no">Get-Content -Tail</code></td><td>뒷부분 보기, <code translate="no">-f</code>로 실시간 추적</td></tr>
+        <tr><td><code translate="no">wc &lt;파일&gt;</code></td><td>텍스트 처리</td><td><code translate="no">find /c /v ""</code></td><td>줄·단어·바이트 수 세기</td></tr>
+        <tr><td><code translate="no">sort &lt;파일&gt;</code></td><td>텍스트 처리</td><td><code translate="no">sort</code></td><td>줄 정렬</td></tr>
+        <tr><td><code translate="no">uniq</code></td><td>텍스트 처리</td><td>PS <code translate="no">Get-Unique</code></td><td>연속 중복 줄 제거</td></tr>
+        <tr><td><code translate="no">diff &lt;파일1&gt; &lt;파일2&gt;</code></td><td>텍스트 처리</td><td><code translate="no">fc</code></td><td>두 파일 차이 비교</td></tr>
+        <tr><td><code translate="no">tee &lt;파일&gt;</code></td><td>텍스트 처리</td><td>PS <code translate="no">Tee-Object</code></td><td>출력을 화면과 파일에 동시에</td></tr>
+        <tr><td><code translate="no">chmod &lt;모드&gt; &lt;파일&gt;</code></td><td>권한</td><td><code translate="no">icacls</code></td><td>읽기·쓰기·실행 권한 변경</td></tr>
+        <tr><td><code translate="no">chown &lt;사용자&gt; &lt;파일&gt;</code></td><td>권한</td><td><code translate="no">takeown</code></td><td>소유자 변경</td></tr>
+        <tr><td><code translate="no">sudo &lt;명령&gt;</code></td><td>권한</td><td>관리자 권한 실행</td><td>root 등 다른 사용자 권한으로 실행</td></tr>
+        <tr><td><code translate="no">uname -a</code></td><td>시스템</td><td><code translate="no">ver</code></td><td>커널·시스템 정보</td></tr>
+        <tr><td><code translate="no">df -h</code></td><td>시스템</td><td>PS <code translate="no">Get-PSDrive</code></td><td>디스크 여유 공간</td></tr>
+        <tr><td><code translate="no">du -sh &lt;경로&gt;</code></td><td>시스템</td><td>—</td><td>폴더·파일이 차지하는 용량</td></tr>
+        <tr><td><code translate="no">free -h</code></td><td>시스템</td><td><code translate="no">systeminfo</code></td><td>메모리 사용량</td></tr>
+        <tr><td><code translate="no">lsblk</code></td><td>시스템</td><td><code translate="no">diskpart</code> → <code translate="no">list disk</code></td><td>디스크·파티션 목록</td></tr>
+        <tr><td><code translate="no">mount</code></td><td>시스템</td><td><code translate="no">mountvol</code></td><td>파일 시스템 연결·연결 목록</td></tr>
+        <tr><td><code translate="no">top</code></td><td>프로세스</td><td>작업 관리자</td><td>프로세스·CPU·메모리 실시간 보기</td></tr>
+        <tr><td><code translate="no">ps aux</code></td><td>프로세스</td><td><code translate="no">tasklist</code></td><td>프로세스 목록</td></tr>
+        <tr><td><code translate="no">kill &lt;PID&gt;</code></td><td>프로세스</td><td><code translate="no">taskkill /pid</code></td><td>PID로 프로세스에 신호 보내기·종료</td></tr>
+        <tr><td><code translate="no">pkill &lt;패턴&gt;</code></td><td>프로세스</td><td><code translate="no">taskkill /im</code></td><td>이름 패턴으로 프로세스 종료</td></tr>
+        <tr><td><code translate="no">killall &lt;이름&gt;</code></td><td>프로세스</td><td><code translate="no">taskkill /im</code></td><td>같은 이름의 프로세스 모두 종료</td></tr>
+        <tr><td><code translate="no">watch &lt;명령&gt;</code></td><td>프로세스</td><td>—</td><td>명령을 주기적으로 반복 실행해 보기</td></tr>
+        <tr><td><code translate="no">jobs</code></td><td>작업 제어</td><td>—</td><td>현재 셸의 백그라운드 작업 목록</td></tr>
+        <tr><td><code translate="no">fg [%번호]</code></td><td>작업 제어</td><td>—</td><td>작업을 포그라운드로</td></tr>
+        <tr><td><code translate="no">bg [%번호]</code></td><td>작업 제어</td><td>—</td><td>멈춘 작업을 백그라운드에서 계속</td></tr>
+        <tr><td><code translate="no">nohup &lt;명령&gt;</code></td><td>작업 제어</td><td><code translate="no">start /b</code></td><td>터미널을 닫아도 계속 실행</td></tr>
+        <tr><td><code translate="no">ip addr</code></td><td>네트워크</td><td><code translate="no">ipconfig</code></td><td>IP 주소·네트워크 인터페이스</td></tr>
+        <tr><td><code translate="no">ss -tlnp</code></td><td>네트워크</td><td><code translate="no">netstat -ano</code></td><td>열린 포트·연결 확인</td></tr>
+        <tr><td><code translate="no">ping &lt;호스트&gt;</code></td><td>네트워크</td><td><code translate="no">ping</code></td><td>연결 확인(멈출 때까지 반복)</td></tr>
+        <tr><td><code translate="no">curl &lt;URL&gt;</code></td><td>네트워크</td><td><code translate="no">curl</code></td><td>HTTP 요청·다운로드</td></tr>
+        <tr><td><code translate="no">wget &lt;URL&gt;</code></td><td>네트워크</td><td>PS <code translate="no">Invoke-WebRequest</code></td><td>파일 다운로드</td></tr>
+        <tr><td><code translate="no">ssh &lt;사용자@호스트&gt;</code></td><td>네트워크</td><td><code translate="no">ssh</code></td><td>원격 서버 접속</td></tr>
+        <tr><td><code translate="no">scp &lt;원본&gt; &lt;대상&gt;</code></td><td>네트워크</td><td><code translate="no">scp</code></td><td>SSH로 파일 복사</td></tr>
+        <tr><td><code translate="no">rsync &lt;원본&gt; &lt;대상&gt;</code></td><td>네트워크</td><td><code translate="no">robocopy</code></td><td>변경분만 동기화 복사</td></tr>
+        <tr><td><code translate="no">tar</code></td><td>압축</td><td><code translate="no">tar</code></td><td>.tar/.tar.gz 묶기·풀기</td></tr>
+        <tr><td><code translate="no">gzip &lt;파일&gt;</code></td><td>압축</td><td>—</td><td>.gz 압축·해제</td></tr>
+        <tr><td><code translate="no">zip &lt;압축&gt; &lt;파일&gt;</code></td><td>압축</td><td>PS <code translate="no">Compress-Archive</code></td><td>.zip 만들기</td></tr>
+        <tr><td><code translate="no">unzip &lt;압축&gt;</code></td><td>압축</td><td>PS <code translate="no">Expand-Archive</code></td><td>.zip 풀기</td></tr>
+        <tr><td><code translate="no">apt &lt;하위명령&gt;</code></td><td>패키지·서비스</td><td><code translate="no">winget</code></td><td>Ubuntu 패키지 설치·업데이트·삭제</td></tr>
+        <tr><td><code translate="no">systemctl &lt;하위명령&gt;</code></td><td>패키지·서비스</td><td><code translate="no">sc</code>, <code translate="no">services.msc</code></td><td>서비스 시작·중지·상태</td></tr>
+        <tr><td><code translate="no">journalctl</code></td><td>패키지·서비스</td><td>이벤트 뷰어</td><td>시스템·서비스 로그 보기</td></tr>
+        <tr><td><code translate="no">man &lt;명령&gt;</code></td><td>셸·도움말</td><td><code translate="no">help</code>, <code translate="no">/?</code></td><td>매뉴얼 보기</td></tr>
+        <tr><td><code translate="no">echo &lt;텍스트&gt;</code></td><td>셸·도움말</td><td><code translate="no">echo</code></td><td>텍스트·변수 출력</td></tr>
+        <tr><td><code translate="no">env</code></td><td>셸·도움말</td><td><code translate="no">set</code></td><td>환경 변수 목록</td></tr>
+        <tr><td><code translate="no">export &lt;이름=값&gt;</code></td><td>셸·도움말</td><td><code translate="no">set</code>, <code translate="no">setx</code></td><td>환경 변수 설정</td></tr>
+        <tr><td><code translate="no">alias &lt;이름=명령&gt;</code></td><td>셸·도움말</td><td><code translate="no">doskey</code></td><td>명령 별칭 만들기</td></tr>
+        <tr><td><code translate="no">history</code></td><td>셸·도움말</td><td><code translate="no">doskey /history</code></td><td>입력한 명령 기록</td></tr>
+        <tr><td><code translate="no">clear</code></td><td>셸·도움말</td><td><code translate="no">cls</code></td><td>화면 지우기</td></tr>
+        <tr><td><code translate="no">date</code></td><td>셸·도움말</td><td><code translate="no">date</code>, <code translate="no">time</code></td><td>날짜·시각 출력</td></tr>
+        <tr><td><code translate="no">nano &lt;파일&gt;</code></td><td>편집기</td><td><code translate="no">notepad</code></td><td>쉬운 터미널 텍스트 편집기</td></tr>
+        <tr><td><code translate="no">vim &lt;파일&gt;</code></td><td>편집기</td><td>—</td><td>모드 기반 텍스트 편집기</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <a class="src" href="https://manpages.ubuntu.com/" target="_blank" rel="noopener">출처: Ubuntu Manpage Repository ↗</a>
+</section>
+<footer>
+  주요 출처:
+  <a href="https://portland.freedesktop.org/doc/xdg-open.html" target="_blank" rel="noopener">xdg-open (freedesktop)</a> ·
+  <a href="https://manpages.ubuntu.com/" target="_blank" rel="noopener">Ubuntu Manpages (noble)</a> ·
+  <a href="https://www.gnu.org/software/bash/manual/bash.html" target="_blank" rel="noopener">GNU Bash 매뉴얼</a> ·
+  <a href="https://learn.microsoft.com/en-us/windows/wsl/filesystems" target="_blank" rel="noopener">WSL 파일 시스템</a>.
+  2026-11-14에 조사한 내용입니다.
+</footer></section><section id="windows"><h2>Windows PowerShell</h2>
+<section id="windows-start">
+  <h3>1. 시작하기</h3>
+  <p class="lead">PowerShell은 텍스트가 아니라 <b>객체</b>를 파이프라인으로 넘깁니다. 이 차이만 알면 대부분의 명령을 조합할 수 있습니다.</p>
+  <div class="grid">
+    <article class="card">
+      <h4>실행과 버전</h4>
+      <ul>
+        <li><code translate="no">Win+X</code> → 터미널, 또는 <code translate="no">Win+R</code> → <code translate="no">powershell</code></li>
+        <li>Windows PowerShell 5.1(<code translate="no">powershell.exe</code>)은 Windows 기본 탑재, PowerShell 7(<code translate="no">pwsh.exe</code>)은 별도 설치</li>
+        <li>버전 확인: <code translate="no">$PSVersionTable</code></li>
+        <li>관리자 권한: 터미널을 오른쪽 클릭 → 관리자 권한으로 실행</li>
+      </ul>
+      <a class="src" href="https://learn.microsoft.com/en-us/powershell/scripting/overview" target="_blank" rel="noopener">출처: What is PowerShell? ↗</a>
+    </article>
+    <article class="card">
+      <h4>명령 찾기와 도움말</h4>
+      <ul>
+        <li>이름은 <b>동사-명사</b> 형식: <code translate="no">Get-Process</code>, <code translate="no">Stop-Service</code></li>
+        <li><code translate="no">Get-Command *service*</code> 명령 찾기</li>
+        <li><code translate="no">Get-Help Get-Process -Examples</code> 예제 보기 (처음엔 <code translate="no">Update-Help</code>)</li>
+        <li><code translate="no">Get-Process | Get-Member</code> 객체 속성·메서드 확인</li>
+        <li><code translate="no">Tab</code> 자동완성, <code translate="no">Ctrl+Space</code> 후보 목록</li>
+      </ul>
+      <a class="src" href="https://learn.microsoft.com/en-us/powershell/scripting/learn/ps101/02-help-system" target="_blank" rel="noopener">출처: The Help system ↗</a>
+    </article>
+    <article class="card">
+      <h4>파이프라인과 연산자</h4>
+      <ul>
+        <li><code translate="no">|</code> 객체를 다음 명령으로 전달, <code translate="no">$_</code>(또는 <code translate="no">$PSItem</code>)가 현재 객체</li>
+        <li>비교: <code translate="no">-eq</code> <code translate="no">-ne</code> <code translate="no">-gt</code> <code translate="no">-lt</code> <code translate="no">-like</code> <code translate="no">-match</code></li>
+        <li>논리: <code translate="no">-and</code> <code translate="no">-or</code> <code translate="no">-not</code></li>
+        <li><code translate="no">&gt;</code>·<code translate="no">&gt;&gt;</code> 리디렉션, <code translate="no">2&gt;&amp;1</code> 오류 합치기</li>
+        <li>변수 <code translate="no">$name = 값</code>, 환경 변수 <code translate="no">$env:PATH</code></li>
+      </ul>
+      <a class="src" href="https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_pipelines" target="_blank" rel="noopener">출처: about_Pipelines ↗</a>
+    </article>
+    <article class="card">
+      <h4>cmd·Linux 별칭 <span class="tag note">5.1 기준</span></h4>
+      <p><code translate="no">dir</code>, <code translate="no">ls</code>, <code translate="no">cd</code>, <code translate="no">cp</code>, <code translate="no">rm</code>, <code translate="no">cat</code>, <code translate="no">ps</code>, <code translate="no">kill</code> 같은 익숙한 이름이 cmdlet의 별칭으로 등록돼 있습니다. 다만 옵션은 원래 명령과 다릅니다(<code translate="no">ls -la</code>는 동작하지 않음). 스크립트에서는 전체 이름을 쓰는 것이 권장됩니다.</p>
+      <p>PowerShell 7에서는 <code translate="no">curl</code>, <code translate="no">wget</code> 등 일부 별칭이 제거되었으니 <code translate="no">Get-Alias</code>로 확인하세요.</p>
+      <a class="src" href="https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_aliases" target="_blank" rel="noopener">출처: about_Aliases ↗</a>
+    </article>
+  </div>
+</section>
+
+<section id="windows-core">
+  <h3>2. 핵심 명령</h3>
+  <p class="lead">가장 자주 쓰는 cmdlet입니다. 자세한 매개변수는 3번 표에서 행을 클릭해 확인하세요.</p>
+  <div class="grid">
+    <article class="card"><h4><code translate="no">Get-ChildItem</code> <span class="tag">파일</span></h4>
+      <p>폴더 목록(<code translate="no">dir</code>, <code translate="no">ls</code>). <code translate="no">-Recurse</code> 하위 포함, <code translate="no">-Filter</code> 이름 필터, <code translate="no">-Force</code> 숨김 포함.</p></article>
+    <article class="card"><h4><code translate="no">Copy-Item</code> / <code translate="no">Remove-Item</code> <span class="tag">파일</span></h4>
+      <p>복사·삭제. 폴더째 처리할 땐 <code translate="no">-Recurse</code>, 실행 전 확인은 <code translate="no">-WhatIf</code>.</p></article>
+    <article class="card"><h4><code translate="no">Get-Content</code> <span class="tag">텍스트</span></h4>
+      <p>파일 읽기(<code translate="no">cat</code>). <code translate="no">-Tail 20 -Wait</code>로 로그 실시간 보기.</p></article>
+    <article class="card"><h4><code translate="no">Select-String</code> <span class="tag">텍스트</span></h4>
+      <p>문자열·정규식 검색(<code translate="no">grep</code>과 비슷). <code translate="no">-Pattern</code>, <code translate="no">-Path</code>.</p></article>
+    <article class="card"><h4><code translate="no">Where-Object</code> <span class="tag">파이프라인</span></h4>
+      <p>조건으로 객체 거르기. <code translate="no">... | Where-Object CPU -gt 100</code>.</p></article>
+    <article class="card"><h4><code translate="no">Select-Object</code> / <code translate="no">Sort-Object</code> <span class="tag">파이프라인</span></h4>
+      <p>원하는 속성만 고르고 정렬. <code translate="no">-First 5</code>, <code translate="no">-Descending</code>.</p></article>
+    <article class="card"><h4><code translate="no">Get-Process</code> / <code translate="no">Stop-Process</code> <span class="tag">시스템</span></h4>
+      <p>프로세스 확인과 종료. <code translate="no">Stop-Process -Name notepad -Force</code>.</p></article>
+    <article class="card"><h4><code translate="no">Get-Service</code> <span class="tag">시스템</span></h4>
+      <p>서비스 상태 확인. 시작·중지는 <code translate="no">Start-Service</code>, <code translate="no">Stop-Service</code>.</p></article>
+    <article class="card"><h4><code translate="no">Test-NetConnection</code> <span class="tag">네트워크</span><span class="tag note">Windows 전용</span></h4>
+      <p>연결·포트 확인. <code translate="no">Test-NetConnection example.com -Port 443</code>.</p></article>
+    <article class="card"><h4><code translate="no">Invoke-RestMethod</code> <span class="tag">네트워크</span></h4>
+      <p>HTTP 요청 후 JSON을 객체로 변환. API 호출에 적합.</p></article>
+  </div>
+</section>
+
+<section id="windows-all">
+  <h3>3. 전체 명령</h3>
+  <p class="lead">자주 쓰는 cmdlet 목록입니다. 별칭은 Windows PowerShell 5.1에서 <code translate="no">Get-Alias</code>로 확인한 값입니다.</p>
+  <input class="filter" id="windows-cmd-filter" type="search" name="q" autocomplete="off" spellcheck="false" placeholder="cmdlet·별칭·설명 검색…" aria-label="명령 검색">
+  <p class="count" id="windows-cmd-count" aria-live="polite"></p>
+  <p class="hint">명령을 클릭하거나 Tab으로 이동해 Enter를 누르면 자세한 설명과 사용 예, 공식 문서 링크가 펼쳐집니다. 검색어와 펼친 항목은 주소에 남아 그대로 공유할 수 있습니다.</p>
+  <div class="tablebox">
+    <table data-command-table id="windows-cmd-table">
+      <thead><tr><th>명령</th><th>분류</th><th>별칭</th><th>설명</th></tr></thead>
+      <tbody>
+        <tr><td><code translate="no">Get-Help</code></td><td>도움말·탐색</td><td></td><td>명령 도움말·예제 보기</td></tr>
+        <tr><td><code translate="no">Get-Command</code></td><td>도움말·탐색</td><td><code translate="no">gcm</code></td><td>사용 가능한 명령 찾기</td></tr>
+        <tr><td><code translate="no">Get-Member</code></td><td>도움말·탐색</td><td><code translate="no">gm</code></td><td>객체의 속성·메서드 확인</td></tr>
+        <tr><td><code translate="no">Get-Alias</code></td><td>도움말·탐색</td><td><code translate="no">gal</code></td><td>별칭 목록·원래 명령 확인</td></tr>
+        <tr><td><code translate="no">Get-Module</code></td><td>도움말·탐색</td><td><code translate="no">gmo</code></td><td>로드된·설치된 모듈 확인</td></tr>
+        <tr><td><code translate="no">Install-Module</code></td><td>도움말·탐색</td><td><code translate="no">inmo</code></td><td>PowerShell Gallery에서 모듈 설치</td></tr>
+        <tr><td><code translate="no">Set-Location</code></td><td>파일·폴더</td><td><code translate="no">cd</code>, <code translate="no">chdir</code>, <code translate="no">sl</code></td><td>현재 위치 이동</td></tr>
+        <tr><td><code translate="no">Get-Location</code></td><td>파일·폴더</td><td><code translate="no">pwd</code>, <code translate="no">gl</code></td><td>현재 위치 표시</td></tr>
+        <tr><td><code translate="no">Push-Location</code></td><td>파일·폴더</td><td><code translate="no">pushd</code></td><td>현재 위치 저장 후 이동</td></tr>
+        <tr><td><code translate="no">Pop-Location</code></td><td>파일·폴더</td><td><code translate="no">popd</code></td><td>저장한 위치로 복귀</td></tr>
+        <tr><td><code translate="no">Get-ChildItem</code></td><td>파일·폴더</td><td><code translate="no">dir</code>, <code translate="no">ls</code>, <code translate="no">gci</code></td><td>파일·폴더 목록</td></tr>
+        <tr><td><code translate="no">Get-Item</code></td><td>파일·폴더</td><td><code translate="no">gi</code></td><td>특정 항목 정보</td></tr>
+        <tr><td><code translate="no">New-Item</code></td><td>파일·폴더</td><td><code translate="no">ni</code></td><td>파일·폴더 만들기</td></tr>
+        <tr><td><code translate="no">Copy-Item</code></td><td>파일·폴더</td><td><code translate="no">copy</code>, <code translate="no">cp</code>, <code translate="no">cpi</code></td><td>복사</td></tr>
+        <tr><td><code translate="no">Move-Item</code></td><td>파일·폴더</td><td><code translate="no">move</code>, <code translate="no">mv</code>, <code translate="no">mi</code></td><td>이동</td></tr>
+        <tr><td><code translate="no">Rename-Item</code></td><td>파일·폴더</td><td><code translate="no">ren</code>, <code translate="no">rni</code></td><td>이름 변경</td></tr>
+        <tr><td><code translate="no">Remove-Item</code></td><td>파일·폴더</td><td><code translate="no">del</code>, <code translate="no">rm</code>, <code translate="no">rmdir</code>, <code translate="no">rd</code>, <code translate="no">erase</code>, <code translate="no">ri</code></td><td>삭제</td></tr>
+        <tr><td><code translate="no">Test-Path</code></td><td>파일·폴더</td><td></td><td>경로 존재 여부 확인</td></tr>
+        <tr><td><code translate="no">Resolve-Path</code></td><td>파일·폴더</td><td><code translate="no">rvpa</code></td><td>와일드카드·상대 경로를 실제 경로로</td></tr>
+        <tr><td><code translate="no">Join-Path</code></td><td>파일·폴더</td><td></td><td>경로 결합</td></tr>
+        <tr><td><code translate="no">Split-Path</code></td><td>파일·폴더</td><td></td><td>경로에서 부모·파일 이름 분리</td></tr>
+        <tr><td><code translate="no">Get-Acl</code></td><td>파일·폴더</td><td></td><td>접근 권한(ACL) 보기</td></tr>
+        <tr><td><code translate="no">Compress-Archive</code></td><td>파일·폴더</td><td></td><td>zip 압축</td></tr>
+        <tr><td><code translate="no">Expand-Archive</code></td><td>파일·폴더</td><td></td><td>zip 압축 풀기</td></tr>
+        <tr><td><code translate="no">Get-FileHash</code></td><td>파일·폴더</td><td></td><td>파일 해시 계산</td></tr>
+        <tr><td><code translate="no">Get-Content</code></td><td>텍스트·데이터</td><td><code translate="no">cat</code>, <code translate="no">type</code>, <code translate="no">gc</code></td><td>파일 내용 읽기</td></tr>
+        <tr><td><code translate="no">Set-Content</code></td><td>텍스트·데이터</td><td><code translate="no">sc</code></td><td>파일 내용 쓰기(덮어쓰기)</td></tr>
+        <tr><td><code translate="no">Add-Content</code></td><td>텍스트·데이터</td><td><code translate="no">ac</code></td><td>파일에 내용 추가</td></tr>
+        <tr><td><code translate="no">Out-File</code></td><td>텍스트·데이터</td><td></td><td>출력을 파일로 저장</td></tr>
+        <tr><td><code translate="no">Select-String</code></td><td>텍스트·데이터</td><td><code translate="no">sls</code></td><td>문자열·정규식 검색</td></tr>
+        <tr><td><code translate="no">Compare-Object</code></td><td>텍스트·데이터</td><td><code translate="no">compare</code>, <code translate="no">diff</code></td><td>두 객체 집합 비교</td></tr>
+        <tr><td><code translate="no">Import-Csv</code></td><td>텍스트·데이터</td><td><code translate="no">ipcsv</code></td><td>CSV를 객체로 읽기</td></tr>
+        <tr><td><code translate="no">Export-Csv</code></td><td>텍스트·데이터</td><td><code translate="no">epcsv</code></td><td>객체를 CSV로 저장</td></tr>
+        <tr><td><code translate="no">ConvertFrom-Json</code></td><td>텍스트·데이터</td><td></td><td>JSON 문자열을 객체로</td></tr>
+        <tr><td><code translate="no">ConvertTo-Json</code></td><td>텍스트·데이터</td><td></td><td>객체를 JSON 문자열로</td></tr>
+        <tr><td><code translate="no">Get-Clipboard</code></td><td>텍스트·데이터</td><td><code translate="no">gcb</code></td><td>클립보드 읽기</td></tr>
+        <tr><td><code translate="no">Set-Clipboard</code></td><td>텍스트·데이터</td><td><code translate="no">scb</code></td><td>클립보드에 복사</td></tr>
+        <tr><td><code translate="no">Where-Object</code></td><td>파이프라인</td><td><code translate="no">where</code>, <code translate="no">?</code></td><td>조건으로 객체 필터링</td></tr>
+        <tr><td><code translate="no">ForEach-Object</code></td><td>파이프라인</td><td><code translate="no">foreach</code>, <code translate="no">%</code></td><td>각 객체에 작업 실행</td></tr>
+        <tr><td><code translate="no">Select-Object</code></td><td>파이프라인</td><td><code translate="no">select</code></td><td>속성 선택, 앞·뒤 n개</td></tr>
+        <tr><td><code translate="no">Sort-Object</code></td><td>파이프라인</td><td><code translate="no">sort</code></td><td>정렬</td></tr>
+        <tr><td><code translate="no">Group-Object</code></td><td>파이프라인</td><td><code translate="no">group</code></td><td>속성 값으로 그룹화</td></tr>
+        <tr><td><code translate="no">Measure-Object</code></td><td>파이프라인</td><td><code translate="no">measure</code></td><td>개수·합계·평균 계산</td></tr>
+        <tr><td><code translate="no">Format-Table</code></td><td>파이프라인</td><td><code translate="no">ft</code></td><td>표 형태로 출력</td></tr>
+        <tr><td><code translate="no">Format-List</code></td><td>파이프라인</td><td><code translate="no">fl</code></td><td>목록 형태로 출력</td></tr>
+        <tr><td><code translate="no">Out-GridView</code></td><td>파이프라인</td><td><code translate="no">ogv</code></td><td>GUI 표 창으로 보기</td></tr>
+        <tr><td><code translate="no">Write-Output</code></td><td>파이프라인</td><td><code translate="no">echo</code>, <code translate="no">write</code></td><td>파이프라인으로 출력</td></tr>
+        <tr><td><code translate="no">Write-Host</code></td><td>파이프라인</td><td></td><td>화면에만 출력(색상 지정)</td></tr>
+        <tr><td><code translate="no">Get-Process</code></td><td>시스템</td><td><code translate="no">ps</code>, <code translate="no">gps</code></td><td>프로세스 목록</td></tr>
+        <tr><td><code translate="no">Stop-Process</code></td><td>시스템</td><td><code translate="no">kill</code>, <code translate="no">spps</code></td><td>프로세스 종료</td></tr>
+        <tr><td><code translate="no">Start-Process</code></td><td>시스템</td><td><code translate="no">start</code>, <code translate="no">saps</code></td><td>프로그램 실행(관리자 권한 포함)</td></tr>
+        <tr><td><code translate="no">Get-Service</code></td><td>시스템</td><td><code translate="no">gsv</code></td><td>서비스 목록·상태</td></tr>
+        <tr><td><code translate="no">Start-Service</code></td><td>시스템</td><td><code translate="no">sasv</code></td><td>서비스 시작</td></tr>
+        <tr><td><code translate="no">Stop-Service</code></td><td>시스템</td><td><code translate="no">spsv</code></td><td>서비스 중지</td></tr>
+        <tr><td><code translate="no">Restart-Service</code></td><td>시스템</td><td></td><td>서비스 재시작</td></tr>
+        <tr><td><code translate="no">Set-Service</code></td><td>시스템</td><td></td><td>서비스 시작 유형 등 변경</td></tr>
+        <tr><td><code translate="no">Get-ComputerInfo</code></td><td>시스템</td><td><code translate="no">gin</code></td><td>OS·하드웨어 정보</td></tr>
+        <tr><td><code translate="no">Get-CimInstance</code></td><td>시스템</td><td><code translate="no">gcim</code></td><td>WMI/CIM 정보 조회</td></tr>
+        <tr><td><code translate="no">Get-HotFix</code></td><td>시스템</td><td></td><td>설치된 업데이트 목록</td></tr>
+        <tr><td><code translate="no">Get-WinEvent</code></td><td>시스템</td><td></td><td>이벤트 로그 조회</td></tr>
+        <tr><td><code translate="no">Get-ScheduledTask</code></td><td>시스템</td><td></td><td>예약 작업 조회</td></tr>
+        <tr><td><code translate="no">Get-LocalUser</code></td><td>시스템</td><td><code translate="no">glu</code></td><td>로컬 사용자 계정</td></tr>
+        <tr><td><code translate="no">Restart-Computer</code></td><td>시스템</td><td></td><td>컴퓨터 재시작</td></tr>
+        <tr><td><code translate="no">Stop-Computer</code></td><td>시스템</td><td></td><td>컴퓨터 종료</td></tr>
+        <tr><td><code translate="no">Get-NetIPConfiguration</code></td><td>네트워크</td><td><code translate="no">gip</code></td><td>IP 구성 요약(ipconfig 대체)</td></tr>
+        <tr><td><code translate="no">Get-NetIPAddress</code></td><td>네트워크</td><td></td><td>IP 주소 목록</td></tr>
+        <tr><td><code translate="no">Get-NetAdapter</code></td><td>네트워크</td><td></td><td>네트워크 어댑터 상태</td></tr>
+        <tr><td><code translate="no">Test-Connection</code></td><td>네트워크</td><td></td><td>ping 테스트</td></tr>
+        <tr><td><code translate="no">Test-NetConnection</code></td><td>네트워크</td><td><code translate="no">TNC</code></td><td>연결·포트·경로 진단</td></tr>
+        <tr><td><code translate="no">Resolve-DnsName</code></td><td>네트워크</td><td></td><td>DNS 조회(nslookup 대체)</td></tr>
+        <tr><td><code translate="no">Clear-DnsClientCache</code></td><td>네트워크</td><td></td><td>DNS 캐시 비우기</td></tr>
+        <tr><td><code translate="no">Get-NetTCPConnection</code></td><td>네트워크</td><td></td><td>TCP 연결·포트(netstat 대체)</td></tr>
+        <tr><td><code translate="no">Get-NetRoute</code></td><td>네트워크</td><td></td><td>라우팅 테이블</td></tr>
+        <tr><td><code translate="no">Get-NetFirewallRule</code></td><td>네트워크</td><td></td><td>방화벽 규칙 조회</td></tr>
+        <tr><td><code translate="no">Invoke-WebRequest</code></td><td>네트워크</td><td><code translate="no">iwr</code>, <code translate="no">curl</code>, <code translate="no">wget</code></td><td>HTTP 요청·다운로드</td></tr>
+        <tr><td><code translate="no">Invoke-RestMethod</code></td><td>네트워크</td><td><code translate="no">irm</code></td><td>REST API 호출(JSON 자동 변환)</td></tr>
+        <tr><td><code translate="no">Get-ItemProperty</code></td><td>레지스트리·디스크</td><td><code translate="no">gp</code></td><td>레지스트리 값 읽기</td></tr>
+        <tr><td><code translate="no">Set-ItemProperty</code></td><td>레지스트리·디스크</td><td><code translate="no">sp</code></td><td>레지스트리 값 쓰기</td></tr>
+        <tr><td><code translate="no">Get-PSDrive</code></td><td>레지스트리·디스크</td><td><code translate="no">gdr</code></td><td>드라이브(파일·레지스트리 등)와 사용량</td></tr>
+        <tr><td><code translate="no">Get-Volume</code></td><td>레지스트리·디스크</td><td></td><td>볼륨 정보·남은 공간</td></tr>
+        <tr><td><code translate="no">Get-Disk</code></td><td>레지스트리·디스크</td><td></td><td>물리 디스크 정보</td></tr>
+        <tr><td><code translate="no">Repair-Volume</code></td><td>레지스트리·디스크</td><td></td><td>볼륨 검사·복구(chkdsk 대체)</td></tr>
+        <tr><td><code translate="no">Get-ExecutionPolicy</code></td><td>스크립트·세션</td><td></td><td>스크립트 실행 정책 확인</td></tr>
+        <tr><td><code translate="no">Set-ExecutionPolicy</code></td><td>스크립트·세션</td><td></td><td>스크립트 실행 정책 변경</td></tr>
+        <tr><td><code translate="no">Read-Host</code></td><td>스크립트·세션</td><td></td><td>사용자 입력 받기</td></tr>
+        <tr><td><code translate="no">Start-Sleep</code></td><td>스크립트·세션</td><td><code translate="no">sleep</code></td><td>지정 시간 대기</td></tr>
+        <tr><td><code translate="no">Get-Date</code></td><td>스크립트·세션</td><td></td><td>날짜·시간, 형식 지정</td></tr>
+        <tr><td><code translate="no">Clear-Host</code></td><td>스크립트·세션</td><td><code translate="no">cls</code>, <code translate="no">clear</code></td><td>화면 지우기</td></tr>
+        <tr><td><code translate="no">Get-History</code></td><td>스크립트·세션</td><td><code translate="no">history</code>, <code translate="no">h</code>, <code translate="no">ghy</code></td><td>이번 세션 명령 기록</td></tr>
+        <tr><td><code translate="no">Start-Transcript</code></td><td>스크립트·세션</td><td></td><td>세션 입출력을 파일로 기록</td></tr>
+        <tr><td><code translate="no">Set-Alias</code></td><td>스크립트·세션</td><td><code translate="no">sal</code></td><td>별칭 만들기</td></tr>
+        <tr><td><code translate="no">Invoke-Expression</code></td><td>스크립트·세션</td><td><code translate="no">iex</code></td><td>문자열을 명령으로 실행</td></tr>
+        <tr><td><code translate="no">Start-Job</code></td><td>스크립트·세션</td><td><code translate="no">sajb</code></td><td>백그라운드 작업 시작</td></tr>
+        <tr><td><code translate="no">Receive-Job</code></td><td>스크립트·세션</td><td><code translate="no">rcjb</code></td><td>백그라운드 작업 결과 받기</td></tr>
+        <tr><td><code translate="no">Invoke-Command</code></td><td>스크립트·세션</td><td><code translate="no">icm</code></td><td>원격·로컬에서 명령 실행</td></tr>
+        <tr><td><code translate="no">Enter-PSSession</code></td><td>스크립트·세션</td><td><code translate="no">etsn</code></td><td>원격 컴퓨터에 대화형 접속</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="lead" style="margin-top:12px">전체 cmdlet은 <code translate="no">Get-Command</code>로 확인하거나 Microsoft Learn의 모듈 레퍼런스를 참고하세요.</p>
+  <a class="src" href="https://learn.microsoft.com/en-us/powershell/module/" target="_blank" rel="noopener">출처: PowerShell Module Browser ↗</a>
+</section>
+<footer>
+  주요 출처:
+  <a href="https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/" target="_blank" rel="noopener">Microsoft.PowerShell.Management</a> ·
+  <a href="https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/" target="_blank" rel="noopener">Microsoft.PowerShell.Utility</a> ·
+  <a href="https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/" target="_blank" rel="noopener">Microsoft.PowerShell.Core</a> ·
+  <a href="https://learn.microsoft.com/en-us/powershell/module/nettcpip/" target="_blank" rel="noopener">NetTCPIP</a>.
+  2026-11-09에 조사한 내용이며, 매개변수는 <code translate="no">Get-Help &lt;cmdlet&gt; -Full</code>로 최종 확인하세요.
+</footer></section></main></div><script>
+(function(){
+
+  var REF = 'https://manpages.ubuntu.com/';
+  var U = 'https://manpages.ubuntu.com/manpages/noble/en/man';
+  var BASH = 'https://www.gnu.org/software/bash/manual/bash.html';
+  // 명령별 상세 설명: [설명, 사용 예(선택), 공식 문서 링크(선택)]
+  var DETAILS = {
+    'xdg-open': ['파일이나 URL을 사용자가 지정한 기본 앱으로 엽니다. 윈도우의 <code translate="no">start</code>와 같은 용도이며 데스크톱 환경(GNOME, KDE 등)을 가리지 않습니다. Ubuntu에서는 <code translate="no">open</code>도 이 명령으로 연결되어 있습니다.', 'xdg-open file.html', 'https://portland.freedesktop.org/doc/xdg-open.html'],
+    'gio': ['GNOME의 GIO 명령줄 도구입니다. <code translate="no">gio open</code>은 파일 형식에 등록된 기본 앱으로 엽니다. 이 밖에 <code translate="no">gio trash</code>(휴지통으로 보내기), <code translate="no">gio info</code> 같은 하위 명령이 있습니다.', 'gio open file.html', U + '1/gio.1.html'],
+    'sensible-browser': ['Debian·Ubuntu에서 기본으로 설정된 웹 브라우저를 실행합니다. 스크립트에서 "아무 브라우저나" 열고 싶을 때 씁니다. 파일을 형식에 맞는 앱으로 열려면 <code translate="no">xdg-open</code>이 더 일반적입니다.', 'sensible-browser https://example.com', U + '1/sensible-browser.1.html'],
+    'pwd': ['현재 작업 폴더의 전체 경로를 출력합니다. 윈도우 cmd에서 인자 없이 <code translate="no">cd</code>를 입력한 것과 같습니다.', 'pwd', U + '1/pwd.1.html'],
+    'cd': ['작업 폴더를 바꾸는 bash 내장 명령입니다. 인자 없이 쓰면 홈 폴더로, <code translate="no">cd -</code>는 직전 폴더로, <code translate="no">cd ..</code>은 상위 폴더로 이동합니다. 리눅스는 경로 구분자가 <code translate="no">/</code>이고 대소문자를 구분합니다.', 'cd ~/projects', BASH],
+    'ls': ['폴더 내용을 나열합니다. <code translate="no">-l</code>은 권한·크기·시각을 포함한 자세한 목록, <code translate="no">-a</code>는 <code translate="no">.</code>으로 시작하는 숨김 파일 포함, <code translate="no">-h</code>는 크기를 K·M·G 단위로 보여줍니다. <code translate="no">-t</code>로 수정 시각순 정렬을 합니다.', 'ls -lah', U + '1/ls.1.html'],
+    'tree': ['폴더 구조를 나무 모양으로 출력합니다. Ubuntu에는 기본 설치되어 있지 않아 <code translate="no">sudo apt install tree</code>로 설치합니다. <code translate="no">-L 2</code>로 깊이를 제한합니다.', 'tree -L 2', U + '1/tree.1.html'],
+    'mkdir': ['폴더를 만듭니다. <code translate="no">-p</code>를 주면 중간 경로가 없을 때 함께 만들고, 이미 있어도 오류를 내지 않습니다.', 'mkdir -p src/components', U + '1/mkdir.1.html'],
+    'rmdir': ['비어 있는 폴더만 삭제합니다. 내용이 있는 폴더는 <code translate="no">rm -r</code>을 씁니다.', 'rmdir old-folder', U + '1/rmdir.1.html'],
+    'touch': ['파일의 접근·수정 시각을 현재 시각으로 바꿉니다. 파일이 없으면 빈 파일을 만들기 때문에 빈 파일 생성에 자주 씁니다.', 'touch index.html', U + '1/touch.1.html'],
+    'cp': ['파일을 복사합니다. 폴더는 <code translate="no">-r</code>(재귀)이 필요하고, <code translate="no">-i</code>는 덮어쓰기 전에 묻고, <code translate="no">-a</code>는 권한·시각 등 속성을 보존합니다.', 'cp -r src/ backup/', U + '1/cp.1.html'],
+    'mv': ['파일·폴더를 옮기거나 이름을 바꿉니다. 윈도우의 <code translate="no">move</code>와 <code translate="no">ren</code>을 합친 역할입니다. <code translate="no">-i</code>로 덮어쓰기 전에 확인합니다.', 'mv old.txt new.txt', U + '1/mv.1.html'],
+    'rm': ['파일을 삭제합니다. 휴지통을 거치지 않으므로 복구가 어렵습니다. 폴더는 <code translate="no">-r</code>, 확인 없이 강제 삭제는 <code translate="no">-f</code>이며 <code translate="no">-i</code>는 하나씩 확인합니다. 휴지통으로 보내려면 <code translate="no">gio trash</code>를 씁니다.', 'rm -i *.log', U + '1/rm.1.html'],
+    'ln': ['링크를 만듭니다. <code translate="no">-s</code>를 주면 바로가기와 비슷한 심볼릭 링크를 만들고, 없으면 하드 링크를 만듭니다. 순서는 <code translate="no">ln -s 대상 링크이름</code>입니다.', 'ln -s /opt/app/bin/app ~/bin/app', U + '1/ln.1.html'],
+    'stat': ['파일의 크기, 권한, 소유자, 접근·수정·변경 시각 등 상세 정보를 보여줍니다.', 'stat file.html', U + '1/stat.1.html'],
+    'file': ['파일 내용을 검사해 형식을 판별합니다. 리눅스는 확장자보다 내용으로 형식을 판단하는 경우가 많아 유용합니다.', 'file download.bin', U + '1/file.1.html'],
+    'find': ['폴더를 따라 내려가며 조건에 맞는 파일을 찾습니다. <code translate="no">-name</code> 이름 패턴, <code translate="no">-type f</code>/<code translate="no">-type d</code> 파일·폴더, <code translate="no">-mtime</code> 수정일, <code translate="no">-size</code> 크기로 거르고 <code translate="no">-exec</code>나 <code translate="no">-delete</code>로 처리합니다.', 'find . -name &quot;*.html&quot; -type f', U + '1/find.1.html'],
+    'grep': ['파일이나 입력에서 패턴과 일치하는 줄을 찾습니다. <code translate="no">-r</code> 하위 폴더 포함, <code translate="no">-n</code> 줄 번호, <code translate="no">-i</code> 대소문자 무시, <code translate="no">-v</code> 일치하지 않는 줄, <code translate="no">-E</code> 확장 정규식입니다. 파이프(<code translate="no">|</code>)와 함께 자주 씁니다.', 'ps aux | grep python', U + '1/grep.1.html'],
+    'which': ['명령 이름으로 실행될 파일의 경로를 <code translate="no">PATH</code>에서 찾아 줍니다. 윈도우의 <code translate="no">where</code>와 비슷합니다.', 'which python3', U + '1/which.debianutils.1.html'],
+    'type': ['bash 내장 명령으로, 이름이 별칭·함수·내장 명령·실행 파일 중 무엇인지 알려 줍니다. 윈도우 cmd의 <code translate="no">type</code>(파일 내용 출력)과 이름만 같고 용도가 다르니 주의합니다.', 'type ll', BASH],
+    'cat': ['파일 내용을 출력하거나 여러 파일을 이어 붙여 출력합니다. <code translate="no">-n</code>으로 줄 번호를 붙입니다. 긴 파일은 <code translate="no">less</code>가 편합니다.', 'cat a.txt b.txt &gt; all.txt', U + '1/cat.1.html'],
+    'less': ['파일을 한 화면씩 봅니다. <code translate="no">Space</code>/<code translate="no">b</code>로 페이지 이동, <code translate="no">/단어</code>로 검색, <code translate="no">n</code>으로 다음 결과, <code translate="no">q</code>로 종료합니다.', 'less /var/log/syslog', U + '1/less.1.html'],
+    'head': ['파일의 앞부분을 출력합니다. 기본 10줄이며 <code translate="no">-n</code>으로 줄 수를 정합니다.', 'head -n 20 data.csv', U + '1/head.1.html'],
+    'tail': ['파일의 끝부분을 출력합니다. 기본 10줄이며 <code translate="no">-n</code>으로 줄 수를 정하고, <code translate="no">-f</code>는 파일에 추가되는 내용을 실시간으로 계속 보여줘 로그 확인에 씁니다(<code translate="no">Ctrl+C</code>로 종료).', 'tail -f app.log', U + '1/tail.1.html'],
+    'wc': ['줄 수(<code translate="no">-l</code>), 단어 수(<code translate="no">-w</code>), 바이트 수(<code translate="no">-c</code>)를 셉니다.', 'wc -l *.html', U + '1/wc.1.html'],
+    'sort': ['줄을 정렬합니다. <code translate="no">-n</code> 숫자 기준, <code translate="no">-r</code> 역순, <code translate="no">-u</code> 중복 제거, <code translate="no">-k</code> 정렬할 필드 지정입니다.', 'sort -n scores.txt', U + '1/sort.1.html'],
+    'uniq': ['연속으로 반복되는 줄을 하나로 합칩니다. 떨어진 중복까지 없애려면 먼저 <code translate="no">sort</code>합니다. <code translate="no">-c</code>로 등장 횟수를 셉니다.', 'sort access.log | uniq -c', U + '1/uniq.1.html'],
+    'diff': ['두 파일을 줄 단위로 비교해 차이를 보여줍니다. <code translate="no">-u</code>는 git과 같은 통합(unified) 형식, <code translate="no">-r</code>은 폴더 비교입니다.', 'diff -u old.txt new.txt', U + '1/diff.1.html'],
+    'tee': ['표준 입력을 받아 화면에 출력하면서 파일에도 씁니다. <code translate="no">-a</code>로 덮어쓰지 않고 이어 씁니다.', 'make 2&gt;&amp;1 | tee build.log', U + '1/tee.1.html'],
+    'chmod': ['파일 권한을 바꿉니다. 기호 방식(<code translate="no">u+x</code>: 소유자에게 실행 권한 추가)이나 숫자 방식(<code translate="no">755</code>, <code translate="no">644</code>)을 씁니다. 스크립트를 <code translate="no">./script.sh</code>로 실행하려면 실행 권한이 필요합니다. <code translate="no">-R</code>로 하위까지 적용합니다.', 'chmod +x script.sh', U + '1/chmod.1.html'],
+    'chown': ['파일의 소유자와 그룹을 바꿉니다. 형식은 <code translate="no">사용자:그룹</code>이고 보통 <code translate="no">sudo</code>가 필요합니다. <code translate="no">-R</code>로 하위까지 적용합니다.', 'sudo chown -R $USER:$USER ./data', U + '1/chown.1.html'],
+    'sudo': ['다른 사용자(기본 root) 권한으로 명령을 실행합니다. 처음 실행할 때 내 계정 암호를 묻습니다. 윈도우의 "관리자 권한으로 실행"과 비슷합니다. <code translate="no">sudo -i</code>로 root 셸을 엽니다.', 'sudo apt update', U + '8/sudo.8.html'],
+    'uname': ['커널 이름·버전·아키텍처 등 시스템 정보를 출력합니다. <code translate="no">-a</code>로 전부 보여줍니다. 배포판 버전은 <code translate="no">cat /etc/os-release</code>로 확인합니다.', 'uname -a', U + '1/uname.1.html'],
+    'df': ['마운트된 파일 시스템별 디스크 사용량과 여유 공간을 보여줍니다. <code translate="no">-h</code>로 읽기 쉬운 단위를 씁니다.', 'df -h', U + '1/df.1.html'],
+    'du': ['파일·폴더가 차지하는 디스크 용량을 계산합니다. <code translate="no">-s</code>는 합계만, <code translate="no">-h</code>는 읽기 쉬운 단위입니다. 큰 폴더를 찾을 때 <code translate="no">sort -h</code>와 함께 씁니다.', 'du -sh * | sort -h', U + '1/du.1.html'],
+    'free': ['전체·사용 중·사용 가능한 메모리와 스왑을 보여줍니다. <code translate="no">-h</code>로 읽기 쉬운 단위를 씁니다.', 'free -h', U + '1/free.1.html'],
+    'lsblk': ['디스크와 파티션 같은 블록 장치를 나무 모양으로 나열합니다. 장치 이름, 크기, 마운트 위치를 확인할 때 씁니다.', 'lsblk', U + '8/lsblk.8.html'],
+    'mount': ['파일 시스템을 폴더에 연결(마운트)합니다. 인자 없이 쓰면 현재 마운트 목록을 보여줍니다. 연결 해제는 <code translate="no">umount</code>입니다.', 'sudo mount /dev/sdb1 /mnt', U + '8/mount.8.html'],
+    'top': ['프로세스와 CPU·메모리 사용률을 실시간으로 보여줍니다. <code translate="no">q</code>로 종료하고, <code translate="no">M</code>은 메모리순, <code translate="no">P</code>는 CPU순 정렬입니다. 더 보기 편한 <code translate="no">htop</code>은 별도 설치합니다.', 'top', U + '1/top.1.html'],
+    'ps': ['실행 중인 프로세스 목록을 출력합니다. <code translate="no">ps aux</code>는 모든 사용자의 전체 프로세스를, <code translate="no">ps -ef</code>는 표준 형식으로 보여줍니다. <code translate="no">grep</code>과 함께 특정 프로세스를 찾습니다.', 'ps aux | grep node', U + '1/ps.1.html'],
+    'kill': ['PID로 프로세스에 신호를 보냅니다. 기본은 정상 종료 요청(TERM)이고, 응답하지 않으면 <code translate="no">-9</code>(KILL)로 강제 종료합니다. <code translate="no">kill -l</code>로 신호 목록을 봅니다.', 'kill 12345', U + '1/kill.1.html'],
+    'pkill': ['이름 등 패턴과 일치하는 프로세스에 신호를 보냅니다. <code translate="no">-f</code>는 전체 명령줄로 비교합니다. 미리 확인하려면 같은 패턴으로 <code translate="no">pgrep -a</code>를 씁니다.', 'pkill -f &quot;python server.py&quot;', U + '1/pkill.1.html'],
+    'killall': ['정확히 같은 이름의 프로세스에 모두 신호를 보냅니다. <code translate="no">-i</code>로 하나씩 확인합니다.', 'killall firefox', U + '1/killall.1.html'],
+    'watch': ['명령을 일정 간격(기본 2초)으로 반복 실행하며 결과를 전체 화면으로 갱신합니다. <code translate="no">-n</code>으로 간격, <code translate="no">-d</code>로 바뀐 부분 강조입니다.', 'watch -n 1 df -h', U + '1/watch.1.html'],
+    'jobs': ['현재 셸에서 백그라운드로 돌리거나 멈춘 작업 목록을 보여주는 bash 내장 명령입니다. 명령 끝에 <code translate="no">&amp;</code>를 붙이면 백그라운드로 실행되고, 실행 중 <code translate="no">Ctrl+Z</code>를 누르면 멈춥니다.', 'jobs -l', BASH],
+    'fg': ['백그라운드나 멈춘 작업을 포그라운드로 가져오는 bash 내장 명령입니다. 번호는 <code translate="no">jobs</code>에 나온 <code translate="no">%1</code> 형식입니다.', 'fg %1', BASH],
+    'bg': ['<code translate="no">Ctrl+Z</code>로 멈춘 작업을 백그라운드에서 계속 실행하는 bash 내장 명령입니다.', 'bg %1', BASH],
+    'nohup': ['터미널이 끊겨도(HUP 신호) 명령이 종료되지 않게 실행합니다. 출력은 기본으로 <code translate="no">nohup.out</code>에 저장됩니다. 보통 끝에 <code translate="no">&amp;</code>를 붙여 백그라운드로 돌립니다.', 'nohup ./server.sh &amp;', U + '1/nohup.1.html'],
+    'ip': ['네트워크 인터페이스, 주소, 라우팅을 보고 설정합니다. <code translate="no">ip addr</code>(줄여서 <code translate="no">ip a</code>)로 IP 주소, <code translate="no">ip route</code>로 라우팅 표를 봅니다. 예전 <code translate="no">ifconfig</code>를 대체합니다.', 'ip a', U + '8/ip.8.html'],
+    'ss': ['소켓(네트워크 연결) 정보를 보여줍니다. <code translate="no">-t</code> TCP, <code translate="no">-u</code> UDP, <code translate="no">-l</code> 대기 중, <code translate="no">-n</code> 숫자 표시, <code translate="no">-p</code> 프로세스 표시이며 다른 사용자 프로세스는 <code translate="no">sudo</code>가 필요합니다. 예전 <code translate="no">netstat</code>을 대체합니다.', 'ss -tlnp', U + '8/ss.8.html'],
+    'ping': ['호스트에 ICMP 요청을 보내 연결과 응답 시간을 확인합니다. 윈도우와 달리 기본으로 멈출 때까지 계속 보내므로 <code translate="no">Ctrl+C</code>로 끝내거나 <code translate="no">-c</code>로 횟수를 정합니다.', 'ping -c 4 google.com', U + '8/ping.8.html'],
+    'curl': ['URL로 데이터를 주고받습니다. <code translate="no">-O</code> 원래 이름으로 저장, <code translate="no">-o</code> 이름 지정 저장, <code translate="no">-L</code> 리다이렉트 따라가기, <code translate="no">-I</code> 헤더만, <code translate="no">-X</code>·<code translate="no">-d</code>로 메서드·본문을 지정합니다. API 테스트에 자주 씁니다.', 'curl -L -o page.html https://example.com', U + '1/curl.1.html'],
+    'wget': ['URL에서 파일을 내려받습니다. <code translate="no">-c</code>로 중단된 다운로드를 이어받고, <code translate="no">-O</code>로 저장 이름을 정합니다.', 'wget https://example.com/file.zip', U + '1/wget.1.html'],
+    'ssh': ['SSH로 원격 서버에 접속하거나 원격에서 명령을 실행합니다. <code translate="no">-p</code>로 포트, <code translate="no">-i</code>로 키 파일을 지정합니다. 키는 <code translate="no">ssh-keygen</code>으로 만듭니다.', 'ssh user@192.168.0.10', U + '1/ssh.1.html'],
+    'scp': ['SSH로 파일을 복사합니다. 원격 경로는 <code translate="no">사용자@호스트:경로</code> 형식이고 폴더는 <code translate="no">-r</code>이 필요합니다.', 'scp file.html user@server:/var/www/', U + '1/scp.1.html'],
+    'rsync': ['로컬이나 원격(SSH) 사이에서 바뀐 부분만 전송해 동기화합니다. <code translate="no">-a</code> 속성 보존·재귀, <code translate="no">-v</code> 자세히, <code translate="no">-z</code> 압축, <code translate="no">--delete</code> 원본에 없는 파일 삭제, <code translate="no">-n</code> 미리 보기입니다. 원본 끝의 <code translate="no">/</code> 유무에 따라 결과가 달라집니다.', 'rsync -avn src/ backup/', U + '1/rsync.1.html'],
+    'tar': ['여러 파일을 하나로 묶거나 풉니다. <code translate="no">-c</code> 만들기, <code translate="no">-x</code> 풀기, <code translate="no">-t</code> 목록, <code translate="no">-z</code> gzip 압축, <code translate="no">-f</code> 아카이브 파일 지정, <code translate="no">-v</code> 진행 표시입니다.', 'tar -czf site.tar.gz site/ ; tar -xzf site.tar.gz', U + '1/tar.1.html'],
+    'gzip': ['파일 하나를 .gz로 압축하며 원본은 압축 파일로 바뀝니다. <code translate="no">-d</code>(또는 <code translate="no">gunzip</code>)로 풀고 <code translate="no">-k</code>로 원본을 남깁니다.', 'gzip -k big.log', U + '1/gzip.1.html'],
+    'zip': ['.zip 압축 파일을 만듭니다. 폴더는 <code translate="no">-r</code>이 필요합니다. 설치되어 있지 않으면 <code translate="no">sudo apt install zip</code>으로 설치합니다.', 'zip -r site.zip site/', U + '1/zip.1.html'],
+    'unzip': ['.zip 파일을 풉니다. <code translate="no">-d</code>로 풀 폴더를 정하고 <code translate="no">-l</code>로 내용만 봅니다.', 'unzip site.zip -d site', U + '1/unzip.1.html'],
+    'apt': ['Ubuntu·Debian의 패키지 관리 명령입니다. <code translate="no">update</code>로 패키지 목록을 갱신하고 <code translate="no">install</code>·<code translate="no">remove</code>로 설치·삭제, <code translate="no">upgrade</code>로 업그레이드, <code translate="no">search</code>로 검색합니다. 설치·삭제는 <code translate="no">sudo</code>가 필요합니다.', 'sudo apt update &amp;&amp; sudo apt install tree', U + '8/apt.8.html'],
+    'systemctl': ['systemd 서비스를 관리합니다. <code translate="no">status</code>·<code translate="no">start</code>·<code translate="no">stop</code>·<code translate="no">restart</code>로 상태 확인과 제어를, <code translate="no">enable</code>·<code translate="no">disable</code>로 부팅 시 자동 시작을 설정합니다. 변경은 보통 <code translate="no">sudo</code>가 필요합니다.', 'sudo systemctl restart nginx', U + '1/systemctl.1.html'],
+    'journalctl': ['systemd 저널(시스템·서비스 로그)을 봅니다. <code translate="no">-u</code>로 특정 서비스, <code translate="no">-f</code>로 실시간 추적, <code translate="no">-b</code>로 이번 부팅 이후, <code translate="no">--since</code>로 시간 범위를 지정합니다.', 'journalctl -u nginx -f', U + '1/journalctl.1.html'],
+    'man': ['명령의 매뉴얼 페이지를 봅니다. <code translate="no">less</code>와 같은 키로 이동·검색하고 <code translate="no">q</code>로 나옵니다. <code translate="no">man -k 키워드</code>로 관련 명령을 찾습니다.', 'man ls', U + '1/man.1.html'],
+    'echo': ['텍스트나 변수 값을 출력합니다. <code translate="no">&gt;</code>로 파일에 쓰고 <code translate="no">&gt;&gt;</code>로 이어 씁니다.', 'echo $HOME', BASH],
+    'env': ['환경 변수 목록을 출력하거나, 변수를 바꾼 환경에서 명령을 실행합니다.', 'env | grep PATH', U + '1/env.1.html'],
+    'export': ['변수를 환경 변수로 지정해 자식 프로세스에 전달하는 bash 내장 명령입니다. 현재 셸에만 적용되므로 계속 쓰려면 <code translate="no">~/.bashrc</code>에 적습니다.', 'export PATH=&quot;$HOME/bin:$PATH&quot;', BASH],
+    'alias': ['긴 명령에 짧은 이름을 붙이는 bash 내장 명령입니다. 인자 없이 쓰면 현재 별칭 목록을 보여줍니다. 계속 쓰려면 <code translate="no">~/.bashrc</code>에 적습니다.', 'alias ll=&#39;ls -alF&#39;', BASH],
+    'history': ['입력한 명령 기록을 번호와 함께 보여주는 bash 내장 명령입니다. <code translate="no">!번호</code>로 다시 실행하고, <code translate="no">Ctrl+R</code>로 기록을 검색합니다.', 'history | grep ssh', BASH],
+    'clear': ['터미널 화면을 지웁니다. 단축키 <code translate="no">Ctrl+L</code>과 비슷합니다.', 'clear', U + '1/clear.1.html'],
+    'date': ['현재 날짜와 시각을 출력하거나 형식을 지정해 출력합니다.', 'date &quot;+%Y-%m-%d %H:%M&quot;', U + '1/date.1.html'],
+    'nano': ['초보자가 쓰기 쉬운 터미널 텍스트 편집기입니다. 화면 아래에 단축키가 표시되며 <code translate="no">Ctrl+O</code> 저장, <code translate="no">Ctrl+X</code> 종료입니다.', 'nano ~/.bashrc', U + '1/nano.1.html'],
+    'vim': ['모드 기반 텍스트 편집기입니다. <code translate="no">i</code>로 입력 모드, <code translate="no">Esc</code>로 명령 모드, <code translate="no">:wq</code> 저장 후 종료, <code translate="no">:q!</code> 저장 없이 종료입니다. <code translate="no">vimtutor</code>로 연습할 수 있습니다.', 'vim file.html', U + '1/vim.1.html']
+  };
+
+  function nameOf(tr) {
+    var name = tr.querySelector('code').textContent.split(' ')[0];
+    return name;
+  }
+  function linkOf(name, d) { return (d[2] || REF); }
+
+  var table = document.getElementById('linux-cmd-table');
+  var filter = document.getElementById('linux-cmd-filter');
+  var count = document.getElementById('linux-cmd-count');
+  var params = new URLSearchParams(location.search);
+  var opened = (params.get('linux-open') || '').split(',').filter(Boolean);
+  var items = [];
+
+  // 명령어·식별자는 자동 번역에서 제외
+  document.querySelectorAll('code, pre').forEach(function (el) { el.setAttribute('translate', 'no'); });
+
+  function setOpen(it, open) {
+    it.row.hidden = !open;
+    it.tr.classList.toggle('open', open);
+    it.btn.setAttribute('aria-expanded', String(open));
+  }
+
+  function syncUrl() {
+    var p = new URLSearchParams(location.search);
+    var q = filter.value.trim();
+    if (q) p.set('linux-q', q); else p.delete('linux-q');
+    var open = items.filter(function (it) { return !it.row.hidden; }).map(function (it) { return it.name; });
+    if (open.length) p.set('linux-open', open.join(',')); else p.delete('linux-open');
+    var s = p.toString();
+    try { history.replaceState(null, '', location.pathname + (s ? '?' + s : '') + location.hash); } catch (e) {}
+  }
+
+  table.querySelectorAll('tbody tr').forEach(function (tr, i) {
+    var name = nameOf(tr);
+    var d = DETAILS[name];
+    if (!d) return;
+    var cell = tr.cells[0];
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'toggle';
+    btn.setAttribute('aria-expanded', 'false');
+    btn.setAttribute('aria-controls', 'linux-detail-' + i);
+    while (cell.firstChild) btn.appendChild(cell.firstChild);
+    cell.appendChild(btn);
+    tr.classList.add('cmd');
+    var row = document.createElement('tr');
+    row.className = 'detail';
+    row.id = 'linux-detail-' + i;
+    row.hidden = true;
+    var html = '<td colspan="' + tr.cells.length + '"><p>' + d[0] + '</p>';
+    if (d[1]) html += '<div class="ex">예: <code translate="no">' + d[1] + '</code></div>';
+    html += '<a class="src" href="' + linkOf(name, d) + '" target="_blank" rel="noopener">공식 문서 ↗</a></td>';
+    row.innerHTML = html;
+    tr.after(row);
+    var it = { name: name, tr: tr, row: row, btn: btn };
+    items.push(it);
+    // 버튼의 클릭·Enter·Space는 행으로 전파되어 여기서 한 번만 처리된다
+    btn.addEventListener('click', function (e) {
+      setOpen(it, it.row.hidden);
+      syncUrl();
+    });
+    if (opened.indexOf(name) !== -1) setOpen(it, true);
+  });
+
+  var empty = document.createElement('tr');
+  empty.className = 'empty';
+  empty.hidden = true;
+  empty.innerHTML = '<td colspan="' + table.tHead.rows[0].cells.length + '">일치하는 명령이 없습니다. 다른 검색어를 입력해 보세요.</td>';
+  table.tBodies[0].appendChild(empty);
+
+  function applyFilter() {
+    var q = filter.value.trim().toLowerCase();
+    var shown = 0;
+    items.forEach(function (it) {
+      var hit = !q || (it.tr.textContent + ' ' + it.row.textContent).toLowerCase().indexOf(q) !== -1;
+      it.tr.style.display = hit ? '' : 'none';
+      it.row.style.display = hit ? '' : 'none';
+      if (hit) shown++;
+    });
+    empty.hidden = shown !== 0;
+    count.textContent = q ? '명령 ' + items.length + '개 중 ' + shown + '개 일치' : '명령 ' + items.length + '개';
+  }
+
+  filter.value = params.get('linux-q') || '';
+  filter.addEventListener('input', function () { applyFilter(); syncUrl(); });
+  applyFilter();
+
+})();
+</script><script>
+(function(){
+
+  var BASE = 'https://learn.microsoft.com/en-us/powershell/module/';
+  var M = 'microsoft.powershell.management', U = 'microsoft.powershell.utility', C = 'microsoft.powershell.core', S = 'microsoft.powershell.security';
+  // 명령별 상세 설명: [설명, 사용 예(선택), 모듈 이름(문서 링크용)]
+  var DETAILS = {
+    'Get-Help': ['cmdlet과 개념(about_*) 도움말을 보여줍니다. <code translate="no">-Examples</code> 예제만, <code translate="no">-Full</code> 전체, <code translate="no">-Online</code> 웹 문서 열기. 로컬 도움말이 비어 있으면 관리자 권한으로 <code translate="no">Update-Help</code>를 실행합니다.', 'Get-Help Copy-Item -Examples', C],
+    'Get-Command': ['설치된 cmdlet, 함수, 별칭, 실행 파일을 찾습니다. 와일드카드, <code translate="no">-Verb</code>, <code translate="no">-Noun</code>, <code translate="no">-Module</code>로 좁힐 수 있습니다.', 'Get-Command -Noun Service', C],
+    'Get-Member': ['파이프라인으로 받은 객체의 형식, 속성, 메서드를 보여줍니다. 어떤 속성으로 필터·정렬할 수 있는지 확인할 때 씁니다.', 'Get-Service | Get-Member -MemberType Property', U],
+    'Get-Alias': ['별칭 목록을 보여줍니다. <code translate="no">-Definition</code>으로 특정 cmdlet의 별칭을 찾을 수 있습니다.', 'Get-Alias -Definition Get-ChildItem', U],
+    'Get-Module': ['현재 세션에 로드된 모듈을 보여줍니다. <code translate="no">-ListAvailable</code>은 설치된 모든 모듈을 보여줍니다.', 'Get-Module -ListAvailable', C],
+    'Install-Module': ['PowerShell Gallery에서 모듈을 설치합니다. <code translate="no">-Scope CurrentUser</code>를 주면 관리자 권한 없이 설치합니다. PowerShellGet 모듈에 포함됩니다.', 'Install-Module PSReadLine -Scope CurrentUser', 'powershellget'],
+    'Set-Location': ['현재 위치를 바꿉니다. 파일 시스템뿐 아니라 레지스트리(<code translate="no">HKCU:</code>), 환경 변수(<code translate="no">Env:</code>) 같은 PowerShell 드라이브로도 이동합니다. 드라이브 이동에 cmd의 <code translate="no">/d</code>가 필요 없습니다.', 'Set-Location D:\\projects', M],
+    'Get-Location': ['현재 위치를 경로 객체로 돌려줍니다. 스크립트 파일의 폴더는 <code translate="no">$PSScriptRoot</code>로 얻습니다.', 'Get-Location', M],
+    'Push-Location': ['현재 위치를 스택에 저장하고 지정한 위치로 이동합니다.', 'Push-Location C:\\Windows', M],
+    'Pop-Location': ['<code translate="no">Push-Location</code>으로 저장한 위치로 돌아갑니다.', 'Pop-Location', M],
+    'Get-ChildItem': ['폴더의 파일·하위 폴더를 나열합니다. <code translate="no">-Recurse</code> 하위 포함, <code translate="no">-Filter</code> 이름 필터(빠름), <code translate="no">-Include</code>/<code translate="no">-Exclude</code>, <code translate="no">-File</code>/<code translate="no">-Directory</code> 종류 제한, <code translate="no">-Force</code> 숨김 포함.', 'Get-ChildItem -Path C:\\logs -Recurse -Filter *.log | Sort-Object Length -Descending | Select-Object -First 10', M],
+    'Get-Item': ['지정한 경로의 항목 하나를 객체로 가져옵니다. 파일 크기, 수정 시각 등 속성을 볼 때 씁니다.', 'Get-Item .\\report.xlsx | Select-Object Name, Length, LastWriteTime', M],
+    'New-Item': ['파일이나 폴더를 만듭니다. <code translate="no">-ItemType File</code> 또는 <code translate="no">Directory</code>, <code translate="no">-Force</code>는 중간 폴더를 함께 만들거나 기존 파일을 덮어씁니다.', 'New-Item -ItemType Directory -Path .\\src\\components -Force', M],
+    'Copy-Item': ['파일·폴더를 복사합니다. 폴더 전체는 <code translate="no">-Recurse</code>, 덮어쓰기는 <code translate="no">-Force</code>. 실행 전 결과를 보려면 <code translate="no">-WhatIf</code>를 붙입니다.', 'Copy-Item .\\src -Destination D:\\backup\\src -Recurse', M],
+    'Move-Item': ['파일·폴더를 이동합니다. 같은 폴더 안에서 쓰면 이름 변경처럼 동작합니다.', 'Move-Item *.jpg -Destination D:\\photos', M],
+    'Rename-Item': ['항목 이름을 바꿉니다. <code translate="no">-NewName</code>에 스크립트 블록을 주면 일괄 변경이 됩니다.', 'Get-ChildItem *.txt | Rename-Item -NewName { $_.Name -replace \'\\.txt$\', \'.md\' }', M],
+    'Remove-Item': ['파일·폴더를 삭제합니다. 폴더는 <code translate="no">-Recurse</code>, 읽기 전용·숨김은 <code translate="no">-Force</code>. 휴지통을 거치지 않으니 <code translate="no">-WhatIf</code>로 먼저 확인하세요.', 'Remove-Item .\\build -Recurse -Force -WhatIf', M],
+    'Test-Path': ['경로가 있으면 <code translate="no">True</code>, 없으면 <code translate="no">False</code>를 돌려줍니다. <code translate="no">-PathType Leaf</code>(파일)·<code translate="no">Container</code>(폴더)로 종류도 확인합니다.', 'if (Test-Path .\\config.json) { \'있음\' }', M],
+    'Resolve-Path': ['와일드카드나 상대 경로를 실제 전체 경로로 바꿉니다. 경로가 없으면 오류가 납니다.', 'Resolve-Path ..\\*.sln', M],
+    'Join-Path': ['구분자를 신경 쓰지 않고 경로를 안전하게 합칩니다.', 'Join-Path $env:USERPROFILE \'Documents\'', M],
+    'Split-Path': ['경로에서 부모 경로(기본), <code translate="no">-Leaf</code> 파일 이름, <code translate="no">-Extension</code> 확장자(PS 7) 등을 뽑습니다.', 'Split-Path C:\\data\\report.csv -Leaf', M],
+    'Get-Acl': ['파일·폴더·레지스트리 키의 보안 설명자(소유자, 접근 규칙)를 가져옵니다. 변경은 <code translate="no">Set-Acl</code>로 합니다.', '(Get-Acl C:\\share).Access | Format-Table IdentityReference, FileSystemRights', S],
+    'Compress-Archive': ['파일·폴더를 zip으로 압축합니다. <code translate="no">-Update</code>로 기존 zip에 추가, <code translate="no">-Force</code>로 덮어쓰기.', 'Compress-Archive -Path .\\dist\\* -DestinationPath release.zip', 'microsoft.powershell.archive'],
+    'Expand-Archive': ['zip 파일을 풉니다. <code translate="no">-Force</code>는 기존 파일을 덮어씁니다.', 'Expand-Archive release.zip -DestinationPath .\\out', 'microsoft.powershell.archive'],
+    'Get-FileHash': ['파일 해시를 계산합니다. 기본 알고리즘은 SHA256이며 <code translate="no">-Algorithm</code>으로 바꿀 수 있습니다. 다운로드 파일 검증에 씁니다.', 'Get-FileHash .\\setup.exe -Algorithm SHA256', U],
+    'Get-Content': ['파일을 줄 단위 문자열 배열로 읽습니다. <code translate="no">-Tail n</code> 마지막 n줄, <code translate="no">-Wait</code> 추가되는 내용 계속 보기, <code translate="no">-Raw</code> 한 문자열로, <code translate="no">-Encoding</code> 인코딩 지정.', 'Get-Content .\\app.log -Tail 50 -Wait', M],
+    'Set-Content': ['파일 내용을 지정한 값으로 덮어씁니다. 기본 인코딩은 버전에 따라 다르므로 필요하면 <code translate="no">-Encoding utf8</code>을 지정합니다.', 'Set-Content .\\note.txt -Value \'hello\' -Encoding utf8', M],
+    'Add-Content': ['파일 끝에 내용을 덧붙입니다. 로그 기록에 편합니다.', 'Add-Content .\\log.txt "$(Get-Date) 작업 완료"', M],
+    'Out-File': ['파이프라인 출력을 화면에 보이는 형식 그대로 파일에 씁니다. <code translate="no">-Append</code> 이어 쓰기, <code translate="no">-Encoding</code> 지정. <code translate="no">&gt;</code> 리디렉션과 비슷합니다.', 'Get-Process | Out-File .\\procs.txt', U],
+    'Select-String': ['파일이나 입력에서 정규식으로 검색합니다. 기본은 대소문자 무시, <code translate="no">-CaseSensitive</code>로 구분. <code translate="no">-SimpleMatch</code> 정규식 대신 문자 그대로, <code translate="no">-Context 2</code> 앞뒤 줄 표시.', 'Get-ChildItem -Recurse *.ps1 | Select-String -Pattern \'TODO\'', U],
+    'Compare-Object': ['두 객체 집합을 비교해 한쪽에만 있는 항목을 <code translate="no">&lt;=</code>, <code translate="no">=&gt;</code>로 표시합니다. 파일 비교는 각각 <code translate="no">Get-Content</code>로 읽어 넘깁니다.', 'Compare-Object (Get-Content a.txt) (Get-Content b.txt)', U],
+    'Import-Csv': ['CSV 파일의 각 행을 속성이 있는 객체로 읽습니다. 구분자가 다르면 <code translate="no">-Delimiter</code>를 씁니다.', 'Import-Csv .\\users.csv | Where-Object Dept -eq \'IT\'', U],
+    'Export-Csv': ['객체를 CSV로 저장합니다. Windows PowerShell 5.1에서는 첫 줄에 형식 정보가 붙지 않도록 <code translate="no">-NoTypeInformation</code>을 붙이는 경우가 많습니다. 한글은 <code translate="no">-Encoding UTF8</code>을 지정하세요.', 'Get-Process | Select-Object Name, Id, CPU | Export-Csv procs.csv -NoTypeInformation -Encoding UTF8', U],
+    'ConvertFrom-Json': ['JSON 문자열을 PowerShell 객체로 바꿉니다. 파일은 <code translate="no">Get-Content -Raw</code>로 읽어 넘깁니다.', '(Get-Content .\\package.json -Raw | ConvertFrom-Json).version', U],
+    'ConvertTo-Json': ['객체를 JSON 문자열로 바꿉니다. 기본 깊이가 얕아(2) 중첩 객체가 잘릴 수 있으니 <code translate="no">-Depth</code>를 늘립니다.', '$config | ConvertTo-Json -Depth 5 | Set-Content config.json', U],
+    'Get-Clipboard': ['클립보드의 텍스트를 가져옵니다.', 'Get-Clipboard', M],
+    'Set-Clipboard': ['값을 클립보드에 복사합니다. 파이프라인으로 받은 출력도 복사할 수 있습니다.', 'Get-Location | Set-Clipboard', M],
+    'Where-Object': ['조건을 만족하는 객체만 통과시킵니다. 간단한 형식(<code translate="no">Where-Object Status -eq Running</code>)과 스크립트 블록 형식(<code translate="no">{ $_.CPU -gt 100 }</code>)이 있습니다.', 'Get-Service | Where-Object Status -eq \'Running\'', C],
+    'ForEach-Object': ['파이프라인의 각 객체에 스크립트 블록을 실행합니다. 현재 객체는 <code translate="no">$_</code>입니다. PowerShell 7에서는 <code translate="no">-Parallel</code>로 병렬 실행이 가능합니다.', '1..5 | ForEach-Object { $_ * 2 }', C],
+    'Select-Object': ['원하는 속성만 고르거나(<code translate="no">-Property</code>), 앞·뒤 n개(<code translate="no">-First</code>, <code translate="no">-Last</code>), 중복 제거(<code translate="no">-Unique</code>), 계산 속성을 만듭니다.', 'Get-Process | Select-Object Name, Id, @{n=\'MemMB\'; e={[int]($_.WS/1MB)}} -First 5', U],
+    'Sort-Object': ['속성 기준으로 정렬합니다. <code translate="no">-Descending</code> 내림차순, <code translate="no">-Unique</code> 중복 제거, 여러 속성 지정 가능.', 'Get-ChildItem | Sort-Object LastWriteTime -Descending', U],
+    'Group-Object': ['속성 값이 같은 객체끼리 묶고 개수를 셉니다.', 'Get-ChildItem -Recurse -File | Group-Object Extension | Sort-Object Count -Descending', U],
+    'Measure-Object': ['개수, 합계, 평균, 최소·최대를 계산합니다. 텍스트는 <code translate="no">-Line</code>, <code translate="no">-Word</code>, <code translate="no">-Character</code>로 셉니다.', 'Get-ChildItem -Recurse -File | Measure-Object Length -Sum', U],
+    'Format-Table': ['출력을 표로 보여줍니다. <code translate="no">-AutoSize</code> 열 너비 자동 조정. 형식 지정 cmdlet은 파이프라인 맨 끝에만 쓰세요(이후에는 객체가 아님).', 'Get-Process | Format-Table Name, Id, CPU -AutoSize', U],
+    'Format-List': ['각 속성을 한 줄씩 목록으로 보여줍니다. <code translate="no">Format-List *</code>는 모든 속성을 보여줍니다.', 'Get-Service wuauserv | Format-List *', U],
+    'Out-GridView': ['출력을 정렬·필터 가능한 GUI 창에 띄웁니다. <code translate="no">-PassThru</code>로 선택한 행을 다시 파이프라인에 넘길 수 있습니다. Windows 데스크톱 환경에서만 동작합니다.', 'Get-Process | Out-GridView -PassThru | Stop-Process', U],
+    'Write-Output': ['값을 파이프라인으로 내보냅니다. 함수의 반환값으로 쓰입니다. 그냥 값을 적어도 같은 효과입니다.', 'Write-Output \'done\'', U],
+    'Write-Host': ['화면에만 출력하고 파이프라인으로는 넘기지 않습니다. <code translate="no">-ForegroundColor</code>로 색을 지정합니다. 데이터 반환에는 쓰지 않습니다.', 'Write-Host \'완료\' -ForegroundColor Green', U],
+    'Get-Process': ['실행 중인 프로세스를 객체로 가져옵니다. <code translate="no">-Name</code>, <code translate="no">-Id</code>로 지정하고 CPU·메모리(WS) 속성으로 정렬할 수 있습니다.', 'Get-Process | Sort-Object WS -Descending | Select-Object -First 5 Name, Id, WS', M],
+    'Stop-Process': ['프로세스를 종료합니다. <code translate="no">-Name</code> 또는 <code translate="no">-Id</code>로 지정하고 <code translate="no">-Force</code>는 확인 없이 강제 종료합니다.', 'Stop-Process -Name notepad -Force', M],
+    'Start-Process': ['프로그램이나 파일을 실행합니다. <code translate="no">-Verb RunAs</code>는 관리자 권한으로 실행, <code translate="no">-Wait</code>는 끝날 때까지 대기, <code translate="no">-ArgumentList</code>로 인자 전달.', 'Start-Process powershell -Verb RunAs', M],
+    'Get-Service': ['서비스 목록과 상태(Running, Stopped)를 가져옵니다. 이름에 와일드카드를 쓸 수 있습니다.', 'Get-Service *sql* | Where-Object Status -eq Running', M],
+    'Start-Service': ['중지된 서비스를 시작합니다. 관리자 권한이 필요합니다.', 'Start-Service -Name Spooler', M],
+    'Stop-Service': ['서비스를 중지합니다. 의존 서비스가 있으면 <code translate="no">-Force</code>가 필요합니다. 관리자 권한이 필요합니다.', 'Stop-Service -Name Spooler', M],
+    'Restart-Service': ['서비스를 중지했다가 다시 시작합니다. 관리자 권한이 필요합니다.', 'Restart-Service -Name Spooler', M],
+    'Set-Service': ['서비스의 시작 유형(<code translate="no">-StartupType</code> Automatic, Manual, Disabled), 표시 이름, 설명 등을 바꿉니다. 관리자 권한이 필요합니다.', 'Set-Service -Name Spooler -StartupType Manual', M],
+    'Get-ComputerInfo': ['OS 버전, 설치일, BIOS, 메모리 등 시스템 정보를 한 번에 가져옵니다. 처음 실행은 다소 느립니다.', 'Get-ComputerInfo -Property OsName, OsVersion, CsTotalPhysicalMemory', M],
+    'Get-CimInstance': ['CIM/WMI 클래스를 조회합니다. 사용 중단된 <code translate="no">wmic</code>의 대체 수단입니다.', 'Get-CimInstance Win32_OperatingSystem | Select-Object Caption, LastBootUpTime', 'cimcmdlets'],
+    'Get-HotFix': ['설치된 Windows 업데이트(핫픽스) 목록을 보여줍니다.', 'Get-HotFix | Sort-Object InstalledOn -Descending | Select-Object -First 5', M],
+    'Get-WinEvent': ['이벤트 로그를 조회합니다. <code translate="no">-LogName</code>, <code translate="no">-MaxEvents</code>, 빠른 필터링은 <code translate="no">-FilterHashtable</code>을 씁니다.', 'Get-WinEvent -FilterHashtable @{LogName=\'System\'; Level=2} -MaxEvents 20', 'microsoft.powershell.diagnostics'],
+    'Get-ScheduledTask': ['작업 스케줄러의 예약 작업을 조회합니다. 등록은 <code translate="no">Register-ScheduledTask</code>로 합니다. Windows 전용 ScheduledTasks 모듈입니다.', 'Get-ScheduledTask | Where-Object State -eq Ready', 'scheduledtasks'],
+    'Get-LocalUser': ['로컬 사용자 계정 목록을 보여줍니다. 그룹 구성원은 <code translate="no">Get-LocalGroupMember</code>로 확인합니다.', 'Get-LocalUser | Select-Object Name, Enabled, LastLogon', 'microsoft.powershell.localaccounts'],
+    'Restart-Computer': ['컴퓨터를 재시작합니다. <code translate="no">-Force</code>는 로그인한 사용자가 있어도 진행합니다. <code translate="no">-ComputerName</code>으로 원격 재시작도 됩니다.', 'Restart-Computer -Force', M],
+    'Stop-Computer': ['컴퓨터를 종료합니다.', 'Stop-Computer -Force', M],
+    'Get-NetIPConfiguration': ['어댑터별 IP 주소, 게이트웨이, DNS 서버를 요약해 보여줍니다. <code translate="no">-Detailed</code>로 상세 정보를 봅니다.', 'Get-NetIPConfiguration', 'nettcpip'],
+    'Get-NetIPAddress': ['IP 주소 구성을 가져옵니다. <code translate="no">-AddressFamily IPv4</code>로 좁힐 수 있습니다.', 'Get-NetIPAddress -AddressFamily IPv4 | Select-Object InterfaceAlias, IPAddress', 'nettcpip'],
+    'Get-NetAdapter': ['네트워크 어댑터의 이름, 상태, 속도, MAC 주소를 보여줍니다.', 'Get-NetAdapter | Where-Object Status -eq Up', 'netadapter'],
+    'Test-Connection': ['ICMP ping을 보내고 결과를 객체로 돌려줍니다. <code translate="no">-Count</code> 횟수, <code translate="no">-Quiet</code>는 성공 여부만 True/False로 반환합니다.', 'Test-Connection 8.8.8.8 -Count 4', M],
+    'Test-NetConnection': ['ping, TCP 포트 연결, 경로 추적을 한 번에 진단합니다. <code translate="no">-Port</code> 포트 확인, <code translate="no">-TraceRoute</code> 경로 추적, <code translate="no">-InformationLevel Detailed</code> 상세.', 'Test-NetConnection example.com -Port 443', 'nettcpip'],
+    'Resolve-DnsName': ['DNS 이름을 조회합니다. <code translate="no">-Type</code>으로 레코드 종류(A, MX, TXT 등), <code translate="no">-Server</code>로 DNS 서버를 지정합니다.', 'Resolve-DnsName example.com -Type MX -Server 8.8.8.8', 'dnsclient'],
+    'Clear-DnsClientCache': ['DNS 클라이언트 캐시를 비웁니다(<code translate="no">ipconfig /flushdns</code>와 같은 용도). 관리자 권한이 필요합니다.', 'Clear-DnsClientCache', 'dnsclient'],
+    'Get-NetTCPConnection': ['TCP 연결과 수신 대기 포트, 소유 프로세스 ID를 보여줍니다.', 'Get-NetTCPConnection -LocalPort 8080 | Select-Object LocalPort, State, OwningProcess', 'nettcpip'],
+    'Get-NetRoute': ['IP 라우팅 테이블을 보여줍니다.', 'Get-NetRoute -AddressFamily IPv4', 'nettcpip'],
+    'Get-NetFirewallRule': ['Windows 방화벽 규칙을 조회합니다. 새 규칙은 <code translate="no">New-NetFirewallRule</code>로 만듭니다.', 'Get-NetFirewallRule -Enabled True -Direction Inbound | Select-Object -First 10 DisplayName', 'netsecurity'],
+    'Invoke-WebRequest': ['HTTP·HTTPS 요청을 보내고 응답(상태 코드, 헤더, 본문)을 받습니다. <code translate="no">-OutFile</code>로 파일 다운로드. Windows PowerShell 5.1에서는 <code translate="no">curl</code>, <code translate="no">wget</code>이 이 cmdlet의 별칭이라 실제 curl과 옵션이 다릅니다. 실제 curl은 <code translate="no">curl.exe</code>로 호출합니다.', 'Invoke-WebRequest https://example.com/file.zip -OutFile file.zip', U],
+    'Invoke-RestMethod': ['REST API를 호출하고 JSON·XML 응답을 자동으로 객체로 바꿉니다. <code translate="no">-Method</code>, <code translate="no">-Headers</code>, <code translate="no">-Body</code>로 요청을 구성합니다.', 'Invoke-RestMethod https://api.github.com/repos/PowerShell/PowerShell | Select-Object stargazers_count', U],
+    'Get-ItemProperty': ['항목의 속성을 읽습니다. 주로 레지스트리 값을 읽는 데 씁니다.', 'Get-ItemProperty \'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Run\'', M],
+    'Set-ItemProperty': ['항목의 속성 값을 바꿉니다. 레지스트리 값 수정에 씁니다. 바꾸기 전에 백업하세요.', 'Set-ItemProperty -Path \'HKCU:\\Control Panel\\Desktop\' -Name MenuShowDelay -Value 100', M],
+    'Get-PSDrive': ['PowerShell 드라이브(파일 시스템, 레지스트리 <code translate="no">HKLM:</code>·<code translate="no">HKCU:</code>, <code translate="no">Env:</code> 등)와 디스크 사용량을 보여줍니다.', 'Get-PSDrive -PSProvider FileSystem', M],
+    'Get-Volume': ['볼륨의 드라이브 문자, 파일 시스템, 크기, 남은 공간을 보여줍니다. Windows 전용 Storage 모듈입니다.', 'Get-Volume', 'storage'],
+    'Get-Disk': ['물리 디스크의 번호, 크기, 파티션 형식, 상태를 보여줍니다.', 'Get-Disk', 'storage'],
+    'Repair-Volume': ['볼륨을 검사·복구합니다(<code translate="no">chkdsk</code>와 비슷). <code translate="no">-Scan</code> 온라인 검사, <code translate="no">-OfflineScanAndFix</code> 오프라인 복구. 관리자 권한이 필요합니다.', 'Repair-Volume -DriveLetter C -Scan', 'storage'],
+    'Get-ExecutionPolicy': ['스크립트 실행 정책을 보여줍니다. <code translate="no">-List</code>로 범위별 정책을 확인합니다.', 'Get-ExecutionPolicy -List', S],
+    'Set-ExecutionPolicy': ['스크립트 실행 정책을 바꿉니다. 개인 PC에서는 <code translate="no">RemoteSigned</code>를 <code translate="no">-Scope CurrentUser</code>로 설정하는 방식이 흔합니다. 보안 기능은 아니며 실수로 스크립트가 실행되는 것을 막는 장치입니다.', 'Set-ExecutionPolicy RemoteSigned -Scope CurrentUser', S],
+    'Read-Host': ['사용자 입력을 받습니다. <code translate="no">-AsSecureString</code>으로 비밀번호를 가려서 받습니다.', '$name = Read-Host \'이름을 입력하세요\'', U],
+    'Start-Sleep': ['지정한 시간만큼 대기합니다. <code translate="no">-Seconds</code> 또는 <code translate="no">-Milliseconds</code>.', 'Start-Sleep -Seconds 5', U],
+    'Get-Date': ['현재 날짜·시간을 가져옵니다. <code translate="no">-Format</code>으로 형식 지정, <code translate="no">.AddDays()</code> 같은 메서드로 계산합니다.', 'Get-Date -Format \'yyyy-MM-dd HH:mm\'', U],
+    'Clear-Host': ['화면을 지웁니다. cmdlet이 아니라 함수로 제공됩니다.', 'cls', C],
+    'Get-History': ['현재 세션에서 실행한 명령 기록을 보여줍니다. <code translate="no">Invoke-History</code>(<code translate="no">r</code>)로 다시 실행할 수 있습니다. 세션 간 기록은 PSReadLine이 별도로 저장합니다.', 'Get-History -Count 10', C],
+    'Start-Transcript': ['세션의 입력과 출력을 텍스트 파일로 기록합니다. <code translate="no">Stop-Transcript</code>로 끝냅니다.', 'Start-Transcript -Path .\\session.log', 'microsoft.powershell.host'],
+    'Set-Alias': ['별칭을 만듭니다. 세션이 끝나면 사라지므로 계속 쓰려면 <code translate="no">$PROFILE</code> 파일에 넣습니다.', 'Set-Alias np notepad', U],
+    'Invoke-Expression': ['문자열을 명령으로 실행합니다. 외부에서 받은 문자열을 실행하면 보안 위험이 크므로 신뢰할 수 있는 입력에만 씁니다.', 'Invoke-Expression \'Get-Date\'', U],
+    'Start-Job': ['명령을 백그라운드 작업으로 실행합니다. <code translate="no">Get-Job</code>으로 상태 확인, <code translate="no">Receive-Job</code>으로 결과를 받습니다.', '$job = Start-Job { Get-ChildItem C:\\ -Recurse -ErrorAction SilentlyContinue | Measure-Object }', C],
+    'Receive-Job': ['백그라운드 작업의 결과를 가져옵니다. <code translate="no">-Wait</code>로 완료까지 기다리고, <code translate="no">-Keep</code>으로 결과를 남겨 둡니다.', 'Receive-Job $job -Wait', C],
+    'Invoke-Command': ['로컬이나 원격 컴퓨터에서 스크립트 블록을 실행합니다. 원격은 WinRM(PowerShell Remoting) 설정이 필요합니다.', 'Invoke-Command -ComputerName Server01 -ScriptBlock { Get-Service W32Time }', C],
+    'Enter-PSSession': ['원격 컴퓨터에 대화형 세션으로 접속합니다. <code translate="no">Exit-PSSession</code>으로 나옵니다. WinRM 설정이 필요합니다.', 'Enter-PSSession -ComputerName Server01', C]
+  };
+
+  function nameOf(tr) {
+    var name = tr.querySelector('code').textContent.split(' ')[0];
+    return name;
+  }
+  function linkOf(name, d) { return BASE + d[2] + '/' + name.toLowerCase(); }
+
+  var table = document.getElementById('windows-cmd-table');
+  var filter = document.getElementById('windows-cmd-filter');
+  var count = document.getElementById('windows-cmd-count');
+  var params = new URLSearchParams(location.search);
+  var opened = (params.get('windows-open') || '').split(',').filter(Boolean);
+  var items = [];
+
+  // 명령어·식별자는 자동 번역에서 제외
+  document.querySelectorAll('code, pre').forEach(function (el) { el.setAttribute('translate', 'no'); });
+
+  function setOpen(it, open) {
+    it.row.hidden = !open;
+    it.tr.classList.toggle('open', open);
+    it.btn.setAttribute('aria-expanded', String(open));
+  }
+
+  function syncUrl() {
+    var p = new URLSearchParams(location.search);
+    var q = filter.value.trim();
+    if (q) p.set('windows-q', q); else p.delete('windows-q');
+    var open = items.filter(function (it) { return !it.row.hidden; }).map(function (it) { return it.name; });
+    if (open.length) p.set('windows-open', open.join(',')); else p.delete('windows-open');
+    var s = p.toString();
+    try { history.replaceState(null, '', location.pathname + (s ? '?' + s : '') + location.hash); } catch (e) {}
+  }
+
+  table.querySelectorAll('tbody tr').forEach(function (tr, i) {
+    var name = nameOf(tr);
+    var d = DETAILS[name];
+    if (!d) return;
+    var cell = tr.cells[0];
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'toggle';
+    btn.setAttribute('aria-expanded', 'false');
+    btn.setAttribute('aria-controls', 'windows-detail-' + i);
+    while (cell.firstChild) btn.appendChild(cell.firstChild);
+    cell.appendChild(btn);
+    tr.classList.add('cmd');
+    var row = document.createElement('tr');
+    row.className = 'detail';
+    row.id = 'windows-detail-' + i;
+    row.hidden = true;
+    var html = '<td colspan="' + tr.cells.length + '"><p>' + d[0] + '</p>';
+    if (d[1]) html += '<div class="ex">예: <code translate="no">' + d[1] + '</code></div>';
+    html += '<a class="src" href="' + linkOf(name, d) + '" target="_blank" rel="noopener">공식 문서 ↗</a></td>';
+    row.innerHTML = html;
+    tr.after(row);
+    var it = { name: name, tr: tr, row: row, btn: btn };
+    items.push(it);
+    // 버튼의 클릭·Enter·Space는 행으로 전파되어 여기서 한 번만 처리된다
+    btn.addEventListener('click', function (e) {
+      setOpen(it, it.row.hidden);
+      syncUrl();
+    });
+    if (opened.indexOf(name) !== -1) setOpen(it, true);
+  });
+
+  var empty = document.createElement('tr');
+  empty.className = 'empty';
+  empty.hidden = true;
+  empty.innerHTML = '<td colspan="' + table.tHead.rows[0].cells.length + '">일치하는 명령이 없습니다. 다른 검색어를 입력해 보세요.</td>';
+  table.tBodies[0].appendChild(empty);
+
+  function applyFilter() {
+    var q = filter.value.trim().toLowerCase();
+    var shown = 0;
+    items.forEach(function (it) {
+      var hit = !q || (it.tr.textContent + ' ' + it.row.textContent).toLowerCase().indexOf(q) !== -1;
+      it.tr.style.display = hit ? '' : 'none';
+      it.row.style.display = hit ? '' : 'none';
+      if (hit) shown++;
+    });
+    empty.hidden = shown !== 0;
+    count.textContent = q ? '명령 ' + items.length + '개 중 ' + shown + '개 일치' : '명령 ' + items.length + '개';
+  }
+
+  filter.value = params.get('windows-q') || '';
+  filter.addEventListener('input', function () { applyFilter(); syncUrl(); });
+  applyFilter();
+
+})();
+</script></body></html>

@@ -1,23 +1,15 @@
 # ai
 
-AI 스킬과 CLI 명령어를 모으고 설명하는 저장소입니다. 작업 규칙은 [AGENTS.md](AGENTS.md)에 있고, Claude Code는 [CLAUDE.md](CLAUDE.md)를 통해 같은 규칙을 읽습니다.
+AI 스킬과 CLI 명령어를 모으고 설명하는 저장소입니다. 공통 작업 규칙은 [AGENTS.md](AGENTS.md)에 있고, [CLAUDE.md](CLAUDE.md)는 같은 규칙을 연결합니다.
 
-## 시작: find-skills
+## 통합 설명서
 
-모든 스킬은 Vercel의 [find-skills](https://github.com/vercel-labs/skills/tree/main/skills/find-skills)에서 시작합니다. 설치 방법과 사용법은 [docs/find-skills-guide.html](docs/find-skills-guide.html)에 정리했습니다.
+| 문서 | 내용 |
+| --- | --- |
+| [스킬 통합 가이드](docs/skills-guide.html) | 설치된 모든 스킬의 출처·설치·호출·사용법, skills CLI, 오픈소스 참고 자료 |
+| [CLI 통합 가이드](docs/cli-guide.html) | Linux·Bash와 Windows PowerShell의 명령·검색·상세 설명 |
 
-```bash
-# 프로젝트에 Claude Code·Codex용으로 설치 (Node.js 22.20 이상)
-npx skills add vercel-labs/skills --skill find-skills -a claude-code -a codex
-```
-
-설치한 뒤에는 에이전트에게 말로 요청하거나 슬래시 명령으로 부릅니다.
-
-```text
-PR 리뷰를 도와줄 스킬이 있는지 찾아줘     # 일반 대화 (자동 선택)
-/find-skills PR 리뷰                     # Claude Code
-$find-skills PR 리뷰                     # Codex (/skills 목록에서도 선택 가능)
-```
+각 분야는 위 HTML 한 파일에 모읍니다. AI 도구의 CLI 설명은 현재 범위에서 제외합니다. HTML을 내려받아 브라우저로 열어도 외부 라이브러리 없이 동작합니다.
 
 ## 설치한 스킬
 
@@ -25,21 +17,22 @@ $find-skills PR 리뷰                     # Codex (/skills 목록에서도 선�
 | --- | --- | --- |
 | [find-skills](.agents/skills/find-skills/SKILL.md) | [vercel-labs/skills](https://github.com/vercel-labs/skills) | MIT |
 | [handoff](.agents/skills/handoff/SKILL.md) | [mattpocock/skills](https://github.com/mattpocock/skills) | MIT |
+| [web-design-guidelines](.agents/skills/web-design-guidelines/SKILL.md) | [vercel-labs/agent-skills](https://github.com/vercel-labs/agent-skills) | MIT (README 표기) |
 
-새 스킬을 설치하면 이 표와 [docs/find-skills-guide.html](docs/find-skills-guide.html)의 "설치한 스킬" 섹션, [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)에 추가합니다.
+새 스킬은 find-skills로 찾고 프로젝트 범위로 양쪽 에이전트에 설치합니다. 설치한 모든 스킬은 [스킬 통합 가이드](docs/skills-guide.html#installed)와 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)에 기록합니다.
 
-## CLI 명령어 설명서
+```bash
+# Node.js 22.20 이상
+npx skills add <owner/repo> --skill <name> -a claude-code -a codex
+```
 
-| 문서 | 대상 |
-| --- | --- |
-| [linux-cli-guide.html](docs/linux-cli-guide.html) | 리눅스(Ubuntu, bash) 명령어와 윈도우 대응 명령 |
-| [windows-powershell-cli-guide.html](docs/windows-powershell-cli-guide.html) | Windows PowerShell |
-| [claude-code-cli-guide.html](docs/claude-code-cli-guide.html) | Claude Code CLI |
-| [codex-cli-guide.html](docs/codex-cli-guide.html) | Codex CLI |
-| [antigravity-cli-skills.html](docs/antigravity-cli-skills.html) | Antigravity CLI 스킬과 슬래시 명령 |
+```text
+/find-skills PR 리뷰                     # Claude Code
+$find-skills PR 리뷰                     # Codex (/skills에서도 선택)
+/handoff 다음 세션에서 로그인 오류 수정  # Claude Code
+$handoff 다음 세션에서 로그인 오류 수정  # Codex
+/web-design-guidelines docs/skills-guide.html  # Claude Code
+$web-design-guidelines docs/skills-guide.html  # Codex
+```
 
-HTML 파일은 브라우저로 엽니다. 리눅스에서는 `xdg-open docs/linux-cli-guide.html`, 윈도우에서는 `start docs\linux-cli-guide.html`을 씁니다.
-
-### 세션 인계: handoff
-
-Claude Code에서는 `/handoff 다음 세션의 목적`, Codex에서는 `$handoff 다음 세션의 목적` 또는 `/skills`에서 선택합니다. 대화 요약을 OS 임시 폴더에 저장하며, 새 세션에서 해당 파일을 읽고 이어가도록 요청합니다. 자동 재개 훅은 포함하지 않습니다. 실제 클라이언트의 발견·호출은 아직 확인하지 않았습니다.
+설치 원본은 `.agents/skills/<name>/`, Claude Code 연결은 `.claude/skills/<name>`에 있습니다. handoff는 인계서를 OS 임시 폴더에 저장하며 자동 재개 훅은 없습니다. 실제 클라이언트에서 모든 스킬의 발견·호출·자동완성까지 검증한 것은 아닙니다.
