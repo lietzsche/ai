@@ -6,6 +6,12 @@
       "sourceType": "github",
       "skillPath": "skills/productivity/handoff/SKILL.md",
       "computedHash": "f60a2c3688379b7a306b3a7b8dd4120eab39da44c74fa2cb62d6424935f04aa7"
+    },
+    "visual-explainer": {
+      "source": "nicobailon/visual-explainer",
+      "sourceType": "github",
+      "skillPath": "plugins/visual-explainer/SKILL.md",
+      "computedHash": "305dcaef5f5ee1cd49083609b3ab182b9c55293590d4fbeeb625b2b5c30eab91"
     }
   }
 }

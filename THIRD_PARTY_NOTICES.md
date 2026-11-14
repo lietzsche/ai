@@ -62,3 +62,37 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
+
+## visual-explainer
+
+- 경로: `.agents/skills/visual-explainer/` (`.claude/skills/visual-explainer`는 심볼릭 링크)
+- 출처: https://github.com/nicobailon/visual-explainer/tree/9d5f880b7e8e0a9a80c890b8e1bb6918b68481ad/plugins/visual-explainer
+- 커밋: `9d5f880b7e8e0a9a80c890b8e1bb6918b68481ad` (2026-11-14 설치 파일 전체와 Git blob 일치 확인)
+- 제작자: Nico Bailon (`nicobailon`)
+- 라이선스: MIT (저장소 LICENSE와 SKILL.md 기준)
+- 설치: `npx skills add nicobailon/visual-explainer --skill visual-explainer -a claude-code -a codex -y`
+- 번들 외부 코드의 고지는 `kit/vendor/PELE-LICENSE`에 보존했다.
+
+```text
+MIT License
+
+Copyright (c) 2025 Nico Bailon
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```

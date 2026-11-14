@@ -120,11 +120,11 @@ tbody tr.cmd{content-visibility:auto;contain-intrinsic-size:auto 46px}
 <header>
   <h1>스킬 통합 가이드</h1>
   <p>이 프로젝트에 설치한 모든 스킬의 설치·호출·사용법과 오픈소스 참고 자료를 한곳에서 봅니다. 새 스킬은 find-skills로 찾고 이 문서에 추가합니다.</p>
-  <div class="meta">조사일: 2026-11-14 · 출처: Vercel Skills, Matt Pocock Skills의 원문과 공식 문서 (각 카드에 커밋 기록) · CLI는 자주 바뀌므로 <code translate="no">npx skills --help</code>로 최신 옵션을 확인하세요.</div>
+  <div class="meta">조사일: 2026-11-14 · 출처: Vercel Skills, Matt Pocock Skills, Visual Explainer의 원문과 공식 문서 (각 카드에 커밋 기록) · CLI는 자주 바뀌므로 <code translate="no">npx skills --help</code>로 최신 옵션을 확인하세요.</div>
 </header>
 
 <nav class="toc" aria-label="목차">
-  <a href="#installed">설치된 스킬 2개</a>
+  <a href="#installed">설치된 스킬 3개</a>
   <a href="#about">스킬 찾기</a>
   <a href="#install">설치</a>
   <a href="#usage">사용법</a>
@@ -168,6 +168,22 @@ $handoff 다음 세션에서 로그인 오류 수정    # Codex</code></pre>
       <p>설치 시 공개 목록은 약 110만 설치, 저장소 약 32만 스타로 표시했습니다. 숫자는 변동하는 참고값입니다. CLI 잠금 파일을 함께 기록했습니다.</p>
       <a class="src" href="https://skills.sh/mattpocock/skills/handoff" target="_blank" rel="noopener">skills.sh 페이지 ↗</a>
       <a class="src" href="https://github.com/mattpocock/skills/blob/5863806dd4e15c63174bee4e7515a4256792ecfa/skills/productivity/handoff/SKILL.md" target="_blank" rel="noopener">설치 원문 ↗</a>
+    </article>
+    <article class="card">
+      <h3 id="skill-visual-explainer"><code translate="no">visual-explainer</code> <span class="tag all">MIT</span><span class="tag">그림 중심 HTML</span></h3>
+      <ul><li>출처: Nico Bailon · <code translate="no">nicobailon/visual-explainer</code> · 커밋 <code translate="no">9d5f880</code> (2026-11-14 설치)</li>
+      <li>위치: <code translate="no">.agents/skills/visual-explainer/</code>, <code translate="no">.claude/skills/visual-explainer</code>(링크)</li>
+      <li>용도: 시스템·개념·계획·데이터를 다이어그램과 그래프 중심의 HTML로 설명</li>
+      <li>구조·흐름은 SVG, 수치·추세·비율은 차트, 과정·상태 변화는 단계별 그림으로 표현합니다. Mermaid는 요청할 때 사용합니다.</li>
+      <li>본문·참조·템플릿·렌더러를 함께 설치했습니다. Node.js 렌더러로 소스 HTML을 최종 HTML로 변환합니다.</li></ul>
+      <pre translate="no"><code translate="no">npx skills add nicobailon/visual-explainer --skill visual-explainer -a claude-code -a codex
+/visual-explainer 캐시 동작을 SVG 흐름도와 차트 중심으로 설명해 줘    # Claude Code
+$visual-explainer 캐시 동작을 SVG 흐름도와 차트 중심으로 설명해 줘    # Codex</code></pre>
+      <p>Codex는 <code translate="no">/skills</code>에서도 선택합니다. 사용 예: “두 대안의 구조 차이와 처리량을 그림으로 비교해 HTML로 정리해 줘.” 그림에 근거와 캡션을 붙이고, 수치가 없으면 임의로 만들지 않도록 요청하세요.</p>
+      <p>기본 출력은 <code translate="no">~/.agent/diagrams/</code>이며 사용자 경로를 지정할 수 있습니다. 이 프로젝트의 설명서는 새 HTML을 늘리지 않고 기존 통합 가이드 안에 반영합니다. 일부 차트는 CDN을 사용할 수 있으므로 오프라인 결과물은 외부 라이브러리·웹폰트 없이 생성하도록 명시하세요.</p>
+      <p>설치 당시 공개 목록은 874회 설치, 저장소 약 1.1만 스타로 표시됐습니다. 파일 원본·링크·잠금 해시는 확인했으며 실제 클라이언트의 스킬 호출과 생성 결과는 아직 검증하지 않았습니다.</p>
+      <a class="src" href="https://skills.sh/nicobailon/visual-explainer/visual-explainer" target="_blank" rel="noopener">skills.sh 페이지 ↗</a>
+      <a class="src" href="https://github.com/nicobailon/visual-explainer/tree/9d5f880b7e8e0a9a80c890b8e1bb6918b68481ad/plugins/visual-explainer" target="_blank" rel="noopener">설치 원문 ↗</a>
     </article>
   </div>
 </section>
@@ -327,7 +343,7 @@ npx skills add &lt;owner/repo&gt; --skill &lt;name&gt; \
       <p>직접 수정하면 <code translate="no">skills-lock.json</code>의 해시와 달라져 <code translate="no">list</code>에서 <code translate="no">modified</code>로 표시되고 <code translate="no">check</code>가 실패합니다. 바꿔야 하면 업데이트나 재설치로 처리합니다.</p></article>
   </div>
 </section>
-<section id="references"><h2>오픈소스 참고와 세션 인계 조사</h2><p class="lead">2026-11-14 조사 자료입니다. 아래 외부 후보와 과거 스킬 이름은 현재 설치 목록과 구분합니다. 실제 설치 상태는 맨 위 카드 2개를 기준으로 봅니다.</p><section id="ref-development"><h3>02 · 개발 관련 오픈소스 레퍼런스</h3><p>아래 프로젝트를 모두 설치했다는 뜻은 아닙니다. 앞선 조사에서 찾은 외부 레퍼런스를 최초 조사 당시 로컬 스킬과 비교한 목록입니다. 인기도는 설치 수·스타라는 서로 다른 지표를 섞어 단일 순위로 만들지 않았습니다.</p>
+<section id="references"><h2>오픈소스 참고와 세션 인계 조사</h2><p class="lead">2026-11-14 조사 자료입니다. 아래 외부 후보와 과거 스킬 이름은 현재 설치 목록과 구분합니다. 실제 설치 상태는 맨 위 카드 3개를 기준으로 봅니다.</p><section id="ref-development"><h3>02 · 개발 관련 오픈소스 레퍼런스</h3><p>아래 프로젝트를 모두 설치했다는 뜻은 아닙니다. 앞선 조사에서 찾은 외부 레퍼런스를 최초 조사 당시 로컬 스킬과 비교한 목록입니다. 인기도는 설치 수·스타라는 서로 다른 지표를 섞어 단일 순위로 만들지 않았습니다.</p>
 <div class="grid">
 <article><span class="tag">MIT · 추가 참고 후보</span><h4>Matt Pocock Skills</h4><p>인터뷰, 설계 검토, 구현·코드 리뷰를 작고 조합 가능한 스킬로 구성합니다. 공개 <code translate="no">grill-me</code>는 현재 실제 인터뷰 스킬 <code translate="no">grilling</code>을 부르는 진입점입니다.</p><p>우리 <code translate="no">grill-me</code>·<code translate="no">make-plan</code>과 비교하기 좋습니다. <code translate="no">grill-with-docs</code>도 문서 기반 검토 후보입니다.</p><p><a href="https://github.com/mattpocock/skills">저장소·라이선스</a> · <a href="https://github.com/mattpocock/skills/blob/main/skills/productivity/grill-me/SKILL.md">grill-me 원문</a></p></article>
 <article><span class="tag">MIT · 추가 참고 후보</span><h4>Obra Superpowers</h4><p>브레인스토밍, 계획, TDD, 근본 원인 디버깅, 리뷰와 완료 검증을 연결하는 개발 방법론입니다.</p><p>우리 <code translate="no">boost</code>·<code translate="no">teamwork</code>·<code translate="no">make-plan</code>의 단계 연결과 완료 조건을 비교할 때 유용합니다. 스킬 전체를 도입하기 전, 중복되는 규칙을 살펴보는 편이 좋습니다.</p><p><a href="https://github.com/obra/superpowers">저장소·스킬 목록</a></p></article>
