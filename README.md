@@ -1,172 +1,40 @@
 # ai
 
-AI로 할 수 있는 일을 재사용 가능한 스킬과 워크플로로 모으는 저장소입니다.
+AI 스킬과 CLI 명령어를 모으고 설명하는 저장소입니다. 작업 규칙은 [AGENTS.md](AGENTS.md)에 있고, Claude Code는 [CLAUDE.md](CLAUDE.md)를 통해 같은 규칙을 읽습니다.
 
-## 스킬
+## 시작: find-skills
 
-| 스킬 | 용도 |
+모든 스킬은 Vercel의 [find-skills](https://github.com/vercel-labs/skills/tree/main/skills/find-skills)에서 시작합니다. 설치 방법과 사용법은 [docs/find-skills-guide.html](docs/find-skills-guide.html)에 정리했습니다.
+
+```bash
+# 프로젝트에 Claude Code·Codex용으로 설치 (Node.js 22.20 이상)
+npx skills add vercel-labs/skills --skill find-skills -a claude-code -a codex
+```
+
+설치한 뒤에는 에이전트에게 말로 요청하거나 슬래시 명령으로 부릅니다.
+
+```text
+PR 리뷰를 도와줄 스킬이 있는지 찾아줘     # 일반 대화 (자동 선택)
+/find-skills PR 리뷰                     # Claude Code
+$find-skills PR 리뷰                     # Codex (/skills 목록에서도 선택 가능)
+```
+
+## 설치한 스킬
+
+| 스킬 | 출처 | 라이선스 |
+| --- | --- | --- |
+| [find-skills](.agents/skills/find-skills/SKILL.md) | [vercel-labs/skills](https://github.com/vercel-labs/skills) | MIT |
+
+새 스킬을 설치하면 이 표와 [docs/find-skills-guide.html](docs/find-skills-guide.html)의 "설치한 스킬" 섹션, [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)에 추가합니다.
+
+## CLI 명령어 설명서
+
+| 문서 | 대상 |
 | --- | --- |
-| [grill-me](skills/grill-me/SKILL.md) | 한 번에 한 질문씩 인터뷰하여 아이디어를 목표·범위·제약·완료 기준으로 정리 |
-| [make-plan](skills/make-plan/SKILL.md) | 확정된 요구사항을 단계·산출물·검증·위험이 담긴 실행 계획으로 정리 |
-| [cli-guide](skills/cli-guide/SKILL.md) | 특정 CLI의 명령어를 공식 문서 기준으로 조사해 검색·펼쳐보기가 있는 단일 HTML 설명서로 정리 |
-| [skill-maker](skills/skill-maker/SKILL.md) | 아이디어나 반복 작업을 새로운 교차 호환 스킬로 설계·작성하거나 기존 스킬 수정 및 타 도구 워크플로 이식 |
-| [boost](skills/boost/SKILL.md) | 복잡한 버그·경쟁 상태·최적화 문제를 3단계 심층 추론(가설 수립 → 다각도 탐색·구현 → 독립 검증)으로 해결 |
-| [teamwork](skills/teamwork/SKILL.md) | 대규모 기능·마이그레이션·다중 모듈 작업을 4단계 에이전트 팀 협업(역할 분담·계약 합의 → 분할 실행 → 통합 검증)으로 수행 |
-| [docfig](skills/docfig/SKILL.md) | HTML 문서에 외부 의존성 없는 인라인 SVG 흐름도·구조도·매핑(격자) 그림을 넣고 밝은·어두운 화면과 접근성·링크를 점검 |
-| [feel](skills/feel/SKILL.md) | 체감 점검: 웹·앱·CLI·API의 느림·버벅임·깜빡임 같은 체감 문제를 메인·검수·평가 3세션으로 찾아 고치고 전후 측정으로 검증 |
+| [linux-cli-guide.html](docs/linux-cli-guide.html) | 리눅스(Ubuntu, bash) 명령어와 윈도우 대응 명령 |
+| [windows-powershell-cli-guide.html](docs/windows-powershell-cli-guide.html) | Windows PowerShell |
+| [claude-code-cli-guide.html](docs/claude-code-cli-guide.html) | Claude Code CLI |
+| [codex-cli-guide.html](docs/codex-cli-guide.html) | Codex CLI |
+| [antigravity-cli-skills.html](docs/antigravity-cli-skills.html) | Antigravity CLI 스킬과 슬래시 명령 |
 
-## 인터뷰 사용하기
-
-### Codex CLI / IDE 확장
-
-이 저장소를 연 상태에서 `/skills`로 `grill-me`가 있는지 확인하거나 `$`를 입력해 선택합니다.
-
-```text
-$grill-me AI로 주간 뉴스 정리를 자동화하고 싶어
-```
-
-Codex용 진입 파일은 `.agents/skills/grill-me/SKILL.md`입니다. 목록이 갱신되지 않으면 Codex를 재시작하세요. `/grill-me`는 Codex의 등록된 슬래시 명령이 아닙니다. [공식 스킬 문서](https://learn.chatgpt.com/docs/build-skills)
-
-### 일반 대화로 요청하기
-
-이 저장소의 `AGENTS.md`를 읽는 에이전트에게 다음처럼 요청합니다.
-
-```text
-grill-me: AI로 매주 업계 뉴스를 정리하고 싶은데, 질문하면서 원하는 걸 정리해 줘.
-```
-
-에이전트가 지침을 자동으로 읽지 않는 환경에서는 파일을 직접 지정합니다.
-
-```text
-skills/grill-me/SKILL.md를 읽고 내 아이디어를 인터뷰해 줘: 개인 지출 관리 자동화
-```
-
-질문에는 추천 선택지가 함께 나오며 자유롭게 답하거나 모르는 항목을 건너뛸 수 있습니다. 마지막에는 확정 사항과 미정 사항을 구분한 요구사항 요약을 받습니다. 파일로 남기려면 저장 경로를 함께 요청하세요.
-
-선택지는 Codex의 `request_user_input` 또는 `request_user_input_async`, Claude Code의 `AskUserQuestion`을 우선 사용해 제시합니다. 버튼·카드·터미널 선택 목록 등 실제 모양은 클라이언트에 따라 다릅니다. 현재 환경이나 모드에서 질문 도구를 사용할 수 없으면 이유를 알리고 번호 목록으로 질문합니다. Codex에서는 `/plan`으로 계획 모드에 들어간 뒤 `$grill-me`를 호출하는 방법도 있습니다. 답변 없이 추천안을 확정하지 않습니다.
-
-이 저장소는 별도 CLI 프로그램을 설치하지 않습니다. `/grill-me` 문구를 에이전트에게 전달할 수 있는 환경에서는 `AGENTS.md`가 해당 요청을 스킬로 연결합니다. 클라이언트가 알 수 없는 슬래시 명령을 차단하면 위의 일반 문장으로 요청하세요.
-
-## 실행 계획 만들기
-
-인터뷰 요약을 제시한 뒤 grill-me가 실행 계획으로 이어갈지 묻습니다. 이어가기를 선택하면 확인한 요약을 입력으로 `make-plan` 지침에 따라 계획을 작성합니다. 요약 수정이나 요약으로 마치기도 선택할 수 있으며, 답변 없이 계획으로 넘어가지 않습니다.
-
-`make-plan`은 단독으로도 호출할 수 있습니다. 계획은 단계별 산출물·확인 방법, 전체 검증, 위험과 대응, 가정으로 구성되며, 저장소 작업이면 변경할 파일과 검증 명령을 추가합니다. 계획은 대화로 제시하고, 저장 경로를 지정한 경우에만 파일로 씁니다. 계획 작성은 구현 승인이 아닙니다.
-
-```text
-$make-plan 사내 위키의 오래된 문서를 매달 점검하는 자동화를 만들고 싶어
-```
-
-```text
-/make-plan 사내 위키의 오래된 문서를 매달 점검하는 자동화를 만들고 싶어
-```
-
-위는 Codex(`$`나 `/skills`로 선택), 아래는 Claude Code 예시입니다. Codex용 진입 파일은 `.agents/skills/make-plan/SKILL.md`, Claude Code용은 `.claude/skills/make-plan/SKILL.md`입니다.
-
-## CLI 명령어 설명서 만들기
-
-`cli-guide`는 지정한 도구의 명령어를 조사해 [docs/antigravity-cli-skills.html](docs/antigravity-cli-skills.html)과 같은 양식(핵심 명령 카드, 검색 가능한 전체 명령 표, 행을 클릭하면 펼쳐지는 상세 설명)의 HTML로 만듭니다. 경로를 지정하지 않으면 `docs/<대상>-cli-guide.html`에 저장합니다.
-
-```text
-$cli-guide Linux 파일·프로세스 관리 명령어
-```
-
-```text
-/cli-guide Claude Code 슬래시 명령어
-```
-
-위는 Codex(`$`나 `/skills`로 선택), 아래는 Claude Code 예시입니다. 진입 파일은 `.agents/skills/cli-guide/SKILL.md`와 `.claude/skills/cli-guide/SKILL.md`이며, 양식 견본은 `skills/cli-guide/assets/example.html`입니다.
-
-## 스킬 만들기 및 수정하기
-
-`skill-maker`는 새로운 아이디어나 반복 작업을 Codex와 Claude Code 양쪽에서 동작하는 스킬로 처음부터 설계·작성할 때, 또는 기존 스킬을 다듬거나 다른 도구의 워크플로를 이식할 때 사용합니다. 공통 원본(`skills/<name>/SKILL.md`)과 양쪽 진입 파일(`.agents/skills/<name>/SKILL.md`, `.claude/skills/<name>/SKILL.md`), 필요한 보조 자산(`assets/`, `references/`, `scripts/`), 문서 반영을 한 번에 구성합니다.
-
-```text
-$skill-maker PR 올리기 전에 변경 파일을 점검하고 체크리스트를 만드는 스킬 만들어줘
-```
-
-```text
-/skill-maker Antigravity의 /boost를 이 저장소 스킬로 만들어줘
-```
-
-위는 Codex(`$`나 `/skills`로 선택), 아래는 Claude Code 예시입니다. 진입 파일은 `.agents/skills/skill-maker/SKILL.md`와 `.claude/skills/skill-maker/SKILL.md`입니다.
-
-## 심층 추론(Boost) 사용하기
-
-`boost`는 Antigravity의 `/boost` 워크플로(Orchestrator → DeepInvestigator/DeepCoder → Independent Verifier)를 모티프로, 복잡한 버그·경쟁 상태·성능 최적화 문제를 3단계 다중 가설 탐색과 독립 검증으로 해결합니다. 서브에이전트 도구가 있는 환경에서는 조사와 검증을 분리 위임하고, 단일 에이전트 환경에서는 단계별 역할을 전환하며 수행합니다.
-
-```text
-$boost 간헐적으로 발생하는 결제 중복 처리 경쟁 상태 원인을 찾고 수정해줘
-```
-
-```text
-/boost 대용량 그래프 탐색 루틴의 병목을 분석하고 최적화해줘
-```
-
-위는 Codex(`$`나 `/skills`로 선택), 아래는 Claude Code 예시입니다. 진입 파일은 `.agents/skills/boost/SKILL.md`와 `.claude/skills/boost/SKILL.md`입니다.
-
-## 멀티에이전트 팀 협업(Teamwork) 사용하기
-
-`teamwork`는 Antigravity의 `/teamwork` 워크플로를 모티프로, 대규모 기능 개발·저장소 마이그레이션·다중 모듈 리팩터링을 4단계 팀 협업(팀 편성 및 소유 경로 배정 → 공통 인터페이스·계약 합의 → 역할별 병렬·분할 실행 → 통합 및 교차 검증)으로 수행합니다.
-
-```text
-$teamwork 저장소 전체의 REST API 클라이언트를 신규 SDK로 마이그레이션하고 테스트를 갱신해줘
-```
-
-```text
-/teamwork 백엔드 스키마, 프런트엔드 폼, 통합 테스트를 역할별로 나눠 다국어 프로필 기능을 구현해줘
-```
-
-위는 Codex(`$`나 `/skills`로 선택), 아래는 Claude Code 예시입니다. 진입 파일은 `.agents/skills/teamwork/SKILL.md`와 `.claude/skills/teamwork/SKILL.md`입니다.
-
-## HTML 문서에 그림 넣기(docfig)
-
-`docfig`는 HTML 문서에 외부 라이브러리나 이미지 없이 오프라인·폐쇄망에서도 열리는 인라인 SVG 그림(흐름도·구조도 `Flow`, 다대다 매핑 격자 `matrix`)을 생성해 넣고, `skills/docfig/scripts/figlib.py`로 접근성·링크(`check`)와 밝은·어두운 화면 렌더링(`shot`)을 점검합니다.
-
-```text
-$docfig docs/deploy-guide.html의 배포 절차를 흐름도로 그려서 넣어줘
-```
-
-```text
-/docfig docs/architecture.html의 단계별 테이블 읽기·쓰기 관계를 매핑 그림으로 추가해줘
-```
-
-위는 Codex(`$`나 `/skills`로 선택), 아래는 Claude Code 예시입니다. 진입 파일은 `.agents/skills/docfig/SKILL.md`와 `.claude/skills/docfig/SKILL.md`이며, 보조 스크립트는 `skills/docfig/scripts/figlib.py`입니다.
-
-## 체감 점검(feel)
-
-`feel`은 오류는 없지만 써 보면 느리거나 어색한 문제(느린 반응, 버벅임, 깜빡임, 레이아웃 밀림, 답답한 CLI·API 응답)를 다룹니다. 메인이 범위와 지표를 정하고, 원인을 찾는 검수 세션과 사용자 관점에서 측정하는 평가 세션을 서로 독립적으로 돌린 뒤, 수정 → 교차 검증 → 전후 비교표로 마무리합니다. 웹·모바일·데스크톱·CLI·백엔드 등 프로젝트 종류를 먼저 파악해 그에 맞는 지표와 측정 도구를 고르며, 서브에이전트가 없으면 한 세션이 역할을 바꿔 가며 수행합니다.
-
-```text
-$feel 검색어를 입력하면 결과 목록이 늦게 뜨고 깜빡여
-```
-
-```text
-/feel 우리 CLI의 build 명령이 왠지 답답하게 느려
-```
-
-위는 Codex(`$`나 `/skills`로 선택), 아래는 Claude Code 예시입니다. 진입 파일은 `.agents/skills/feel/SKILL.md`와 `.claude/skills/feel/SKILL.md`입니다.
-
-## Claude Code에서 사용하기
-
-`CLAUDE.md`가 `@AGENTS.md`로 공통 지침을 가져오므로 한글 커밋 메시지와 작업 완료 후 커밋·푸시 규칙도 공유합니다. `.claude/skills/grill-me/SKILL.md`는 공통 스킬 원본을 읽는 진입 파일로, Claude Code에서 다음과 같이 호출할 수 있습니다.
-
-```text
-/grill-me AI로 주간 뉴스 정리를 자동화하고 싶어
-```
-
-새 세션에서 `/grill-me`가 표시되는지 확인하세요. 지침은 에이전트의 행동을 안내하며 Git 훅처럼 커밋·푸시를 강제로 실행하지는 않습니다. 일반 Claude 웹 채팅에는 저장소 파일이 자동 적용되지 않습니다.
-
-공식 문서: [프로젝트 지침과 AGENTS.md](https://code.claude.com/docs/en/memory#agentsmd), [Claude Code 스킬](https://code.claude.com/docs/en/skills).
-
-참고한 기능은 [Google Antigravity의 내장 `/grill-me` 명령](https://antigravity.google/docs/commands/grill-me/)입니다.
-
-## CLI 욜로(YOLO) 모드 명령어
-
-확인 프롬프트 없이 도구 실행과 파일 수정을 자동 승인하는 네이티브 플래그입니다.
-
-| 도구 | 명령어 |
-| --- | --- |
-| Antigravity CLI | `agy --dangerously-skip-permissions` |
-| Claude Code | `claude --dangerously-skip-permissions` |
-| OpenAI Codex CLI | `codex --dangerously-bypass-approvals-and-sandbox` |
+HTML 파일은 브라우저로 엽니다. 리눅스에서는 `xdg-open docs/linux-cli-guide.html`, 윈도우에서는 `start docs\linux-cli-guide.html`을 씁니다.

@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>find-skills 시작 가이드</title>
+<meta name="description" content="Vercel find-skills 스킬의 설치 방법과 사용법, skills CLI 명령, 이 저장소에 설치한 스킬을 공식 문서 기준으로 정리한 문서">
+<style>
+  :root {
+    --bg: #0b0d14; --bg2: #121624; --card: rgba(255,255,255,0.04);
+    --line: rgba(255,255,255,0.09); --text: #e6e8f0; --muted: #9aa1b8;
+    --a1: #7c8cff; --a2: #3fd6c6; --a3: #f58ab0; --warn: #f5b25a;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; color: var(--text); line-height: 1.65;
+    font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", "Segoe UI", sans-serif;
+    background: radial-gradient(1200px 600px at 10% -10%, #1e2350 0%, transparent 60%),
+                radial-gradient(900px 500px at 110% 10%, #0f3b3a 0%, transparent 55%), var(--bg);
+    min-height: 100vh;
+  }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 56px 24px 80px; }
+  header h1 {
+    font-size: clamp(2rem, 4vw, 2.8rem); margin: 0 0 8px;
+    background: linear-gradient(90deg, var(--a1), var(--a2));
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  header p { color: var(--muted); margin: 0; }
+  .meta { margin-top: 12px; font-size: .85rem; color: var(--muted); }
+  nav.toc { display: flex; flex-wrap: wrap; gap: 8px; margin: 28px 0 8px; }
+  nav.toc a {
+    padding: 6px 14px; border: 1px solid var(--line); border-radius: 999px;
+    color: var(--text); text-decoration: none; font-size: .9rem; background: var(--card);
+    transition: border-color .2s, transform .2s;
+  }
+  nav.toc a:hover { border-color: var(--a1); transform: translateY(-2px); }
+  section { margin-top: 52px; }
+  h2 { font-size: 1.5rem; margin: 0 0 6px; }
+  h2 + .lead { color: var(--muted); margin: 0 0 20px; }
+  .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+  .card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 14px;
+    padding: 20px; backdrop-filter: blur(6px); transition: border-color .25s, transform .25s;
+  }
+  .card:hover { border-color: rgba(124,140,255,.5); transform: translateY(-3px); }
+  .card h3 { margin: 0 0 8px; font-size: 1.1rem; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .card p, .card li { color: #c9cde0; font-size: .95rem; margin: 6px 0; }
+  .card ul { padding-left: 18px; margin: 8px 0; }
+  .src { display: inline-block; margin-top: 8px; font-size: .82rem; color: var(--a2); text-decoration: none; }
+  .src:hover { text-decoration: underline; }
+  .tag { font-size: .72rem; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); font-weight: 600; }
+  .paid { color: var(--a3); border-color: rgba(245,138,176,.45); }
+  .all { color: var(--a2); border-color: rgba(63,214,198,.4); }
+  .note { color: var(--warn); border-color: rgba(245,178,90,.45); }
+  code { font-family: "JetBrains Mono", Consolas, monospace; font-size: .88em; background: rgba(255,255,255,.07); padding: 1px 6px; border-radius: 6px; white-space: nowrap; }
+  pre { background: var(--bg2); border: 1px solid var(--line); border-radius: 10px; padding: 14px; overflow-x: auto; font-size: .85rem; margin: 8px 0; }
+  pre code { background: none; padding: 0; white-space: pre; }
+  table { width: 100%; border-collapse: collapse; font-size: .92rem; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; position: sticky; top: 0; background: #151a2b; }
+  tbody tr { transition: background .15s; }
+  tbody tr:hover { background: rgba(124,140,255,.07); }
+  .tablebox { background: var(--card); border: 1px solid var(--line); border-radius: 14px; overflow-x: auto; }
+  .filter { width: 100%; max-width: 360px; margin: 0 0 12px; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg2); color: var(--text); font: inherit; }
+  .filter:focus { outline: none; border-color: var(--a1); }
+  footer { margin-top: 64px; color: var(--muted); font-size: .85rem; border-top: 1px solid var(--line); padding-top: 20px; }
+  footer a { color: var(--a2); }
+  #cmd-table tbody tr.cmd { cursor: pointer; }
+  #cmd-table tbody tr.cmd td:first-child::before { content: "▸"; display: inline-block; width: 1em; color: var(--muted); transition: transform .2s; }
+  #cmd-table tbody tr.cmd.open td:first-child::before { transform: rotate(90deg); color: var(--a1); }
+  #cmd-table tbody tr.cmd.open { background: rgba(124,140,255,.1); }
+  #cmd-table tr.detail td { background: rgba(18,22,36,.85); border-left: 3px solid var(--a1); padding: 14px 18px; animation: fadein .25s ease; }
+  #cmd-table tr.detail p { margin: 0 0 8px; color: #c9cde0; }
+  #cmd-table tr.detail .ex { margin: 6px 0; }
+  @keyframes fadein { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+  .hint { font-size: .85rem; color: var(--muted); margin: 0 0 10px; }
+</style>
+<body>
+<div class="wrap">
+<header>
+  <h1>find-skills 시작 가이드</h1>
+  <p>필요한 스킬을 찾아 설치해 주는 Vercel의 <code>find-skills</code> 스킬을 설치부터 사용까지 정리했습니다. 이 저장소에서는 모든 스킬을 여기서부터 찾고 설치합니다.</p>
+  <div class="meta">조사일: 2026-11-14 · 출처: vercel-labs/skills 저장소의 README, CLI reference, Supported agents, find-skills SKILL.md(커밋 <code>b716f9d</code>) · CLI는 자주 바뀌므로 <code>npx skills --help</code>로 최신 옵션을 확인하세요.</div>
+</header>
+
+<nav class="toc" aria-label="목차">
+  <a href="#about">1. find-skills란</a>
+  <a href="#install">2. 설치</a>
+  <a href="#usage">3. 사용법</a>
+  <a href="#all">4. skills CLI 명령</a>
+  <a href="#installed">5. 설치한 스킬</a>
+  <a href="#notes">6. 주의 사항</a>
+</nav>
+
+<main>
+<section id="about">
+  <h2>1. find-skills란</h2>
+  <p class="lead">"X를 하는 스킬이 있을까?" 같은 질문을 받으면 에이전트가 스킬을 찾고, 품질을 확인한 뒤 설치 명령을 제안하게 만드는 스킬입니다.</p>
+  <div class="grid">
+    <article class="card">
+      <h3>무엇을 하나 <span class="tag all">MIT</span></h3>
+      <p>오픈 에이전트 스킬 생태계에서 스킬을 찾아 설치하도록 돕습니다. 실제 검색과 설치는 <code>skills</code> CLI(<code>npx skills</code>)가 하고, find-skills는 에이전트가 이 CLI를 언제 어떻게 쓸지 알려 주는 지침입니다.</p>
+      <a class="src" href="https://github.com/vercel-labs/skills/blob/main/skills/find-skills/SKILL.md" target="_blank" rel="noopener">출처: find-skills SKILL.md ↗</a>
+    </article>
+    <article class="card">
+      <h3>언제 작동하나</h3>
+      <ul>
+        <li>"X는 어떻게 해?"에서 X가 흔한 작업일 때</li>
+        <li>"X용 스킬 찾아줘", "X 하는 스킬 있어?"</li>
+        <li>디자인·테스트·배포 같은 분야의 도움을 원할 때</li>
+        <li>에이전트 기능을 넓히고 싶다고 할 때</li>
+      </ul>
+    </article>
+    <article class="card">
+      <h3>에이전트가 따르는 6단계</h3>
+      <ul>
+        <li>① 분야와 작업 파악 → ② <a class="src" href="https://skills.sh/" target="_blank" rel="noopener">skills.sh</a> 순위표 확인</li>
+        <li>③ <code>npx skills find &lt;검색어&gt;</code>로 검색</li>
+        <li>④ 설치 수·출처·스타로 품질 확인</li>
+        <li>⑤ 이름·용도·설치 수·설치 명령·링크 제시</li>
+        <li>⑥ 사용자가 원하면 설치</li>
+      </ul>
+    </article>
+    <article class="card">
+      <h3>못 찾으면</h3>
+      <p>맞는 스킬이 없으면 그렇다고 알리고 일반 능력으로 직접 돕겠다고 제안합니다. 자주 하는 일이라면 <code>npx skills init</code>으로 직접 스킬을 만들도록 권합니다.</p>
+    </article>
+  </div>
+</section>
+
+<section id="install">
+  <h2>2. 설치</h2>
+  <p class="lead">Node.js 22.20 이상이 필요합니다(<code>node -v</code>로 확인). 프로젝트 폴더에서 실행하면 기본으로 그 프로젝트에 설치됩니다.</p>
+  <div class="grid">
+    <article class="card">
+      <h3>이 저장소에 설치 <span class="tag all">권장</span></h3>
+<pre><code>npx skills add vercel-labs/skills \
+  --skill find-skills -a claude-code -a codex</code></pre>
+      <p>Claude Code와 Codex 양쪽에 프로젝트 범위로 설치합니다. 확인 질문을 건너뛰려면 <code>-y</code>를 붙입니다.</p>
+      <a class="src" href="https://github.com/vercel-labs/skills/blob/main/docs/commands.md#skills-add" target="_blank" rel="noopener">출처: skills add ↗</a>
+    </article>
+    <article class="card">
+      <h3>대화형으로 설치</h3>
+<pre><code>npx skills add vercel-labs/skills</code></pre>
+      <p>설치할 스킬과 에이전트를 화면에서 고릅니다. 설치 방식은 심볼릭 링크(권장)와 복사 중에서 고릅니다.</p>
+    </article>
+    <article class="card">
+      <h3>모든 프로젝트에서 쓰기 <span class="tag note">전역</span></h3>
+<pre><code>npx skills add vercel-labs/skills \
+  --skill find-skills -g -a claude-code -a codex</code></pre>
+      <p><code>-g</code>는 사용자 폴더(<code>~/.claude/skills/</code>, <code>~/.agents/skills/</code>)에 설치합니다.</p>
+    </article>
+    <article class="card">
+      <h3>설치 확인</h3>
+<pre><code>npx skills list
+npx skills check</code></pre>
+      <p><code>list</code>는 설치된 스킬과 <code>skills-lock.json</code> 기준 상태를, <code>check</code>는 업데이트와 로컬 변경 여부를 보여줍니다.</p>
+    </article>
+  </div>
+  <div class="tablebox" style="margin-top:16px">
+    <table>
+      <thead><tr><th>에이전트</th><th><code>-a</code> 값</th><th>프로젝트 경로</th><th>전역 경로(<code>-g</code>)</th></tr></thead>
+      <tbody>
+        <tr><td>Claude Code</td><td><code>claude-code</code></td><td><code>.claude/skills/</code></td><td><code>~/.claude/skills/</code></td></tr>
+        <tr><td>Codex</td><td><code>codex</code></td><td><code>.agents/skills/</code></td><td><code>~/.agents/skills/</code></td></tr>
+        <tr><td>Antigravity</td><td><code>antigravity</code></td><td><code>.agents/skills/</code></td><td><code>~/.gemini/config/skills/</code></td></tr>
+        <tr><td>Cursor</td><td><code>cursor</code></td><td><code>.agents/skills/</code></td><td><code>~/.cursor/skills/</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="hint" style="margin-top:8px">공유 원본은 <code>.agents/skills/</code>에 두고, Claude Code를 고르면 <code>.claude/skills/</code>에 그 원본을 가리키는 링크가 생깁니다. 지원 에이전트 전체 목록은 <a class="src" href="https://github.com/vercel-labs/skills/blob/main/docs/agents.md" target="_blank" rel="noopener">Supported agents ↗</a>에 있습니다.</p>
+</section>
+
+<section id="usage">
+  <h2>3. 사용법</h2>
+  <p class="lead">에이전트에게 말로 요청하는 방법과, 터미널에서 CLI를 직접 쓰는 방법이 있습니다.</p>
+  <div class="grid">
+    <article class="card">
+      <h3>에이전트에게 묻기</h3>
+<pre><code>React 앱을 빠르게 하는 스킬 있어?
+PR 리뷰를 도와줄 스킬 찾아줘
+changelog 만드는 스킬이 있을까?</code></pre>
+      <p>스킬 설명과 맞는 요청이면 에이전트가 find-skills를 스스로 골라 씁니다.</p>
+    </article>
+    <article class="card">
+      <h3>직접 호출</h3>
+<pre><code>/find-skills PR 리뷰      # Claude Code
+$find-skills PR 리뷰      # Codex</code></pre>
+      <p>Codex에서는 <code>/skills</code> 목록에서도 고를 수 있습니다.</p>
+    </article>
+    <article class="card">
+      <h3>터미널에서 직접 찾고 설치</h3>
+<pre><code>npx skills find pr review
+npx skills add &lt;owner/repo&gt; --skill &lt;name&gt; \
+  -a claude-code -a codex</code></pre>
+      <p>찾은 스킬을 이 저장소에 설치하는 기본 흐름입니다. 설치 후 <a class="src" href="#installed">5. 설치한 스킬</a>에 카드를 추가합니다.</p>
+    </article>
+    <article class="card">
+      <h3>추천 전 품질 확인 <span class="tag note">필수</span></h3>
+      <ul>
+        <li>설치 수: 1K 이상을 우선, 100 미만은 주의</li>
+        <li>출처: <code>vercel-labs</code>, <code>anthropics</code>, <code>microsoft</code> 같은 공식 출처를 우선</li>
+        <li>GitHub 스타: 100 미만 저장소는 의심하고 확인</li>
+      </ul>
+      <p>find-skills는 검색 결과만 보고 추천하지 말라고 명시합니다.</p>
+    </article>
+  </div>
+</section>
+
+<section id="all">
+  <h2>4. skills CLI 명령</h2>
+  <p class="lead">모든 명령은 앞에 <code>npx</code>를 붙여 <code>npx skills &lt;명령&gt;</code>으로 실행합니다. <code>experimental_</code> 명령은 미리보기라 언제든 바뀔 수 있습니다.</p>
+  <input class="filter" id="cmd-filter" type="search" placeholder="명령·분류·설명 검색..." aria-label="skills CLI 명령 검색">
+  <p class="hint">행을 클릭하면 자세한 설명과 사용 예, 공식 문서 링크가 펼쳐집니다.</p>
+  <div class="tablebox">
+    <table id="cmd-table">
+      <thead><tr><th>명령</th><th>분류</th><th>별칭</th><th>설명</th></tr></thead>
+      <tbody>
+        <tr><td><code>skills find [query]</code></td><td>검색</td><td></td><td>키워드나 대화형으로 스킬 검색</td></tr>
+        <tr><td><code>skills add &lt;source&gt;</code></td><td>설치</td><td></td><td>GitHub·GitLab·git URL·로컬 경로에서 스킬 설치</td></tr>
+        <tr><td><code>skills use &lt;source&gt;@&lt;skill&gt;</code></td><td>설치</td><td></td><td>설치 없이 스킬 하나로 프롬프트 생성·에이전트 실행</td></tr>
+        <tr><td><code>skills list</code></td><td>관리</td><td><code>ls</code></td><td>설치된 스킬과 상태 목록</td></tr>
+        <tr><td><code>skills check</code></td><td>관리</td><td></td><td>업데이트·로컬 변경 확인</td></tr>
+        <tr><td><code>skills update [skills...]</code></td><td>관리</td><td></td><td>설치된 스킬 업데이트</td></tr>
+        <tr><td><code>skills remove [skills...]</code></td><td>관리</td><td><code>rm</code></td><td>설치된 스킬 삭제</td></tr>
+        <tr><td><code>skills init [name]</code></td><td>만들기</td><td></td><td>새 스킬 템플릿(SKILL.md) 생성</td></tr>
+        <tr><td><code>skills experimental_sync</code></td><td>실험</td><td><code>sync</code></td><td>npm 의존성이 제공하는 스킬을 프로젝트에 동기화</td></tr>
+        <tr><td><code>skills experimental_install</code></td><td>실험</td><td><code>install</code>, <code>i</code></td><td><code>skills-lock.json</code> 기준으로 프로젝트 스킬 복원</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <a class="src" href="https://github.com/vercel-labs/skills/blob/main/docs/commands.md" target="_blank" rel="noopener">출처: CLI reference ↗</a>
+</section>
+
+<section id="installed">
+  <h2>5. 설치한 스킬</h2>
+  <p class="lead">이 저장소에 설치한 스킬입니다. find-skills로 새 스킬을 설치하면 여기에 카드를 추가합니다. 스킬별 탭 구성은 이후 문서 관련 스킬로 만들 예정입니다.</p>
+  <div class="grid">
+    <article class="card">
+      <h3><code>find-skills</code> <span class="tag all">MIT</span><span class="tag">시작점</span></h3>
+      <ul>
+        <li>출처: <code>vercel-labs/skills</code> · 커밋 <code>b716f9d</code> (2026-11-12)</li>
+        <li>위치: <code>.agents/skills/find-skills/</code>, <code>.claude/skills/find-skills</code>(링크)</li>
+        <li>용도: 필요한 기능에 맞는 스킬 검색·품질 확인·설치 제안</li>
+        <li>사용 예: "테스트 자동화 스킬 찾아줘"</li>
+      </ul>
+      <p><span class="tag note">설치 방식</span> 이 저장소에는 공식 <code>SKILL.md</code>를 그대로 복사해 두었습니다. CLI로 설치하지 않아 <code>skills-lock.json</code>이 없으므로, 2장의 명령으로 다시 설치하면 CLI가 관리하는 상태가 됩니다.</p>
+      <a class="src" href="https://skills.sh/vercel-labs/skills/find-skills" target="_blank" rel="noopener">skills.sh 페이지 ↗</a>
+    </article>
+  </div>
+</section>
+
+<section id="notes">
+  <h2>6. 주의 사항</h2>
+  <div class="grid">
+    <article class="card"><h3>Node.js 버전</h3>
+      <p>CLI는 Node.js 22.20 이상이 필요합니다. 낮은 버전이면 먼저 Node.js를 올립니다.</p></article>
+    <article class="card"><h3>텔레메트리</h3>
+      <p>CLI는 익명 사용 데이터를 수집합니다. 끄려면 <code>DISABLE_TELEMETRY=1</code>이나 <code>DO_NOT_TRACK=1</code>을 설정합니다. 이 설정은 보안 감사 요청도 함께 끕니다.</p>
+      <a class="src" href="https://github.com/vercel-labs/skills/blob/main/docs/troubleshooting.md#telemetry" target="_blank" rel="noopener">출처: Telemetry ↗</a></article>
+    <article class="card"><h3>이름이 겹칠 때</h3>
+      <p>같은 이름의 스킬을 다른 출처에서 설치하면 먼저 설치한 것을 덮어씁니다. <code>--rename &lt;name&gt;</code>으로 다른 이름을 붙여 설치합니다.</p></article>
+    <article class="card"><h3>설치한 스킬은 직접 고치지 않기</h3>
+      <p>직접 수정하면 <code>skills-lock.json</code>의 해시와 달라져 <code>list</code>에서 <code>modified</code>로 표시되고 <code>check</code>가 실패합니다. 바꿔야 하면 업데이트나 재설치로 처리합니다.</p></article>
+  </div>
+</section>
+</main>
+
+<footer>
+  주요 출처:
+  <a href="https://github.com/vercel-labs/skills" target="_blank" rel="noopener">vercel-labs/skills README</a> ·
+  <a href="https://github.com/vercel-labs/skills/blob/main/docs/commands.md" target="_blank" rel="noopener">CLI reference</a> ·
+  <a href="https://github.com/vercel-labs/skills/blob/main/docs/agents.md" target="_blank" rel="noopener">Supported agents</a> ·
+  <a href="https://github.com/vercel-labs/skills/blob/main/skills/find-skills/SKILL.md" target="_blank" rel="noopener">find-skills SKILL.md</a> ·
+  <a href="https://skills.sh/" target="_blank" rel="noopener">skills.sh</a>.
+  2026-11-14에 조사한 내용입니다.
+</footer>
+</div>
+<script>
+  var REF = 'https://github.com/vercel-labs/skills/blob/main/docs/commands.md';
+  // 명령별 상세 설명: [설명, 사용 예(선택), 공식 문서 링크(선택)]
+  var DETAILS = {
+    'skills find': ['스킬을 검색합니다. 검색어 없이 실행하면 대화형(fzf 방식) 검색이 열리고, 검색어를 주면 바로 결과를 보여줍니다. <code>--owner &lt;owner&gt;</code>로 특정 조직·사용자의 저장소만 검색합니다. find-skills가 내부적으로 쓰는 명령입니다.', 'npx skills find react --owner vercel', REF + '#skills-find'],
+    'skills add': ['스킬을 설치합니다. 소스는 <code>owner/repo</code>, GitHub·GitLab·Azure Repos URL, git URL, 로컬 경로를 받습니다. <code>-s/--skill</code>로 스킬 선택, <code>-a/--agent</code>로 에이전트 선택, <code>-g</code>로 전역 설치, <code>-l</code>로 목록만 보기, <code>--copy</code>로 링크 대신 복사, <code>-y</code>로 확인 생략, <code>--all</code>로 모든 스킬을 모든 에이전트에 설치합니다.', 'npx skills add vercel-labs/skills --skill find-skills -a claude-code -a codex', REF + '#skills-add'],
+    'skills use': ['스킬을 설치하지 않고 임시 폴더에 받아 프롬프트를 만듭니다. <code>--agent</code>가 없으면 프롬프트만 출력하고, 있으면 그 에이전트를 대화형으로 실행합니다.', 'npx skills use vercel-labs/agent-skills@web-design-guidelines | claude', REF + '#skills-use'],
+    'skills list': ['설치된 스킬을 보여줍니다. 프로젝트 스킬은 <code>skills-lock.json</code>과 비교해 <code>modified</code>(파일 변경), <code>untracked</code>(잠금 기록 없음), <code>Missing</code>(기록만 있고 파일 없음)을 표시합니다. <code>-g</code>는 전역, <code>-a</code>는 에이전트별 필터입니다. 별칭은 <code>ls</code>입니다.', 'npx skills ls -a claude-code', REF + '#skills-list'],
+    'skills check': ['다시 설치하지 않고 업데이트 여부를 확인합니다. 잠금 파일 해시와 다른 로컬 변경도 알려 주며, 업데이트나 변경이 있으면 종료 코드 1을 돌려줘 CI 점검에 쓸 수 있습니다.', 'npx skills check', REF + '#skills-check'],
+    'skills update': ['설치된 스킬을 업데이트합니다. 이름을 주면 해당 스킬만, <code>-g</code>는 전역만, <code>-p</code>는 프로젝트만 대상으로 합니다. <code>-y</code>를 주면 범위를 자동으로 고릅니다(프로젝트 폴더면 프로젝트, 아니면 전역).', 'npx skills update find-skills', REF + '#skills-update'],
+    'skills remove': ['설치된 스킬을 삭제합니다. 인자 없이 실행하면 대화형으로 고릅니다. <code>-a</code>로 특정 에이전트에서만, <code>-g</code>로 전역에서 삭제합니다. <code>--all</code>과 <code>--skill \'*\'</code>는 잠금 파일에 기록된 스킬만 지우고 직접 만든 스킬은 건너뜁니다. 별칭은 <code>rm</code>입니다.', 'npx skills rm find-skills', REF + '#skills-remove'],
+    'skills init': ['새 스킬의 <code>SKILL.md</code> 템플릿을 만듭니다. 이름을 주면 하위 폴더를 만들어 그 안에 생성합니다. 맞는 스킬을 찾지 못했을 때 직접 만드는 출발점입니다.', 'npx skills init my-skill', REF + '#skills-init'],
+    'skills experimental_sync': ['<code>package.json</code>에 선언한 npm 의존성이 함께 제공하는 스킬을 찾아 <code>.agents/skills/</code>와 선택한 에이전트 폴더에 연결합니다. <code>--dry-run</code>으로 계획만 보고, <code>--copy</code>로 복사합니다. skills@1.7.3 호환을 위해 <code>sync</code>도 별칭으로 남아 있습니다. 실험 기능입니다.', 'npx skills experimental_sync -a claude-code -y', REF + '#skills-sync'],
+    'skills experimental_install': ['<code>skills-lock.json</code>에 기록된 프로젝트 스킬을 복원합니다. 파일이 해시와 같은 스킬은 그대로 두고 빠진 링크만 만듭니다. <code>--frozen-lockfile</code>은 해시가 다르면 실패하며 CI에서는 기본값입니다. 소스 없이 쓴 <code>skills install</code>과 <code>skills i</code>도 이 명령입니다. 실험 기능입니다.', 'npx skills experimental_install --dry-run', REF + '#restore-skills-from-the-project-lock-file']
+  };
+
+  document.querySelectorAll('#cmd-table tbody tr').forEach(function (tr) {
+    var name = tr.querySelector('code').textContent.split(' ').slice(0, 2).join(' ');
+    var d = DETAILS[name];
+    if (!d) return;
+    tr.classList.add('cmd');
+    tr.tabIndex = 0;
+    tr.setAttribute('aria-expanded', 'false');
+    var row = document.createElement('tr');
+    row.className = 'detail';
+    row.hidden = true;
+    var html = '<td colspan="4"><p>' + d[0] + '</p>';
+    if (d[1]) html += '<div class="ex">예: <code>' + d[1] + '</code></div>';
+    html += '<a class="src" href="' + (d[2] || REF) + '" target="_blank" rel="noopener">공식 문서 ↗</a></td>';
+    row.innerHTML = html;
+    tr.after(row);
+    function toggle() {
+      var open = row.hidden;
+      row.hidden = !open;
+      tr.classList.toggle('open', open);
+      tr.setAttribute('aria-expanded', String(open));
+    }
+    tr.addEventListener('click', toggle);
+    tr.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
+    });
+  });
+
+  document.getElementById('cmd-filter').addEventListener('input', function (e) {
+    var q = e.target.value.trim().toLowerCase();
+    document.querySelectorAll('#cmd-table tbody tr.cmd').forEach(function (tr) {
+      var detail = tr.nextElementSibling;
+      var hit = (tr.textContent + ' ' + detail.textContent).toLowerCase().indexOf(q) !== -1;
+      tr.style.display = hit ? '' : 'none';
+      detail.style.display = hit ? '' : 'none';
+    });
+  });
+</script>
+</body>
+</html>
