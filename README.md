@@ -11,6 +11,21 @@ AI 스킬과 CLI 명령어를 모으고 설명하는 저장소입니다. 공통 
 
 각 분야는 위 HTML 한 파일에 모읍니다. AI 도구의 CLI 설명은 현재 범위에서 제외합니다. HTML을 내려받아 브라우저로 열어도 외부 라이브러리 없이 동작합니다.
 
+## WSL 도구 설치
+
+저장소 루트의 [install.sh](install.sh)로 WSL에서 `wslview`를 설치할 수 있습니다.
+
+```bash
+./install.sh          # 기본: wslview 설치
+./install.sh wslview  # 설치 대상을 명시
+./install.sh --help   # 도움말
+wslview docs/cli-guide.html
+```
+
+Ubuntu·Debian 등 APT 기반 WSL에서 현재 설정된 저장소의 `wslu` 패키지를 설치합니다. 이미 `wslview`가 있으면 건너뜁니다. 일반 사용자로 실행하면 패키지 목록 갱신·설치에 `sudo`를 사용하며, 암호와 APT 설치 확인을 요청할 수 있습니다. 셸 설정이나 기본 브라우저 설정은 변경하지 않습니다.
+
+현재 저장소에 `wslu`가 없으면 안내와 함께 종료합니다. Ubuntu의 `universe` 또는 배포판별 추가 저장소가 필요할 수 있으며, 저장소는 자동으로 추가하지 않습니다. [wslu 공식 설치 안내](https://wslutiliti.es/wslu/install.html)와 [Ubuntu 24.04 패키지 정보](https://packages.ubuntu.com/noble/wslu)를 참고하세요. 확인일: 2026-11-17.
+
 ## 설치한 스킬
 
 | 스킬 | 출처 | 라이선스 |
