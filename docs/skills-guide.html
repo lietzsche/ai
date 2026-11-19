@@ -202,17 +202,17 @@ $deep-research 2026년 로컬 LLM 추론 엔진 비교, 성능·라이선스 중
       <a class="src" href="https://github.com/samber/cc-skills/tree/50a33836b20f690c668af557bd9ef9d07a8c7ef2/skills/deep-research" target="_blank" rel="noopener">설치 원문 ↗</a>
     </article>
     <article class="card">
-      <h3 id="skill-docfig"><code translate="no">docfig</code> <span class="tag">자체 스킬</span><span class="tag">인라인 SVG</span></h3>
+      <h3 id="skill-docfig"><code translate="no">docfig</code> <span class="tag">자체 스킬</span><span class="tag">인라인 SVG · 연결도</span></h3>
       <ul>
-        <li>출처: 이 저장소 자체 작성 · git 이력 커밋 <code translate="no">13b0dfd</code> (2026-11-09 추가, 2026-11-15 복원)</li>
+        <li>출처: 이 저장소 자체 작성 · git 이력 커밋 <code translate="no">13b0dfd</code> (2026-11-09 추가, 2026-11-15 복원, 2026-11-19 연결도 고도화)</li>
         <li>위치: <code translate="no">.agents/skills/docfig/</code>, <code translate="no">.claude/skills/docfig</code>(링크)</li>
-        <li>용도: HTML 문서에 외부 의존성 없는 인라인 SVG 흐름도·구조도·매핑 격자를 넣고 밝은·어두운 화면과 접근성·링크를 점검</li>
-        <li>보조 도구: <code translate="no">.agents/skills/docfig/scripts/figlib.py</code> (<code translate="no">Flow</code>, <code translate="no">matrix</code>, <code translate="no">Doc</code>, <code translate="no">check</code>, <code translate="no">shot</code>)</li>
+        <li>용도: HTML 문서에 외부 의존성 없는 인라인 SVG 흐름도·구조도·매핑 격자와 점진적 노출 방식의 다단 표·열 연결도(ERD·리니지)를 넣고 밝은·어두운 화면, 역방향 간선, 접근성·링크를 점검</li>
+        <li>보조 도구: <code translate="no">.agents/skills/docfig/scripts/figlib.py</code> (<code translate="no">Flow</code>, <code translate="no">matrix</code>, <code translate="no">lineage</code>, <code translate="no">tab_wrap</code>, <code translate="no">Doc</code>, <code translate="no">check</code>, <code translate="no">shot</code>), 상세 참조 <code translate="no">references/lineage.md</code></li>
       </ul>
-      <pre translate="no"><code translate="no"># git 이력에서 복원한 프로젝트 내장 스킬 (skills CLI 미사용)
+      <pre translate="no"><code translate="no"># git 이력에서 복원·고도화한 프로젝트 내장 스킬 (skills CLI 미사용)
 /docfig docs/skills-guide.html에 스킬 설치 흐름도 넣어 줘    # Claude Code
-$docfig docs/skills-guide.html에 스킬 설치 흐름도 넣어 줘    # Codex</code></pre>
-      <p>Codex는 <code translate="no">/skills</code>에서도 선택합니다. <code translate="no">figlib.py check</code>로 SVG 내 스크립트 유무·<code translate="no">figcaption</code>·<code translate="no">aria-label</code>·깨진 링크를 점검하고, <code translate="no">figlib.py shot</code>으로 밝은·어두운 화면 PNG를 찍어 겹침을 확인합니다. 실제 클라이언트 호출은 아직 검증하지 않았습니다.</p>
+$docfig 설계 문서에 silver→gold→게시 표 열 연결도 탭 넣어 줘  # Codex</code></pre>
+      <p>Codex는 <code translate="no">/skills</code>에서도 선택합니다. 다단 표·열 연결도는 기본으로 키 열만 보여 주고 표·열을 클릭하면 상류(초록)·하류(파랑)를 끝까지 추적하며 열 계보선과 상세 패널을 엽니다. <code translate="no">figlib.py check</code>로 외부 의존성·<code translate="no">figcaption</code>·<code translate="no">aria-label</code>·깨진 링크·레인 과다·역방향 간선을 점검하고, <code translate="no">figlib.py shot</code>으로 밝은·어두운 화면 PNG를 찍어 겹침을 확인합니다. 실제 클라이언트 호출은 아직 검증하지 않았습니다.</p>
     </article>
   </div>
 </section>
