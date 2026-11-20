@@ -276,11 +276,13 @@ CELL = {
 }
 
 
-def matrix(cols, groups, label, mid, name_w=190, group_w=104, col_w=110, row_h=38, legend=None, top=58):
+def matrix(cols, groups, label, mid, name_w=190, group_w=104, col_w=110, row_h=38, legend=None, top=None):
     """다대다 관계(개념 × 개념, 단계 × 대상, 주체 × 역할 등)를 선 엉킴 없이 격자로 보여 준다.
     cols:   [('열 이름', '작은 설명' 또는 '')]
     groups: [('묶음 이름\\n둘째 줄', [('행 이름', '작은 설명', 강조막대여부, {열번호: (칸종류, '칸 글자')})])]
     칸종류: strong 핵심/강함 · rel 연관/보조 · pos 해법/달성 · warn 주의/긴장 · gap 단절/미구현 (또는 w·rw·r·h·ok·f·c)"""
+    if top is None:
+        top = 40 if legend else 14
     x0 = group_w + name_w
     W = x0 + col_w * len(cols) + 10
     n_rows = sum(len(r) for _, r in groups)
@@ -475,26 +477,53 @@ NET_JS = f"""<script id="{NET_SCRIPT_ID}">
     }}
 
     function layout() {{
-      let maxH = 0;
+      const colH = G.stages.map(st => st.ids.reduce((s, id, k) => s + (EL[id].offsetHeight || 54) + (k ? GAPY : 0), 0));
+      const maxColH = Math.max(0, ...colH), limitBottom = TOP + maxColH;
+      let maxH = limitBottom;
       G.stages.forEach((st, i) => {{
-        const x = i * (W + GAPX);
+        const x = i * (W + GAPX), ids = st.ids, n = ids.length;
         HEAD[i].style.left = x + 'px';
-        const want = {{}};
-        if (i > 0) {{
-          st.ids.forEach(id => {{
-            const ys = (inn[id] || []).filter(a => N[a] && N[a].stage < i).map(a => EL[a].offsetTop + (EL[a].offsetHeight || 52) / 2);
-            want[id] = ys.length ? ys.reduce((p, c) => p + c, 0) / ys.length - 26 : Infinity;
+        if (!n) return;
+        if (i === 0 || colH[i] >= maxColH * 0.55) {{
+          // 밀도가 비슷한 열(55% 이상)은 머리말 바로 아래(TOP)부터 정렬해 우상단 계단식 공백을 없앤다.
+          const extra = n > 1 ? (maxColH - colH[i]) / (n - 1) : 0;
+          const gap = GAPY + Math.min(16, Math.max(0, extra));
+          let y = TOP;
+          ids.forEach(id => {{
+            const b = EL[id], h = b.offsetHeight || 54;
+            b.style.left = x + 'px'; b.style.top = Math.round(y) + 'px';
+            y += h + gap;
           }});
+          maxH = Math.max(maxH, Math.round(y - gap));
+        }} else {{
+          // 희소 열(55% 미만)은 선행 노드 중심에 단조 회귀(PAVA)로 맞추되 [TOP, limitBottom] 상한을 넘지 않게 고정한다.
+          const maxU = Math.max(TOP, limitBottom - colH[i]);
+          const off = []; let cur = 0;
+          ids.forEach(id => {{ off.push(cur); cur += (EL[id].offsetHeight || 54) + GAPY; }});
+          const blks = [];
+          ids.forEach((id, k) => {{
+            const h = EL[id].offsetHeight || 54;
+            const ps = (inn[id] || []).filter(a => N[a] && N[a].stage < i).map(a => EL[a].offsetTop + (EL[a].offsetHeight || 54) / 2);
+            const targetU = ps.length ? (ps.reduce((p, c) => p + c, 0) / ps.length - h / 2 - off[k]) : (blks.length ? blks[blks.length - 1].sum / blks[blks.length - 1].cnt : TOP);
+            blks.push({{ sum: targetU, cnt: 1, len: 1 }});
+            while (blks.length > 1 && blks[blks.length - 2].sum / blks[blks.length - 2].cnt > blks[blks.length - 1].sum / blks[blks.length - 1].cnt) {{
+              const r = blks.pop(), l = blks[blks.length - 1];
+              l.sum += r.sum; l.cnt += r.cnt; l.len += r.len;
+            }}
+          }});
+          let idx = 0;
+          blks.forEach(bk => {{
+            const u = Math.min(maxU, Math.max(TOP, bk.sum / bk.cnt));
+            for (let c = 0; c < bk.len; c++, idx++) {{
+              const b = EL[ids[idx]];
+              b.style.left = x + 'px'; b.style.top = Math.round(u + off[idx]) + 'px';
+            }}
+          }});
+          const lastB = EL[ids[n - 1]];
+          maxH = Math.max(maxH, lastB.offsetTop + (lastB.offsetHeight || 54));
         }}
-        let y = TOP;
-        st.ids.forEach(id => {{
-          const b = EL[id];
-          if (i > 0 && want[id] !== Infinity) y = Math.max(y, Math.round(want[id]));
-          b.style.left = x + 'px'; b.style.top = y + 'px';
-          y += (b.offsetHeight || 54) + GAPY;
-        }});
-        maxH = Math.max(maxH, y);
       }});
+      maxH += 8;
       const totalW = Math.max(320, G.stages.length * (W + GAPX) - GAPX + 24);
       cv.style.width = totalW + 'px'; cv.style.height = maxH + 'px';
       svg.setAttribute('width', totalW); svg.setAttribute('height', maxH);
@@ -853,6 +882,8 @@ def check(path):
         stages = g.get('stages') or []
         if len(stages) > 7:
             probs.append(f'network 단계 과다({len(stages)}개) — 의미 축 기준으로 3~6단계 이내로 묶으세요')
+        if any(not st.get('ids') for st in stages):
+            probs.append('network 빈 단계(노드 0개) 존재 — 빈 열 공백이 생깁니다')
         nmap = {n['id']: n for n in (g.get('nodes') or [])}
         back = []
         for e in (g.get('edges') or []):
@@ -865,6 +896,8 @@ def check(path):
             probs.append(f'network 역방향(오른쪽→왼쪽) 간선 {len(back)}개({", ".join(back[:4])}) — 선행→후행 단방향으로 배치하세요')
     if 'fig-net' in dom and f'id="{NET_SCRIPT_ID}"' not in s:
         probs.append('network 스크립트 누락 (Doc.save()로 저장하세요)')
+    elif 'fig-net' in dom and 'limitBottom' not in s:
+        probs.append('network 구버전 배치 스크립트(상단 계단식 공백 우려 — Doc.save()로 갱신하세요)')
     for om in re.finditer(r'\.dfn-node\.(?:dim|mute)\s*\{[^}]*?\bopacity\s*:\s*(0?\.\d+)', dom):
         if float(om.group(1)) < 0.4:
             probs.append(f'network 비연관 카드 과도한 흐림(opacity:{om.group(1)}) — 호버 시 맥락이 사라지지 않게 ≥0.5를 유지하세요')
