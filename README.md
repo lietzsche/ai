@@ -35,6 +35,7 @@ Ubuntu·Debian 등 APT 기반 WSL에서 현재 설정된 저장소의 `wslu` 패
 | [find-skills](.agents/skills/find-skills/SKILL.md) | [vercel-labs/skills](https://github.com/vercel-labs/skills) | MIT |
 | [handoff](.agents/skills/handoff/SKILL.md) | [mattpocock/skills](https://github.com/mattpocock/skills) | MIT |
 | [skill-review](.agents/skills/skill-review/SKILL.md) | [sanyuan0704/sanyuan-skills](https://github.com/sanyuan0704/sanyuan-skills) | MIT |
+| [technical-writing](.agents/skills/technical-writing/SKILL.md) | [backnotprop/pstack](https://github.com/backnotprop/pstack) | MIT |
 | [visual-explainer](.agents/skills/visual-explainer/SKILL.md) | [nicobailon/visual-explainer](https://github.com/nicobailon/visual-explainer) | MIT |
 
 새 스킬은 find-skills로 찾고 프로젝트 범위로 양쪽 에이전트에 설치합니다. 설치한 모든 스킬은 [스킬 통합 가이드](docs/skills-guide.html#installed)와 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)에 기록합니다.
@@ -68,3 +69,7 @@ Claude Code에서는 `/docfig`, Codex에서는 `$docfig` 또는 `/skills`로 선
 ### 스킬 품질 검토: skill-review
 
 Claude Code에서는 `/skill-review <스킬경로>`, Codex에서는 `$skill-review <스킬경로>` 또는 `/skills`로 선택해 에이전트 스킬의 구조, 트리거 설명 품질, 워크플로 설계, 토큰 효율, 안티패턴 5개 항목을 기준표(`references/review-criteria.md`)로 점검하고 강점과 구체적 수정안을 받습니다. 실제 클라이언트의 슬래시 명령 자동 발견·호출은 아직 검증하지 않았습니다.
+
+### 기술 문서 구조·문장 정리: technical-writing
+
+Claude Code에서는 `/technical-writing`, Codex에서는 `$technical-writing` 또는 `/skills`로 명시 호출해 기술 문서의 구조와 문장을 다듬습니다. Diátaxis 4분류(튜토리얼·해결 안내·레퍼런스·원리 설명), Google 개발자 문서 스타일(제목 위계·조건 선행), STE(주의·경고 선행, 한 문장 한 지시), 모호성 없는 구문·개수 검증의 4계층 기준을 적용합니다. 원본 프런트매터에 `disable-model-invocation: true`가 지정되어 있어 일반 대화에서 자동 실행되지 않고 직접 호출할 때만 작동합니다. 이 저장소의 `docs/cli-guide.html` 개편에 직접 적용했으며, 실제 클라이언트의 슬래시 명령 호출은 아직 검증하지 않았습니다.

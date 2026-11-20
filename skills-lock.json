@@ -20,6 +20,13 @@
       "skillPath": "skills/skill-review/SKILL.md",
       "computedHash": "74f1682eb10199b66ef6314b18e216efdac90150680cbb28fa8a81e88dbfb511"
     },
+    "technical-writing": {
+      "source": "backnotprop/pstack",
+      "commit": "4a4f41c46c67a006658ac17cef2d092593f6b26a",
+      "sourceType": "github",
+      "skillPath": "skills/technical-writing/SKILL.md",
+      "computedHash": "a073968ea82cfed3e31be2403ff824783d4a342b2fac551532df0d6c76f51af1"
+    },
     "visual-explainer": {
       "source": "nicobailon/visual-explainer",
       "sourceType": "github",

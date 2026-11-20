@@ -1,4 +1,12 @@
-<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b0d14"><title>CLI 통합 가이드</title><style>
+<!doctype html>
+<html lang="ko" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b0d14">
+<title>CLI 통합 가이드 — Linux · Bash &amp; Windows PowerShell</title>
+<meta name="description" content="Linux·Bash 73개 명령과 Windows PowerShell 96개 cmdlet을 작동 원리, 작업별 교차 해법, 핵심 카드, 검색 가능한 전체 사전으로 정리한 단일 가이드">
+<style>
   :root {
     --bg: #0b0d14; --bg2: #121624; --card: rgba(255,255,255,0.04);
     --line: rgba(255,255,255,0.09); --text: #e6e8f0; --muted: #9aa1b8;
@@ -17,65 +25,129 @@
   a, button, input { touch-action: manipulation; -webkit-tap-highlight-color: rgba(124,140,255,.25); }
   :focus-visible { outline: 2px solid var(--a2); outline-offset: 2px; }
   main:focus:not(:focus-visible) { outline: none; }
-  [id] { scroll-margin-top: 16px; }
+  [id] { scroll-margin-top: 20px; }
   .skip {
-    position: absolute; left: 16px; top: -60px; z-index: 10; padding: 8px 14px; border-radius: 8px;
+    position: absolute; left: 16px; top: -60px; z-index: 20; padding: 8px 14px; border-radius: 8px;
     background: var(--a1); color: #0b0d14; font-weight: 700; text-decoration: none; transition: top .15s;
   }
   .skip:focus { top: 12px; }
-  .wrap { max-width: 1100px; margin: 0 auto; padding: 56px 24px 80px; }
-  h1, h2, h3 { text-wrap: balance; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 52px 24px 80px; }
+  h1, h2, h3, h4 { text-wrap: balance; }
   p, li { text-wrap: pretty; }
-  h1, h2, h3, p, li, td, th { word-break: keep-all; overflow-wrap: break-word; }
+  h1, h2, h3, h4, p, li, td, th { word-break: keep-all; overflow-wrap: break-word; }
   header h1 {
-    font-size: clamp(2rem, 4vw, 2.8rem); margin: 0 0 8px;
+    font-size: clamp(2rem, 4vw, 2.75rem); margin: 0 0 8px;
     background: linear-gradient(90deg, var(--a1), var(--a2));
     -webkit-background-clip: text; background-clip: text; color: transparent;
   }
-  header p { color: var(--muted); margin: 0; }
+  header > p { color: var(--muted); margin: 0; max-width: 72ch; }
   .meta { margin-top: 12px; font-size: .85rem; color: var(--muted); }
-  nav.toc { display: flex; flex-wrap: wrap; gap: 8px; margin: 28px 0 8px; }
-  nav.toc a {
-    padding: 6px 14px; border: 1px solid var(--line); border-radius: 999px;
-    color: var(--text); text-decoration: none; font-size: .9rem; background: var(--card);
-    transition: border-color .2s, transform .2s;
+  .kpi-strip {
+    display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    margin: 22px 0 8px;
   }
-  nav.toc a:hover { border-color: var(--a1); transform: translateY(-2px); }
+  .kpi {
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px;
+  }
+  .kpi strong {
+    display: block; font-size: 1.45rem; font-variant-numeric: tabular-nums; color: var(--text); line-height: 1.2;
+  }
+  .kpi span { display: block; margin-top: 4px; font-size: .83rem; color: var(--muted); }
+  nav.toc {
+    display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0 8px;
+    padding: 10px 12px; border: 1px solid var(--line); border-radius: 14px; background: rgba(18,22,36,.78);
+    backdrop-filter: blur(8px); position: sticky; top: 8px; z-index: 10;
+  }
+  nav.toc a {
+    padding: 5px 13px; border: 1px solid var(--line); border-radius: 999px;
+    color: var(--text); text-decoration: none; font-size: .88rem; background: var(--card);
+    transition: border-color .2s, transform .2s, background-color .2s;
+  }
+  nav.toc a:hover { border-color: var(--a1); background: rgba(124,140,255,.12); transform: translateY(-1px); }
+  nav.toc a.ext { border-color: rgba(63,214,198,.4); color: var(--a2); margin-left: auto; }
   section { margin-top: 52px; }
-  h2 { font-size: 1.5rem; margin: 0 0 6px; }
-  h2 + .lead { color: var(--muted); margin: 0 0 20px; }
-  .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr)); }
+  section section { margin-top: 36px; }
+  .sec-kicker {
+    display: inline-block; font-size: .75rem; font-weight: 700; letter-spacing: .04em;
+    color: var(--a2); text-transform: uppercase; margin-bottom: 4px;
+  }
+  h2 { font-size: 1.55rem; margin: 0 0 6px; }
+  h3 { font-size: 1.2rem; margin: 0 0 6px; }
+  .lead { color: var(--muted); margin: 0 0 18px; max-width: 75ch; }
+  .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(min(310px, 100%), 1fr)); }
   .card {
     min-width: 0; background: var(--card); border: 1px solid var(--line); border-radius: 14px;
-    padding: 20px; backdrop-filter: blur(6px); transition: border-color .25s, transform .25s;
+    padding: 20px; transition: border-color .2s, transform .2s;
   }
-  .card:hover { border-color: rgba(124,140,255,.5); transform: translateY(-3px); }
-  .card h3 { margin: 0 0 8px; font-size: 1.1rem; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-  .card p, .card li { color: #c9cde0; font-size: .95rem; margin: 6px 0; }
+  .card:hover { border-color: rgba(124,140,255,.45); transform: translateY(-2px); }
+  .card h3, .card h4 { margin: 0 0 8px; font-size: 1.06rem; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .card p, .card li { color: #c9cde0; font-size: .94rem; margin: 6px 0; }
   .card ul { padding-left: 18px; margin: 8px 0; }
+  .guard {
+    font-size: .84rem !important; color: var(--warn) !important;
+    background: rgba(245,178,90,.08); border-left: 3px solid var(--warn);
+    padding: 6px 10px; border-radius: 0 8px 8px 0; margin: 8px 0 !important;
+  }
+  .pair-code { display: grid; gap: 8px; margin-top: 10px; }
+  .pair-code div { min-width: 0; }
+  .os-label {
+    display: inline-block; font-size: .74rem; font-weight: 700; color: var(--muted);
+    margin-bottom: 2px; letter-spacing: .02em;
+  }
+  .os-label.bash { color: var(--a2); }
+  .os-label.ps { color: var(--a1); }
   .src { display: inline-block; margin-top: 8px; font-size: .82rem; color: var(--a2); text-decoration: none; }
   .src:hover { text-decoration: underline; }
   .tag { font-size: .72rem; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); font-weight: 600; }
   .paid { color: var(--a3); border-color: rgba(245,138,176,.45); }
   .all { color: var(--a2); border-color: rgba(63,214,198,.4); }
   .note { color: var(--warn); border-color: rgba(245,178,90,.45); }
-  code { font-family: "JetBrains Mono", Consolas, monospace; font-size: .88em; background: rgba(255,255,255,.07); padding: 1px 6px; border-radius: 6px; overflow-wrap: break-word; }
-  pre { background: var(--bg2); border: 1px solid var(--line); border-radius: 10px; padding: 14px; overflow-x: auto; font-size: .85rem; margin: 8px 0; }
+  code { font-family: "JetBrains Mono", Consolas, monospace; font-size: .88em; background: rgba(255,255,255,.07); padding: 1px 6px; border-radius: 6px; overflow-wrap: break-word; font-variant-ligatures: none; }
+  pre { background: var(--bg2); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; overflow-x: auto; font-size: .84rem; margin: 4px 0 8px; font-variant-ligatures: none; }
   pre code { background: none; padding: 0; white-space: pre; }
   table { width: 100%; border-collapse: collapse; font-size: .92rem; }
-  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; overflow-wrap: anywhere; }
   th { color: var(--muted); font-weight: 600; background: #151a2b; }
   tbody tr { transition: background-color .15s; }
   tbody tr:hover { background: rgba(124,140,255,.07); }
   .tablebox { background: var(--card); border: 1px solid var(--line); border-radius: 14px; overflow-x: auto; }
-  .filter { width: 100%; max-width: 360px; margin: 0 0 8px; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg2); color: var(--text); font: inherit; }
+  .controls {
+    display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 0 0 10px;
+  }
+  .filter {
+    flex: 1 1 280px; max-width: 400px; padding: 10px 14px; border-radius: 10px;
+    border: 1px solid var(--line); background: var(--bg2); color: var(--text); font: inherit;
+  }
   .filter:hover { border-color: rgba(124,140,255,.5); }
   .filter:focus-visible { border-color: var(--a1); }
   .filter::placeholder { color: var(--muted); }
-  .count { font-size: .85rem; color: var(--muted); margin: 0 0 6px; font-variant-numeric: tabular-nums; }
-  footer { margin-top: 64px; color: var(--muted); font-size: .85rem; border-top: 1px solid var(--line); padding-top: 20px; }
-  footer a { color: var(--a2); }
-  [data-command-table] tbody tr.cmd { cursor: pointer; }
+  .btn-ghost {
+    appearance: none; padding: 8px 12px; border-radius: 9px; border: 1px solid var(--line);
+    background: var(--card); color: var(--muted); font: inherit; font-size: .84rem; cursor: pointer;
+    transition: border-color .15s, color .15s;
+  }
+  .btn-ghost:hover { border-color: var(--a1); color: var(--text); }
+  .chips {
+    display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 10px;
+  }
+  .chip {
+    appearance: none; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line);
+    background: var(--card); color: var(--muted); font: inherit; font-size: .8rem; cursor: pointer;
+    font-variant-numeric: tabular-nums; transition: border-color .15s, color .15s, background-color .15s;
+  }
+  .chip:hover { border-color: rgba(124,140,255,.5); color: var(--text); }
+  .chip[aria-pressed="true"] {
+    border-color: var(--a2); background: rgba(63,214,198,.14); color: var(--text); font-weight: 600;
+  }
+  .status-row {
+    display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; align-items: baseline; margin: 0 0 8px;
+  }
+  .count { font-size: .85rem; color: var(--muted); margin: 0; font-variant-numeric: tabular-nums; }
+  .hint { font-size: .83rem; color: var(--muted); margin: 0; }
+  footer { margin-top: 44px; color: var(--muted); font-size: .85rem; border-top: 1px solid var(--line); padding-top: 18px; }
+  footer a, a { color: var(--a2); }
+  a:hover { text-decoration: underline; }
+  [data-command-table] tbody tr.cmd { cursor: pointer; content-visibility: auto; contain-intrinsic-size: auto 46px; }
   [data-command-table] .toggle {
     appearance: none; background: none; border: 0; padding: 2px 4px 2px 0; margin: 0; border-radius: 6px;
     font: inherit; color: inherit; text-align: left; cursor: pointer;
@@ -84,14 +156,24 @@
   [data-command-table] .toggle:hover code { background: rgba(124,140,255,.2); }
   [data-command-table] tr.cmd.open .toggle::before { transform: rotate(90deg); color: var(--a1); }
   [data-command-table] tbody tr.cmd.open { background: rgba(124,140,255,.1); }
-  [data-command-table] tr.detail td { background: rgba(18,22,36,.85); border-left: 3px solid var(--a1); padding: 14px 18px; animation: fadein .25s ease; }
-  [data-command-table] tr.detail p { margin: 0 0 8px; color: #c9cde0; }
-  [data-command-table] tr.detail .ex { margin: 6px 0; }
-  [data-command-table] tr.empty td { color: var(--muted); text-align: center; padding: 20px; }
+  [data-command-table] tr.detail td { background: rgba(18,22,36,.88); border-left: 3px solid var(--a1); padding: 14px 18px; animation: fadein .2s ease; }
+  [data-command-table] tr.detail p { margin: 0 0 8px; color: #c9cde0; max-width: 82ch; }
+  [data-command-table] tr.detail .ex {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 6px 0 8px;
+  }
+  .copy-btn {
+    appearance: none; padding: 2px 9px; border-radius: 6px; border: 1px solid var(--line);
+    background: var(--bg2); color: var(--muted); font: inherit; font-size: .76rem; cursor: pointer;
+  }
+  .copy-btn:hover { border-color: var(--a2); color: var(--text); }
+  .copy-btn.copied { border-color: var(--a2); color: var(--a2); }
+  [data-command-table] tr.empty td { color: var(--muted); text-align: center; padding: 22px; }
   @keyframes fadein { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
-  .hint { font-size: .85rem; color: var(--muted); margin: 0 0 10px; }
-  @media (max-width: 600px) {
+  [hidden] { display: none !important; }
+  @media (max-width: 640px) {
     .wrap { padding: 32px 16px 56px; }
+    nav.toc { position: static; }
+    nav.toc a.ext { margin-left: 0; }
     th, td { padding: 8px 10px; }
     .card { padding: 16px; }
     .tablebox table { min-width: 680px; }
@@ -100,111 +182,280 @@
     *, *::before, *::after { animation: none !important; transition: none !important; }
     .card:hover, nav.toc a:hover { transform: none; }
   }
-
-tbody tr.cmd{content-visibility:auto;contain-intrinsic-size:auto 46px}
-.box{background:var(--card);border:1px solid var(--line);padding:20px;border-radius:14px;margin:20px 0;overflow-wrap:anywhere}.notice{border-left:3px solid var(--warn)}.scroll{overflow:auto}a{color:var(--a2)}a:hover{text-decoration:underline}p,li,td{overflow-wrap:anywhere}.card{min-width:0}code,pre{font-variant-ligatures:none}details summary{cursor:pointer;padding:8px}details summary:hover{color:var(--a2)}[hidden]{display:none!important}
-</style></head><body><a class="skip" href="#main">본문으로 건너뛰기</a><div class="wrap"><header><h1>CLI 통합 가이드</h1><p>Linux와 Windows PowerShell의 명령을 한 문서에서 찾아봅니다. 각 운영체제의 검색창에서 명령·설명·예시를 검색하고 버튼으로 상세 내용을 펼칠 수 있습니다.</p><div class="meta">조사일: 2026-11-14 · 각 절의 기존 공식 출처·명령·상세 설명을 보존했습니다.</div></header><nav class="toc" aria-label="목차"><a href="#linux">Linux · Bash</a><a href="#linux-all">Linux 명령 검색</a><a href="#windows">Windows PowerShell</a><a href="#windows-all">PowerShell 명령 검색</a><a href="skills-guide.html">스킬 통합 가이드</a></nav><main id="main" tabindex="-1"><section id="linux"><h2>Linux · Ubuntu · Bash</h2>
-<section id="linux-open">
-  <h3>1. 파일을 기본 앱으로 열기 (<code translate="no">start</code> 대응)</h3>
-  <p class="lead">리눅스 데스크톱에서는 <code translate="no">xdg-open</code>이 윈도우의 <code translate="no">start</code> 역할을 합니다. 파일 형식에 연결된 기본 앱으로 엽니다.</p>
-  <div class="tablebox">
-    <table>
-      <thead><tr><th>윈도우</th><th>리눅스</th><th>동작</th></tr></thead>
-      <tbody>
-        <tr><td><code translate="no">start file.html</code></td><td><code translate="no">xdg-open file.html</code></td><td>기본 브라우저로 HTML 파일 열기</td></tr>
-        <tr><td><code translate="no">start https://example.com</code></td><td><code translate="no">xdg-open https://example.com</code></td><td>기본 브라우저로 URL 열기</td></tr>
-        <tr><td><code translate="no">start .</code></td><td><code translate="no">xdg-open .</code></td><td>현재 폴더를 파일 관리자로 열기</td></tr>
-        <tr><td><code translate="no">start report.pdf</code></td><td><code translate="no">xdg-open report.pdf</code></td><td>PDF 뷰어 등 연결된 앱으로 열기</td></tr>
-        <tr><td><code translate="no">start chrome file.html</code></td><td><code translate="no">google-chrome file.html</code>, <code translate="no">firefox file.html</code></td><td>브라우저를 직접 지정해 열기(해당 브라우저가 설치된 경우)</td></tr>
-      </tbody>
-    </table>
+/* docfig */
+:root,[data-theme="light"]{--fg-text:#1F2328;--fg-muted:#5F6670;--fg-line:#D3D7DC;--fg-panel:#FFFFFF;--fg-fill:#F3F5F7;--fg-accent:#1F5F8B;--fg-accent-bg:#E8F1F7;--fg-warn:#8A5A00;--fg-warn-bg:#FDF3DC;--fg-no:#9B2C2C;--fg-no-bg:#FBE9E9;--fg-ok:#1D6B45;--fg-ok-bg:#E5F3EC}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--fg-text:#E8E9EB;--fg-muted:#A3A9B1;--fg-line:#3A3F46;--fg-panel:#1F2226;--fg-fill:#262A30;--fg-accent:#8CC3E8;--fg-accent-bg:#1E3442;--fg-warn:#F0C674;--fg-warn-bg:#3B2F14;--fg-no:#F0A0A0;--fg-no-bg:#3E2020;--fg-ok:#86D0A8;--fg-ok-bg:#183428}}
+:root[data-theme="dark"],[data-theme="dark"]{--fg-text:#E8E9EB;--fg-muted:#A3A9B1;--fg-line:#3A3F46;--fg-panel:#1F2226;--fg-fill:#262A30;--fg-accent:#8CC3E8;--fg-accent-bg:#1E3442;--fg-warn:#F0C674;--fg-warn-bg:#3B2F14;--fg-no:#F0A0A0;--fg-no-bg:#3E2020;--fg-ok:#86D0A8;--fg-ok-bg:#183428}
+figure.fig{background:var(--fg-panel);color:var(--fg-text);border:1px solid var(--fg-line);border-radius:10px;padding:12px 14px;margin:14px 0;overflow-x:auto}
+figure.fig>svg{display:block;width:100%;height:auto;margin:0 auto}
+figure.fig figcaption{font-size:13px;color:var(--fg-muted);margin-top:8px;line-height:1.6}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">본문으로 건너뛰기</a>
+<div class="wrap">
+<header>
+  <h1>CLI 통합 가이드</h1>
+  <p>Linux·Bash와 Windows PowerShell 명령을 <b>작동 원리(Explanation) → 작업별 교차 해법(How-to) → 입문 핵심 명령 → 전체 명령 사전(Reference)</b> 순서로 찾아봅니다. 행 아무 곳이나 클릭하면 상세 설명·예제 복사·공식 문서 링크가 펼쳐집니다.</p>
+  <div class="meta">원문 조사일: 2026-11-09(PowerShell) · 2026-11-14(Linux) · 구조·도식 개편: 2026-11-20 (<code translate="no">technical-writing</code> · <code translate="no">docfig</code> 적용) · 모든 기존 공식 출처·명령·미확인 표기를 보존했습니다.</div>
+  <div class="kpi-strip" aria-label="수록 범위 요약">
+    <div class="kpi"><strong>169개</strong><span>수록 명령 합계 (외부 라이브러리 없음)</span></div>
+    <div class="kpi"><strong>73개 · 14분류</strong><span>Linux · Ubuntu · Bash 명령</span></div>
+    <div class="kpi"><strong>96개 · 8분류</strong><span>Windows PowerShell cmdlet</span></div>
+    <div class="kpi"><strong>단축키 <code translate="no">/</code> · <code translate="no">Esc</code></strong><span>검색창 바로 이동 · 검색어 초기화</span></div>
   </div>
-  <div class="grid" style="margin-top:16px">
+</header>
+
+<nav class="toc" aria-label="목차">
+  <a href="#overview">셸 원리 비교</a>
+  <a href="#howto">작업별 교차 해법</a>
+  <a href="#linux">Linux · Bash</a>
+  <a href="#linux-all">Linux 사전 (73)</a>
+  <a href="#windows">Windows PowerShell</a>
+  <a href="#windows-all">PowerShell 사전 (96)</a>
+  <a class="ext" href="skills-guide.html">스킬 통합 가이드 →</a>
+</nav>
+
+<main id="main" tabindex="-1">
+
+<section id="overview">
+  <span class="sec-kicker">Explanation · 작동 원리</span>
+  <h2>두 셸은 무엇이 다른가</h2>
+  <p class="lead">명령 이름만 일대일로 외우면 옵션 충돌에서 막힙니다. 파이프라인을 흐르는 데이터 단위와 별칭 규칙의 차이를 먼저 잡으면 두 환경을 오갈 때 실수가 줄어듭니다.</p>
+  <figure class="fig" id="fig-shell-paradigm" data-theme="dark"><svg viewBox="0 0 1000 408" role="img" aria-label="Linux Bash 텍스트 스트림과 Windows PowerShell 객체 파이프라인의 5대 작동 원리 대조도" style="color:var(--fg-text);font-family:inherit;max-width:1000px;min-width:720px" xmlns="http://www.w3.org/2000/svg"><defs><marker id="cmpcliac" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--fg-accent)"/></marker><marker id="cmpclia" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--fg-text)"/></marker></defs><text x="10" y="18" text-anchor="start" style="fill:var(--fg-text);font-size:12.5px;font-weight:700">Linux · Bash 모델</text><text x="10" y="33" text-anchor="start" style="fill:var(--fg-muted);font-size:11px;font-weight:400">텍스트 스트림 · POSIX 플래그</text><line x1="10" y1="39" x2="416" y2="39" style="stroke:var(--fg-text);stroke-width:2"/><text x="500" y="24" text-anchor="middle" style="fill:var(--fg-muted);font-size:11.5px;font-weight:600">전환 기준 축</text><text x="584" y="18" text-anchor="start" style="fill:var(--fg-text);font-size:12.5px;font-weight:700">Windows PowerShell 모델</text><text x="584" y="33" text-anchor="start" style="fill:var(--fg-muted);font-size:11px;font-weight:400">객체 파이프라인 · Verb-Noun</text><line x1="584" y1="39" x2="990" y2="39" style="stroke:var(--fg-text);stroke-width:2"/><rect x="10" y="52" width="406" height="60" rx="8" style="fill:var(--fg-panel);stroke:var(--fg-line);stroke-width:1.3;stroke-dasharray:6 4"/><text x="22" y="72" text-anchor="start" style="fill:var(--fg-text);font-size:13px;font-weight:700">줄 단위 텍스트 스트림</text><text x="22" y="88" text-anchor="start" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">문자열을 grep·sort·uniq로 재가공</text><polyline points="422,82.0 576,82.0" style="fill:none;stroke:var(--fg-accent);stroke-width:1.8;stroke-linejoin:round" marker-end="url(#cmpcliac)"/><rect x="444.0" y="63.0" width="111.9" height="14" rx="3" style="fill:var(--fg-panel);opacity:.9;stroke:none"/><text x="500" y="74.0" text-anchor="middle" style="fill:var(--fg-muted);font-size:11px;font-weight:400">파이프(|) 전달 단위</text><rect x="584" y="52" width="406" height="60" rx="8" style="fill:var(--fg-panel);stroke:var(--fg-line);stroke-width:1.3"/><rect x="584" y="56" width="4" height="52" rx="2" style="fill:var(--fg-ok);stroke:none"/><text x="596" y="72" text-anchor="start" style="fill:var(--fg-text);font-size:13px;font-weight:700">.NET 객체 파이프라인</text><text x="596" y="88" text-anchor="start" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">형식·속성을 유지한 채 다음 명령에 전달</text><rect x="10" y="122" width="406" height="60" rx="8" style="fill:var(--fg-panel);stroke:var(--fg-line);stroke-width:1.3;stroke-dasharray:6 4"/><text x="22" y="142" text-anchor="start" style="fill:var(--fg-text);font-size:13px;font-weight:700">짧은 약어와 단일 문자 플래그</text><text x="22" y="158" text-anchor="start" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">ls -lah, ps aux처럼 도구별 규칙 상이</text><polyline points="422,152.0 576,152.0" style="fill:none;stroke:var(--fg-accent);stroke-width:1.8;stroke-linejoin:round" marker-end="url(#cmpcliac)"/><rect x="445.0" y="133.0" width="110.1" height="14" rx="3" style="fill:var(--fg-panel);opacity:.9;stroke:none"/><text x="500" y="144.0" text-anchor="middle" style="fill:var(--fg-muted);font-size:11px;font-weight:400">명령·옵션 명명 체계</text><rect x="584" y="122" width="406" height="60" rx="8" style="fill:var(--fg-panel);stroke:var(--fg-line);stroke-width:1.3"/><rect x="584" y="126" width="4" height="52" rx="2" style="fill:var(--fg-ok);stroke:none"/><text x="596" y="142" text-anchor="start" style="fill:var(--fg-text);font-size:13px;font-weight:700">동사-명사(Verb-Noun) 표준</text><text x="596" y="158" text-anchor="start" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">Get-ChildItem -Force처럼 일관된 구문</text><rect x="10" y="192" width="406" height="60" rx="8" style="fill:var(--fg-panel);stroke:var(--fg-line);stroke-width:1.3;stroke-dasharray:6 4"/><text x="22" y="212" text-anchor="start" style="fill:var(--fg-text);font-size:13px;font-weight:700">별칭이 옵션까지 함께 묶음</text><text x="22" y="228" text-anchor="start" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">alias ll=&quot;ls -alF&quot;로 플래그 포함</text><polyline points="422,222.0 576,222.0" style="fill:none;stroke:var(--fg-accent);stroke-width:1.8;stroke-linejoin:round" marker-end="url(#cmpcliac)"/><rect x="436.9" y="203.0" width="126.1" height="14" rx="3" style="fill:var(--fg-panel);opacity:.9;stroke:none"/><text x="500" y="214.0" text-anchor="middle" style="fill:var(--fg-muted);font-size:11px;font-weight:400">별칭(Alias) 해석 방식</text><rect x="584" y="192" width="406" height="60" rx="8" style="fill:var(--fg-panel);stroke:var(--fg-line);stroke-width:1.3"/><rect x="584" y="196" width="4" height="52" rx="2" style="fill:var(--fg-ok);stroke:none"/><text x="596" y="212" text-anchor="start" style="fill:var(--fg-text);font-size:13px;font-weight:700">cmdlet 이름만 연결 (옵션 불일치)</text><text x="596" y="228" text-anchor="start" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">ls는 동작해도 ls -la는 오류 발생</text><rect x="10" y="262" width="406" height="60" rx="8" style="fill:var(--fg-panel);stroke:var(--fg-line);stroke-width:1.3;stroke-dasharray:6 4"/><text x="22" y="282" text-anchor="start" style="fill:var(--fg-text);font-size:13px;font-weight:700">도구마다 다른 사전 확인 옵션</text><text x="22" y="298" text-anchor="start" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">rm -i, rsync -n 등 개별 숙지 필요</text><polyline points="422,292.0 576,292.0" style="fill:none;stroke:var(--fg-accent);stroke-width:1.8;stroke-linejoin:round" marker-end="url(#cmpcliac)"/><rect x="448.0" y="273.0" width="103.9" height="14" rx="3" style="fill:var(--fg-panel);opacity:.9;stroke:none"/><text x="500" y="284.0" text-anchor="middle" style="fill:var(--fg-muted);font-size:11px;font-weight:400">위험 작업 안전장치</text><rect x="584" y="262" width="406" height="60" rx="8" style="fill:var(--fg-panel);stroke:var(--fg-line);stroke-width:1.3"/><rect x="584" y="266" width="4" height="52" rx="2" style="fill:var(--fg-ok);stroke:none"/><text x="596" y="282" text-anchor="start" style="fill:var(--fg-text);font-size:13px;font-weight:700">공통 -WhatIf · -Confirm 스위치</text><text x="596" y="298" text-anchor="start" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">실제 변경 없이 영향 대상을 미리 출력</text><rect x="10" y="332" width="406" height="60" rx="8" style="fill:var(--fg-panel);stroke:var(--fg-line);stroke-width:1.3;stroke-dasharray:6 4"/><text x="22" y="352" text-anchor="start" style="fill:var(--fg-text);font-size:13px;font-weight:700">매뉴얼 페이지 텍스트 열람</text><text x="22" y="368" text-anchor="start" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">man 명령, --help, help 내장문서 확인</text><polyline points="422,362.0 576,362.0" style="fill:none;stroke:var(--fg-accent);stroke-width:1.8;stroke-linejoin:round" marker-end="url(#cmpcliac)"/><rect x="453.3" y="343.0" width="93.5" height="14" rx="3" style="fill:var(--fg-panel);opacity:.9;stroke:none"/><text x="500" y="354.0" text-anchor="middle" style="fill:var(--fg-muted);font-size:11px;font-weight:400">내장 도움말·탐색</text><rect x="584" y="332" width="406" height="60" rx="8" style="fill:var(--fg-panel);stroke:var(--fg-line);stroke-width:1.3"/><rect x="584" y="336" width="4" height="52" rx="2" style="fill:var(--fg-ok);stroke:none"/><text x="596" y="352" text-anchor="start" style="fill:var(--fg-text);font-size:13px;font-weight:700">명령·속성 메타데이터 탐색</text><text x="596" y="368" text-anchor="start" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">Get-Help·Get-Command·Get-Member 조합</text></svg><figcaption>Bash는 <b>줄 단위 문자열</b>을 도구별 플래그로 빠르게 이어 붙이고, PowerShell은 <b>속성이 살아 있는 객체</b>를 표준 <code translate="no">동사-명사</code> 구문으로 다룹니다. PowerShell에서 <code translate="no">ls -la</code>나 5.1의 <code translate="no">curl</code> 옵션이 다르게 동작하는 이유도 별칭이 이름만 연결하기 때문입니다.</figcaption></figure>
+</section>
+
+<section id="howto">
+  <span class="sec-kicker">How-to · 작업별 교차 해결 안내</span>
+  <h2>목적별 Linux ↔ PowerShell 실무 해법</h2>
+  <p class="lead">자주 겪는 6가지 문제를 두 셸의 표준 명령으로 나란히 풀었습니다. 삭제·종료·동기화 작업은 아래 안전 흐름을 먼저 거치세요.</p>
+  <figure class="fig" id="fig-safe-workflow" data-theme="dark"><svg viewBox="0 0 1000 256" role="img" aria-label="상태 조회, 대상 좁히기, 실행 전 모의 검증, 실행 및 기록으로 이어지는 4단계 안전 CLI 작업 흐름도" style="color:var(--fg-text);font-family:inherit;max-width:1000px;min-width:720px" xmlns="http://www.w3.org/2000/svg"><defs><marker id="flsafeac" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--fg-accent)"/></marker><marker id="flsafeg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--fg-no)"/></marker><marker id="flsafeok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--fg-ok)"/></marker><marker id="flsafea" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--fg-text)"/></marker></defs><text x="10" y="20" text-anchor="start" style="fill:var(--fg-text);font-size:12.5px;font-weight:700">1단계 · 상태 조회</text><text x="10" y="35" text-anchor="start" style="fill:var(--fg-muted);font-size:11px;font-weight:400">읽기 전용으로 현황 파악</text><line x1="10" y1="41" x2="225" y2="41" style="stroke:var(--fg-text);stroke-width:2"/><text x="265" y="20" text-anchor="start" style="fill:var(--fg-text);font-size:12.5px;font-weight:700">2단계 · 대상 좁히기</text><text x="265" y="35" text-anchor="start" style="fill:var(--fg-muted);font-size:11px;font-weight:400">패턴·속성으로 범위 특정</text><line x1="265" y1="41" x2="480" y2="41" style="stroke:var(--fg-text);stroke-width:2"/><text x="520" y="20" text-anchor="start" style="fill:var(--fg-text);font-size:12.5px;font-weight:700">3단계 · 실행 전 검증</text><text x="520" y="35" text-anchor="start" style="fill:var(--fg-muted);font-size:11px;font-weight:400">모의 실행으로 오작동 차단</text><line x1="520" y1="41" x2="735" y2="41" style="stroke:var(--fg-text);stroke-width:2"/><text x="775" y="20" text-anchor="start" style="fill:var(--fg-text);font-size:12.5px;font-weight:700">4단계 · 변경·기록</text><text x="775" y="35" text-anchor="start" style="fill:var(--fg-muted);font-size:11px;font-weight:400">최소 권한 적용 및 로그 보존</text><line x1="775" y1="41" x2="990" y2="41" style="stroke:var(--fg-text);stroke-width:2"/><rect x="10" y="56" width="215" height="76" rx="8" style="fill:var(--fg-panel);stroke:var(--fg-line);stroke-width:1.3"/><rect x="10" y="60" width="4" height="68" rx="2" style="fill:var(--fg-muted);stroke:none"/><rect x="185.1" y="63" width="31.9" height="16" rx="8" style="fill:var(--fg-fill);stroke:none"/><text x="201.025" y="74.5" text-anchor="middle" style="fill:var(--fg-muted);font-size:10.5px;font-weight:600">읽기</text><text x="22" y="74" text-anchor="start" style="fill:var(--fg-muted);font-size:10.5px;font-weight:400">시스템 변경 없음</text><text x="22" y="89" text-anchor="start" style="fill:var(--fg-text);font-size:13px;font-weight:700">현황·열린 자원 읽기</text><text x="22" y="105" text-anchor="start" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">Bash: ps aux · ss -tlnp · df -h</text><text x="22" y="121" text-anchor="start" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">PS: Get-Process · Get-Volume</text><rect x="265" y="56" width="215" height="76" rx="8" style="fill:var(--fg-panel);stroke:var(--fg-line);stroke-width:1.3"/><rect x="265" y="60" width="4" height="68" rx="2" style="fill:var(--fg-accent);stroke:none"/><rect x="440.1" y="63" width="31.9" height="16" rx="8" style="fill:var(--fg-accent-bg);stroke:none"/><text x="456.02500000000003" y="74.5" text-anchor="middle" style="fill:var(--fg-accent);font-size:10.5px;font-weight:600">선별</text><text x="277" y="74" text-anchor="start" style="fill:var(--fg-muted);font-size:10.5px;font-weight:400">정확한 PID·경로 추출</text><text x="277" y="89" text-anchor="start" style="fill:var(--fg-text);font-size:13px;font-weight:700">조건·패턴 필터링</text><text x="277" y="105" text-anchor="start" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">Bash: grep -rn · find -name</text><text x="277" y="121" text-anchor="start" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">PS: Where-Object · Select-String</text><rect x="520" y="56" width="215" height="76" rx="8" style="fill:var(--fg-panel);stroke:var(--fg-line);stroke-width:1.3"/><rect x="520" y="60" width="4" height="68" rx="2" style="fill:var(--fg-warn);stroke:none"/><rect x="695.0" y="63" width="31.9" height="16" rx="8" style="fill:var(--fg-warn-bg);stroke:none"/><text x="711.025" y="74.5" text-anchor="middle" style="fill:var(--fg-warn);font-size:10.5px;font-weight:600">검증</text><text x="532" y="74" text-anchor="start" style="fill:var(--fg-muted);font-size:10.5px;font-weight:400">영향 범위 눈으로 확인</text><text x="532" y="89" text-anchor="start" style="fill:var(--fg-text);font-size:13px;font-weight:700">사전 시뮬레이션</text><text x="532" y="105" text-anchor="start" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">Bash: rsync -avn · rm -i · pgrep</text><text x="532" y="121" text-anchor="start" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">PS: -WhatIf · Out-GridView</text><rect x="775" y="56" width="215" height="76" rx="8" style="fill:var(--fg-panel);stroke:var(--fg-line);stroke-width:1.3"/><rect x="775" y="60" width="4" height="68" rx="2" style="fill:var(--fg-ok);stroke:none"/><rect x="950.0" y="63" width="31.9" height="16" rx="8" style="fill:var(--fg-ok-bg);stroke:none"/><text x="966.025" y="74.5" text-anchor="middle" style="fill:var(--fg-ok);font-size:10.5px;font-weight:600">반영</text><text x="787" y="74" text-anchor="start" style="fill:var(--fg-muted);font-size:10.5px;font-weight:400">검증된 대상만 반영</text><text x="787" y="89" text-anchor="start" style="fill:var(--fg-text);font-size:13px;font-weight:700">실행 및 입출력 기록</text><text x="787" y="105" text-anchor="start" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">Bash: kill · tee build.log</text><text x="787" y="121" text-anchor="start" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">PS: Stop-Process · Out-File</text><rect x="520" y="160" width="215" height="74" rx="8" style="fill:var(--fg-panel);stroke:var(--fg-no);stroke-width:1.3;stroke-dasharray:6 4"/><rect x="695.0" y="167" width="31.9" height="16" rx="8" style="fill:var(--fg-no-bg);stroke:none"/><text x="711.025" y="178.5" text-anchor="middle" style="fill:var(--fg-no);font-size:10.5px;font-weight:600">위험</text><text x="532" y="178" text-anchor="start" style="fill:var(--fg-muted);font-size:10.5px;font-weight:400">흔한 실수 지점</text><text x="532" y="193" text-anchor="start" style="fill:var(--fg-no);font-size:13px;font-weight:700">검증 생략 강제 실행</text><text x="532" y="209" text-anchor="start" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">rm -rf · Remove-Item -Force</text><text x="532" y="225" text-anchor="start" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">원본 / 누락 · 와일드카드 오타</text><rect x="775" y="160" width="215" height="74" rx="8" style="fill:var(--fg-panel);stroke:var(--fg-no);stroke-width:1.3;stroke-dasharray:6 4"/><text x="787" y="178" text-anchor="start" style="fill:var(--fg-muted);font-size:10.5px;font-weight:400">되돌릴 수 없는 결과</text><text x="787" y="193" text-anchor="start" style="fill:var(--fg-no);font-size:13px;font-weight:700">휴지통 미경유 영구 손실</text><text x="787" y="209" text-anchor="start" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">복구 불가 삭제 · 타 프로세스 종료</text><text x="787" y="225" text-anchor="start" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">gio trash · 백업으로만 예방</text><polyline points="225,94 265,94" style="fill:none;stroke:var(--fg-accent);stroke-width:1.8;stroke-linejoin:round" marker-end="url(#flsafeac)"/><rect x="217.0" y="71" width="56.0" height="14" rx="3" style="fill:var(--fg-panel);opacity:.9;stroke:none"/><text x="245" y="82" text-anchor="middle" style="fill:var(--fg-muted);font-size:11px;font-weight:400">출력 전달</text><polyline points="480,94 520,94" style="fill:none;stroke:var(--fg-accent);stroke-width:1.8;stroke-linejoin:round" marker-end="url(#flsafeac)"/><rect x="472.0" y="71" width="56.0" height="14" rx="3" style="fill:var(--fg-panel);opacity:.9;stroke:none"/><text x="500" y="82" text-anchor="middle" style="fill:var(--fg-muted);font-size:11px;font-weight:400">후보 확정</text><polyline points="735,94 775,94" style="fill:none;stroke:var(--fg-ok);stroke-width:1.8;stroke-linejoin:round" marker-end="url(#flsafeok)"/><rect x="727.0" y="71" width="56.0" height="14" rx="3" style="fill:var(--fg-panel);opacity:.9;stroke:none"/><text x="755" y="82" text-anchor="middle" style="fill:var(--fg-muted);font-size:11px;font-weight:400">대상 일치</text><polyline points="480,114 500,114 500,197 520,197" style="fill:none;stroke:var(--fg-no);stroke-width:1.6;stroke-linejoin:round;stroke-dasharray:6 4" marker-end="url(#flsafeg)"/><rect x="464.8" y="141" width="66.4" height="14" rx="3" style="fill:var(--fg-panel);opacity:.9;stroke:none"/><text x="498" y="152" text-anchor="middle" style="fill:var(--fg-no);font-size:11px;font-weight:400">검증 건너뜀</text><polyline points="735,197 775,197" style="fill:none;stroke:var(--fg-no);stroke-width:1.6;stroke-linejoin:round;stroke-dasharray:6 4" marker-end="url(#flsafeg)"/><rect x="727.0" y="174" width="56.0" height="14" rx="3" style="fill:var(--fg-panel);opacity:.9;stroke:none"/><text x="755" y="185" text-anchor="middle" style="fill:var(--fg-no);font-size:11px;font-weight:400">즉시 반영</text></svg><figcaption>삭제·종료·동기화 명령은 두 셸 모두 휴지통을 거치지 않습니다. <b>조회 → 필터링 → 모의 검증(<code translate="no">-n</code>·<code translate="no">-i</code>·<code translate="no">-WhatIf</code>)</b> 3단계를 거친 뒤 마지막에만 변경 명령을 실행하면 와일드카드·경로 실수를 막을 수 있습니다.</figcaption></figure>
+  <div class="grid" style="margin-top:18px">
     <article class="card">
-      <h4><code translate="no">xdg-open</code> <span class="tag all">표준</span></h4>
-      <p>파일이나 URL을 사용자가 지정한 기본 앱으로 엽니다. GNOME·KDE 등 데스크톱 환경을 가리지 않는 freedesktop 표준 도구입니다.</p>
+      <h3>포트 점유 프로세스 찾고 종료 <span class="tag">네트워크 · 프로세스</span></h3>
+      <p class="guard">종료 전 PID와 실행 파일 이름을 먼저 대조하고, 정상 종료가 응답하지 않을 때만 강제 종료하세요.</p>
+      <div class="pair-code">
+        <div>
+          <span class="os-label bash">Linux · Bash</span>
+<pre translate="no"><code translate="no">sudo ss -tlnp | grep :8080
+kill 12345          # 응답 없을 때만 kill -9 12345</code></pre>
+        </div>
+        <div>
+          <span class="os-label ps">Windows PowerShell</span>
+<pre translate="no"><code translate="no">Get-NetTCPConnection -LocalPort 8080 |
+  Select-Object LocalPort, OwningProcess
+Stop-Process -Id 12345 -WhatIf</code></pre>
+        </div>
+      </div>
+    </article>
+
+    <article class="card">
+      <h3>실시간 로그 추적과 오류 줄 검색 <span class="tag">로그 · 텍스트</span></h3>
+      <p class="guard">실시간 추적은 <code translate="no">Ctrl+C</code>로 중단합니다. 대용량 과거 로그는 페이지 뷰어나 문자열 검색으로 먼저 좁히세요.</p>
+      <div class="pair-code">
+        <div>
+          <span class="os-label bash">Linux · Bash</span>
+<pre translate="no"><code translate="no">tail -f app.log
+grep -rn "ERROR" ./logs</code></pre>
+        </div>
+        <div>
+          <span class="os-label ps">Windows PowerShell</span>
+<pre translate="no"><code translate="no">Get-Content .\app.log -Tail 50 -Wait
+Get-ChildItem -Recurse .\logs\*.log |
+  Select-String -Pattern 'ERROR'</code></pre>
+        </div>
+      </div>
+    </article>
+
+    <article class="card">
+      <h3>디스크 여유 확인과 대용량 항목 찾기 <span class="tag">디스크 · 파일</span></h3>
+      <p class="guard">파티션 전체 여유 공간을 먼저 본 뒤, 용량이 큰 하위 폴더·파일 순서로 좁혀 내려갑니다.</p>
+      <div class="pair-code">
+        <div>
+          <span class="os-label bash">Linux · Bash</span>
+<pre translate="no"><code translate="no">df -h
+du -sh * | sort -h</code></pre>
+        </div>
+        <div>
+          <span class="os-label ps">Windows PowerShell</span>
+<pre translate="no"><code translate="no">Get-Volume
+Get-ChildItem -Recurse -File |
+  Sort-Object Length -Descending |
+  Select-Object -First 10 Name, Length</code></pre>
+        </div>
+      </div>
+    </article>
+
+    <article class="card">
+      <h3>사전 검증 후 폴더 백업·압축 배포 <span class="tag">동기화 · 압축</span></h3>
+      <p class="guard"><code translate="no">rsync</code>는 원본 경로 끝 <code translate="no">/</code> 유무로 구조가 달라지므로 <code translate="no">-n</code>으로 먼저 확인하세요.</p>
+      <div class="pair-code">
+        <div>
+          <span class="os-label bash">Linux · Bash</span>
+<pre translate="no"><code translate="no">rsync -avn src/ backup/   # 확인 후 -av 실행
+tar -czf release.tar.gz dist/</code></pre>
+        </div>
+        <div>
+          <span class="os-label ps">Windows PowerShell</span>
+<pre translate="no"><code translate="no">Copy-Item .\src D:\backup\src -Recurse -WhatIf
+Compress-Archive -Path .\dist\* -DestinationPath release.zip</code></pre>
+        </div>
+      </div>
+    </article>
+
+    <article class="card">
+      <h3>스크립트 실행 허용과 백그라운드 유지 <span class="tag">권한 · 세션</span></h3>
+      <p class="guard">외부에서 내려받은 스크립트는 실행 권한·정책을 열기 전에 내용을 먼저 검토하세요.</p>
+      <div class="pair-code">
+        <div>
+          <span class="os-label bash">Linux · Bash</span>
+<pre translate="no"><code translate="no">chmod +x ./server.sh
+nohup ./server.sh &amp;
+jobs -l</code></pre>
+        </div>
+        <div>
+          <span class="os-label ps">Windows PowerShell</span>
+<pre translate="no"><code translate="no">Set-ExecutionPolicy RemoteSigned -Scope CurrentUser
+$job = Start-Job { .\worker.ps1 }
+Receive-Job $job -Wait</code></pre>
+        </div>
+      </div>
+    </article>
+
+    <article class="card">
+      <h3>HTTP API 응답 확인과 파일 다운로드 <span class="tag">네트워크 · API</span></h3>
+      <p class="guard">PowerShell 5.1의 <code translate="no">curl</code>은 별칭이므로 원래 curl 플래그를 쓰려면 <code translate="no">curl.exe</code>를 입력합니다.</p>
+      <div class="pair-code">
+        <div>
+          <span class="os-label bash">Linux · Bash</span>
+<pre translate="no"><code translate="no">curl -I https://example.com
+curl -L -o file.zip https://example.com/file.zip</code></pre>
+        </div>
+        <div>
+          <span class="os-label ps">Windows PowerShell</span>
+<pre translate="no"><code translate="no">Invoke-RestMethod https://api.github.com/zen
+Invoke-WebRequest https://example.com/file.zip -OutFile file.zip</code></pre>
+        </div>
+      </div>
+    </article>
+  </div>
+  <h3 style="margin-top:28px">실행 환경별 1차 도구·주의점 매핑</h3>
+  <p class="lead">Ubuntu 데스크톱, WSL, Windows PowerShell 5.1, PowerShell 7 네 환경에서 같은 작업을 수행할 때 우선 선택할 도구입니다.</p>
+  <figure class="fig" id="fig-env-matrix" data-theme="dark"><svg viewBox="0 0 982 356" role="img" aria-label="작업 목적과 4가지 실행 환경 사이의 1차 도구 및 별칭 주의점 매핑 격자" style="color:var(--fg-text);font-family:inherit;max-width:982px;min-width:720px" xmlns="http://www.w3.org/2000/svg"><defs><marker id="mtxenva" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--fg-text)"/></marker></defs><rect x="10" y="11" width="26" height="15" rx="4" style="fill:var(--fg-ok-bg);stroke:var(--fg-ok);stroke-width:1.4"/><text x="42" y="23" text-anchor="start" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">권장 표준 해법</text><rect x="144.43" y="11" width="26" height="15" rx="4" style="fill:var(--fg-accent-bg);stroke:var(--fg-accent);stroke-width:1.6"/><text x="176.43" y="23" text-anchor="start" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">핵심 기본 도구</text><rect x="278.86" y="11" width="26" height="15" rx="4" style="fill:var(--fg-panel);stroke:var(--fg-muted);stroke-width:1.2"/><text x="310.86" y="23" text-anchor="start" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">동일 문법 공유</text><rect x="413.29" y="11" width="26" height="15" rx="4" style="fill:var(--fg-warn-bg);stroke:var(--fg-warn);stroke-width:1.4"/><text x="445.29" y="23" text-anchor="start" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">환경별 별칭·호출 주의</text><text x="384.0" y="50" text-anchor="middle" style="fill:var(--fg-text);font-size:12.5px;font-weight:600">Ubuntu 데스크톱</text><text x="384.0" y="65" text-anchor="middle" style="fill:var(--fg-muted);font-size:10.5px;font-weight:400">표준 Bash · GUI</text><text x="552.0" y="50" text-anchor="middle" style="fill:var(--fg-text);font-size:12.5px;font-weight:600">WSL 혼합 환경</text><text x="552.0" y="65" text-anchor="middle" style="fill:var(--fg-muted);font-size:10.5px;font-weight:400">Linux + Win 호출</text><text x="720.0" y="50" text-anchor="middle" style="fill:var(--fg-text);font-size:12.5px;font-weight:600">PowerShell 5.1</text><text x="720.0" y="65" text-anchor="middle" style="fill:var(--fg-muted);font-size:10.5px;font-weight:400">Windows 기본 탑재</text><text x="888.0" y="50" text-anchor="middle" style="fill:var(--fg-text);font-size:12.5px;font-weight:600">PowerShell 7</text><text x="888.0" y="65" text-anchor="middle" style="fill:var(--fg-muted);font-size:10.5px;font-weight:400">pwsh · 별도 설치</text><rect x="6" y="72" width="92" height="80" rx="6" style="fill:var(--fg-accent-bg);stroke:none"/><text x="52.0" y="109.0" text-anchor="middle" style="fill:var(--fg-text);font-size:11.5px;font-weight:600">열기·탐색</text><text x="52.0" y="123.0" text-anchor="middle" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">2항목</text><text x="116" y="89.0" text-anchor="start" style="fill:var(--fg-text);font-size:12px;font-weight:600">기본 앱·탐색기로 열기</text><text x="116" y="103.0" text-anchor="start" style="fill:var(--fg-muted);font-size:10.5px;font-weight:400">HTML·폴더·URL 실행</text><rect x="306" y="77" width="156" height="28" rx="5" style="fill:var(--fg-ok-bg);stroke:var(--fg-ok);stroke-width:1.4"/><text x="384.0" y="95.0" text-anchor="middle" style="fill:var(--fg-ok);font-size:11.5px;font-weight:600">xdg-open · gio</text><rect x="474" y="77" width="156" height="28" rx="5" style="fill:var(--fg-warn-bg);stroke:var(--fg-warn);stroke-width:1.4"/><text x="552.0" y="95.0" text-anchor="middle" style="fill:var(--fg-warn);font-size:11.5px;font-weight:600">explorer.exe .</text><rect x="642" y="77" width="156" height="28" rx="5" style="fill:var(--fg-accent-bg);stroke:var(--fg-accent);stroke-width:1.6"/><text x="720.0" y="95.0" text-anchor="middle" style="fill:var(--fg-text);font-size:11.5px;font-weight:600">Start-Process</text><rect x="810" y="77" width="156" height="28" rx="5" style="fill:var(--fg-accent-bg);stroke:var(--fg-accent);stroke-width:1.6"/><text x="888.0" y="95.0" text-anchor="middle" style="fill:var(--fg-text);font-size:11.5px;font-weight:600">Start-Process</text><line x1="104" y1="112" x2="976" y2="112" style="stroke:var(--fg-line);stroke-width:1"/><text x="116" y="131.0" text-anchor="start" style="fill:var(--fg-text);font-size:12px;font-weight:600">실행 위치·별칭 확인</text><text x="116" y="145.0" text-anchor="start" style="fill:var(--fg-muted);font-size:10.5px;font-weight:400">실제 호출 대상 판별</text><rect x="306" y="119" width="156" height="28" rx="5" style="fill:var(--fg-accent-bg);stroke:var(--fg-accent);stroke-width:1.6"/><text x="384.0" y="137.0" text-anchor="middle" style="fill:var(--fg-text);font-size:11.5px;font-weight:600">type · which</text><rect x="474" y="119" width="156" height="28" rx="5" style="fill:var(--fg-panel);stroke:var(--fg-muted);stroke-width:1.2"/><text x="552.0" y="137.0" text-anchor="middle" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">type · which</text><rect x="642" y="119" width="156" height="28" rx="5" style="fill:var(--fg-accent-bg);stroke:var(--fg-accent);stroke-width:1.6"/><text x="720.0" y="137.0" text-anchor="middle" style="fill:var(--fg-text);font-size:11.5px;font-weight:600">gcm · Get-Alias</text><rect x="810" y="119" width="156" height="28" rx="5" style="fill:var(--fg-accent-bg);stroke:var(--fg-accent);stroke-width:1.6"/><text x="888.0" y="137.0" text-anchor="middle" style="fill:var(--fg-text);font-size:11.5px;font-weight:600">gcm · Get-Alias</text><rect x="6" y="166" width="92" height="80" rx="6" style="fill:var(--fg-accent-bg);stroke:none"/><text x="52.0" y="203.0" text-anchor="middle" style="fill:var(--fg-text);font-size:11.5px;font-weight:600">검색·진단</text><text x="52.0" y="217.0" text-anchor="middle" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">2항목</text><text x="116" y="183.0" text-anchor="start" style="fill:var(--fg-text);font-size:12px;font-weight:600">하위 검색·실시간 로그</text><text x="116" y="197.0" text-anchor="start" style="fill:var(--fg-muted);font-size:10.5px;font-weight:400">패턴 탐색·로그 추적</text><rect x="306" y="171" width="156" height="28" rx="5" style="fill:var(--fg-accent-bg);stroke:var(--fg-accent);stroke-width:1.6"/><text x="384.0" y="189.0" text-anchor="middle" style="fill:var(--fg-text);font-size:11.5px;font-weight:600">grep -rn · tail -f</text><rect x="474" y="171" width="156" height="28" rx="5" style="fill:var(--fg-panel);stroke:var(--fg-muted);stroke-width:1.2"/><text x="552.0" y="189.0" text-anchor="middle" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">grep -rn · tail -f</text><rect x="642" y="171" width="156" height="28" rx="5" style="fill:var(--fg-accent-bg);stroke:var(--fg-accent);stroke-width:1.6"/><text x="720.0" y="189.0" text-anchor="middle" style="fill:var(--fg-text);font-size:11.5px;font-weight:600">sls · gc -Wait</text><rect x="810" y="171" width="156" height="28" rx="5" style="fill:var(--fg-accent-bg);stroke:var(--fg-accent);stroke-width:1.6"/><text x="888.0" y="189.0" text-anchor="middle" style="fill:var(--fg-text);font-size:11.5px;font-weight:600">sls · gc -Wait</text><line x1="104" y1="206" x2="976" y2="206" style="stroke:var(--fg-line);stroke-width:1"/><text x="116" y="225.0" text-anchor="start" style="fill:var(--fg-text);font-size:12px;font-weight:600">열린 포트·연결 진단</text><text x="116" y="239.0" text-anchor="start" style="fill:var(--fg-muted);font-size:10.5px;font-weight:400">수신 대기 PID·방화벽</text><rect x="306" y="213" width="156" height="28" rx="5" style="fill:var(--fg-accent-bg);stroke:var(--fg-accent);stroke-width:1.6"/><text x="384.0" y="231.0" text-anchor="middle" style="fill:var(--fg-text);font-size:11.5px;font-weight:600">ss -tlnp · ping -c</text><rect x="474" y="213" width="156" height="28" rx="5" style="fill:var(--fg-panel);stroke:var(--fg-muted);stroke-width:1.2"/><text x="552.0" y="231.0" text-anchor="middle" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">ss -tlnp</text><rect x="642" y="213" width="156" height="28" rx="5" style="fill:var(--fg-ok-bg);stroke:var(--fg-ok);stroke-width:1.4"/><text x="720.0" y="231.0" text-anchor="middle" style="fill:var(--fg-ok);font-size:11.5px;font-weight:600">TNC · Get-NetTCP</text><rect x="810" y="213" width="156" height="28" rx="5" style="fill:var(--fg-ok-bg);stroke:var(--fg-ok);stroke-width:1.4"/><text x="888.0" y="231.0" text-anchor="middle" style="fill:var(--fg-ok);font-size:11.5px;font-weight:600">TNC · Get-NetTCP</text><rect x="6" y="260" width="92" height="80" rx="6" style="fill:var(--fg-accent-bg);stroke:none"/><text x="52.0" y="297.0" text-anchor="middle" style="fill:var(--fg-text);font-size:11.5px;font-weight:600">전송·주의</text><text x="52.0" y="311.0" text-anchor="middle" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">2항목</text><rect x="104" y="264" width="4" height="30" rx="2" style="fill:var(--fg-warn)"/><text x="116" y="277.0" text-anchor="start" style="fill:var(--fg-text);font-size:12px;font-weight:600">HTTP 요청·REST API</text><text x="116" y="291.0" text-anchor="start" style="fill:var(--fg-muted);font-size:10.5px;font-weight:400">5.1 별칭 충돌 주의</text><rect x="306" y="265" width="156" height="28" rx="5" style="fill:var(--fg-accent-bg);stroke:var(--fg-accent);stroke-width:1.6"/><text x="384.0" y="283.0" text-anchor="middle" style="fill:var(--fg-text);font-size:11.5px;font-weight:600">curl -L · wget</text><rect x="474" y="265" width="156" height="28" rx="5" style="fill:var(--fg-panel);stroke:var(--fg-muted);stroke-width:1.2"/><text x="552.0" y="283.0" text-anchor="middle" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">curl -L · wget</text><rect x="642" y="265" width="156" height="28" rx="5" style="fill:var(--fg-warn-bg);stroke:var(--fg-warn);stroke-width:1.4"/><text x="720.0" y="283.0" text-anchor="middle" style="fill:var(--fg-warn);font-size:11.5px;font-weight:600">irm · curl.exe 명시</text><rect x="810" y="265" width="156" height="28" rx="5" style="fill:var(--fg-ok-bg);stroke:var(--fg-ok);stroke-width:1.4"/><text x="888.0" y="283.0" text-anchor="middle" style="fill:var(--fg-ok);font-size:11.5px;font-weight:600">irm · 본래 curl</text><line x1="104" y1="300" x2="976" y2="300" style="stroke:var(--fg-line);stroke-width:1"/><text x="116" y="319.0" text-anchor="start" style="fill:var(--fg-text);font-size:12px;font-weight:600">변경분 동기화·압축</text><text x="116" y="333.0" text-anchor="start" style="fill:var(--fg-muted);font-size:10.5px;font-weight:400">백업·아카이브 생성</text><rect x="306" y="307" width="156" height="28" rx="5" style="fill:var(--fg-accent-bg);stroke:var(--fg-accent);stroke-width:1.6"/><text x="384.0" y="325.0" text-anchor="middle" style="fill:var(--fg-text);font-size:11.5px;font-weight:600">rsync -av · tar</text><rect x="474" y="307" width="156" height="28" rx="5" style="fill:var(--fg-panel);stroke:var(--fg-muted);stroke-width:1.2"/><text x="552.0" y="325.0" text-anchor="middle" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">rsync -av · tar</text><rect x="642" y="307" width="156" height="28" rx="5" style="fill:var(--fg-panel);stroke:var(--fg-muted);stroke-width:1.2"/><text x="720.0" y="325.0" text-anchor="middle" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">Compress-Archive</text><rect x="810" y="307" width="156" height="28" rx="5" style="fill:var(--fg-panel);stroke:var(--fg-muted);stroke-width:1.2"/><text x="888.0" y="325.0" text-anchor="middle" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">Compress-Archive</text><line x1="300" y1="40" x2="300" y2="342" style="stroke:var(--fg-line);stroke-width:1;stroke-dasharray:2 4"/><line x1="468" y1="40" x2="468" y2="342" style="stroke:var(--fg-line);stroke-width:1;stroke-dasharray:2 4"/><line x1="636" y1="40" x2="636" y2="342" style="stroke:var(--fg-line);stroke-width:1;stroke-dasharray:2 4"/><line x1="804" y1="40" x2="804" y2="342" style="stroke:var(--fg-line);stroke-width:1;stroke-dasharray:2 4"/><line x1="972" y1="40" x2="972" y2="342" style="stroke:var(--fg-line);stroke-width:1;stroke-dasharray:2 4"/></svg><figcaption>같은 작업이라도 실행 환경에 따라 주의 지점이 다릅니다. WSL에서는 <code translate="no">explorer.exe .</code>로 Windows 탐색기를 직접 호출할 수 있고(<code translate="no">wslview</code>는 공식 매뉴얼 미확인), Windows PowerShell 5.1에서는 <code translate="no">curl</code>이 <code translate="no">Invoke-WebRequest</code> 별칭이므로 실제 curl이 필요하면 <code translate="no">curl.exe</code>를 명시합니다.</figcaption></figure>
+</section>
+
+<section id="linux">
+  <span class="sec-kicker">OS Section 1 · Linux &amp; Bash</span>
+  <h2>Linux · Ubuntu · Bash</h2>
+
+  <section id="linux-open">
+    <h3>1. 시작하기와 기본 앱으로 파일 열기 (<code translate="no">start</code> 대응)</h3>
+    <p class="lead">리눅스 데스크톱에서는 <code translate="no">xdg-open</code>이 윈도우 <code translate="no">start</code> 역할을 맡아 파일 형식에 연결된 기본 앱을 실행합니다.</p>
+    <div class="tablebox">
+      <table>
+        <thead><tr><th>윈도우 (cmd)</th><th>리눅스 (Bash)</th><th>동작</th></tr></thead>
+        <tbody>
+          <tr><td><code translate="no">start file.html</code></td><td><code translate="no">xdg-open file.html</code></td><td>기본 웹 브라우저로 HTML 파일 열기</td></tr>
+          <tr><td><code translate="no">start https://example.com</code></td><td><code translate="no">xdg-open https://example.com</code></td><td>기본 웹 브라우저로 URL 열기</td></tr>
+          <tr><td><code translate="no">start .</code></td><td><code translate="no">xdg-open .</code></td><td>현재 폴더를 파일 관리자로 열기</td></tr>
+          <tr><td><code translate="no">start report.pdf</code></td><td><code translate="no">xdg-open report.pdf</code></td><td>PDF 뷰어 등 형식에 등록된 기본 앱으로 열기</td></tr>
+          <tr><td><code translate="no">start chrome file.html</code></td><td><code translate="no">google-chrome file.html</code>, <code translate="no">firefox file.html</code></td><td>해당 브라우저가 설치된 경우 브라우저를 직접 지정해 열기</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="grid" style="margin-top:16px">
+      <article class="card">
+        <h4><code translate="no">xdg-open</code> <span class="tag all">표준</span></h4>
+        <p>파일이나 URL을 사용자가 지정한 기본 앱으로 엽니다. GNOME·KDE 등 데스크톱 환경을 가리지 않는 freedesktop 표준 도구입니다.</p>
 <pre translate="no"><code translate="no">xdg-open file.html
 xdg-open ~/Downloads</code></pre>
-      <a class="src" href="https://portland.freedesktop.org/doc/xdg-open.html" target="_blank" rel="noopener">출처: xdg-open ↗</a>
-    </article>
-    <article class="card">
-      <h4><code translate="no">open</code> <span class="tag note">Ubuntu</span></h4>
-      <p>Ubuntu에서는 <code translate="no">open</code>이 <code translate="no">xdg-open</code>으로 연결되어 있어 macOS처럼 <code translate="no">open file.html</code>도 됩니다. 이 PC에서 <code translate="no">readlink -f $(command -v open)</code> 결과가 <code translate="no">/usr/bin/xdg-open</code>인 것을 확인했습니다. 다른 배포판에서는 다를 수 있습니다.</p>
-    </article>
-    <article class="card">
-      <h4><code translate="no">gio open</code> <span class="tag">GNOME</span></h4>
-      <p>GNOME의 GIO 도구로 기본 앱에서 엽니다. 파일 형식에 등록된 기본 앱을 사용한다는 점은 <code translate="no">xdg-open</code>과 같습니다.</p>
+        <a class="src" href="https://portland.freedesktop.org/doc/xdg-open.html" target="_blank" rel="noopener">출처: xdg-open 매뉴얼 ↗</a>
+      </article>
+      <article class="card">
+        <h4><code translate="no">open</code> <span class="tag note">Ubuntu</span></h4>
+        <p>Ubuntu에서는 <code translate="no">open</code>이 <code translate="no">xdg-open</code>으로 연결되어 있어 macOS처럼 <code translate="no">open file.html</code>도 동작합니다. 이 PC에서 <code translate="no">readlink -f $(command -v open)</code> 결과가 <code translate="no">/usr/bin/xdg-open</code>인 것을 확인했습니다. 다른 배포판에서는 다른 명령일 수 있습니다.</p>
+      </article>
+      <article class="card">
+        <h4><code translate="no">gio open</code> <span class="tag">GNOME</span></h4>
+        <p>GNOME의 GIO 명령줄 도구로 기본 앱을 실행합니다. 파일 형식에 등록된 기본 앱을 찾는다는 점은 <code translate="no">xdg-open</code>과 같습니다.</p>
 <pre translate="no"><code translate="no">gio open file.html</code></pre>
-      <a class="src" href="https://manpages.ubuntu.com/manpages/noble/en/man1/gio.1.html" target="_blank" rel="noopener">출처: gio(1) ↗</a>
-    </article>
-    <article class="card">
-      <h4>WSL에서 열기 <span class="tag note">WSL</span></h4>
-      <p>WSL 안에서는 윈도우 실행 파일을 그대로 부를 수 있어 <code translate="no">explorer.exe .</code>로 현재 폴더를 윈도우 탐색기로 엽니다. wslu 패키지의 <code translate="no">wslview file.html</code>도 쓰이지만 공식 문서로는 확인하지 못했습니다. <span class="tag note">wslview 미확인</span></p>
-      <a class="src" href="https://learn.microsoft.com/en-us/windows/wsl/filesystems" target="_blank" rel="noopener">출처: WSL 파일 시스템 ↗</a>
-    </article>
-    <article class="card">
-      <h4>터미널 기본 요령</h4>
-      <ul>
-        <li><code translate="no">Tab</code>: 명령·파일 이름 자동완성</li>
-        <li><code translate="no">↑</code>/<code translate="no">↓</code>: 이전 명령 불러오기, <code translate="no">Ctrl+R</code>: 기록 검색</li>
-        <li><code translate="no">Ctrl+C</code>: 실행 중인 명령 중단</li>
-        <li><code translate="no">~</code>는 홈 폴더, <code translate="no">.</code>은 현재, <code translate="no">..</code>은 상위 폴더</li>
-        <li><code translate="no">./script.sh</code>: 현재 폴더의 실행 파일 실행</li>
-      </ul>
-      <a class="src" href="https://www.gnu.org/software/bash/manual/bash.html" target="_blank" rel="noopener">출처: GNU Bash 매뉴얼 ↗</a>
-    </article>
-    <article class="card">
-      <h4>도움말 보기</h4>
-      <p>윈도우의 <code translate="no">help</code>, <code translate="no">명령 /?</code>에 해당합니다. <code translate="no">man 명령</code>은 전체 매뉴얼(<code translate="no">q</code>로 종료), <code translate="no">명령 --help</code>는 짧은 사용법, bash 내장 명령은 <code translate="no">help cd</code>처럼 봅니다.</p>
+        <a class="src" href="https://manpages.ubuntu.com/manpages/noble/en/man1/gio.1.html" target="_blank" rel="noopener">출처: Ubuntu gio(1) ↗</a>
+      </article>
+      <article class="card">
+        <h4>WSL에서 열기 <span class="tag note">WSL</span></h4>
+        <p>WSL 안에서는 윈도우 실행 파일을 직접 호출할 수 있어 <code translate="no">explorer.exe .</code>로 현재 폴더를 윈도우 탐색기로 엽니다. wslu 패키지의 <code translate="no">wslview file.html</code>도 쓰이지만 이 문서 작성 시점 기준 공식 매뉴얼 페이지로는 직접 검증하지 않았습니다. <span class="tag note">wslview 미확인</span></p>
+        <a class="src" href="https://learn.microsoft.com/en-us/windows/wsl/filesystems" target="_blank" rel="noopener">출처: Microsoft WSL 파일 시스템 ↗</a>
+      </article>
+      <article class="card">
+        <h4>터미널 기본 조작</h4>
+        <ul>
+          <li><code translate="no">Tab</code>: 명령·경로 이름 자동완성</li>
+          <li><code translate="no">↑</code>/<code translate="no">↓</code>: 이전 명령 탐색, <code translate="no">Ctrl+R</code>: 명령 기록 역검색</li>
+          <li><code translate="no">Ctrl+C</code>: 실행 중인 작업에 중단 신호 전달</li>
+          <li><code translate="no">~</code> 홈 폴더, <code translate="no">.</code> 현재 폴더, <code translate="no">..</code> 상위 폴더</li>
+          <li><code translate="no">./script.sh</code>: 실행 권한이 있는 현재 폴더 스크립트 실행</li>
+        </ul>
+        <a class="src" href="https://www.gnu.org/software/bash/manual/bash.html" target="_blank" rel="noopener">출처: GNU Bash 매뉴얼 ↗</a>
+      </article>
+      <article class="card">
+        <h4>내장 도움말 확인</h4>
+        <p>윈도우의 <code translate="no">help</code>, <code translate="no">명령 /?</code>에 대응합니다. 전체 매뉴얼은 <code translate="no">man 명령</code>(<code translate="no">q</code>로 종료), 요약 옵션은 <code translate="no">명령 --help</code>, bash 내장 명령은 <code translate="no">help cd</code>로 확인합니다.</p>
 <pre translate="no"><code translate="no">man ls
 ls --help
 help cd</code></pre>
-    </article>
-  </div>
-</section>
+      </article>
+    </div>
+  </section>
 
-<section id="linux-core">
-  <h3>2. 핵심 명령</h3>
-  <p class="lead">처음 리눅스 터미널을 쓸 때 가장 자주 쓰는 명령입니다. 태그는 윈도우 대응 명령입니다.</p>
-  <div class="grid">
-    <article class="card"><h4><code translate="no">ls</code> <span class="tag">dir</span></h4>
-      <p>폴더 내용 보기. <code translate="no">ls -l</code> 자세히, <code translate="no">ls -a</code> 숨김 파일 포함, <code translate="no">ls -lh</code> 크기를 읽기 쉽게.</p></article>
-    <article class="card"><h4><code translate="no">cd</code> <span class="tag">cd</span></h4>
-      <p>폴더 이동. <code translate="no">cd ..</code> 상위, <code translate="no">cd ~</code> 또는 <code translate="no">cd</code> 홈, <code translate="no">cd -</code> 직전 폴더.</p></article>
-    <article class="card"><h4><code translate="no">cp</code> · <code translate="no">mv</code> · <code translate="no">rm</code> <span class="tag">copy · move · del</span></h4>
-      <p>복사·이동(이름 변경)·삭제. 폴더는 <code translate="no">cp -r</code>, <code translate="no">rm -r</code>. <span class="tag note">rm은 휴지통을 거치지 않음</span></p></article>
-    <article class="card"><h4><code translate="no">mkdir</code> <span class="tag">mkdir</span></h4>
-      <p>폴더 만들기. <code translate="no">mkdir -p a/b/c</code>로 중간 폴더까지 한 번에.</p></article>
-    <article class="card"><h4><code translate="no">cat</code> · <code translate="no">less</code> <span class="tag">type · more</span></h4>
-      <p>파일 내용 보기. 긴 파일은 <code translate="no">less</code>로 페이지 단위로 보고 <code translate="no">q</code>로 나옵니다.</p></article>
-    <article class="card"><h4><code translate="no">grep</code> <span class="tag">findstr</span></h4>
-      <p>텍스트 검색. <code translate="no">grep -rn "TODO" .</code>로 하위 폴더까지 줄 번호와 함께 찾기.</p></article>
-    <article class="card"><h4><code translate="no">find</code> <span class="tag">dir /s</span></h4>
-      <p>파일 찾기. <code translate="no">find . -name "*.html"</code>로 현재 폴더 아래 HTML 파일 찾기.</p></article>
-    <article class="card"><h4><code translate="no">sudo</code> <span class="tag">관리자 권한 실행</span></h4>
-      <p>다른 사용자(기본 root) 권한으로 명령 실행. 패키지 설치·시스템 설정 변경에 필요.</p></article>
-    <article class="card"><h4><code translate="no">apt</code> <span class="tag">winget</span></h4>
-      <p>Ubuntu 패키지 관리. <code translate="no">sudo apt update</code> 후 <code translate="no">sudo apt install tree</code>.</p></article>
-    <article class="card"><h4><code translate="no">ps</code> · <code translate="no">kill</code> <span class="tag">tasklist · taskkill</span></h4>
-      <p>프로세스 목록과 종료. <code translate="no">ps aux</code>로 전체를 보고 <code translate="no">kill PID</code>로 종료.</p></article>
-    <article class="card"><h4><code translate="no">ip</code> · <code translate="no">ss</code> <span class="tag">ipconfig · netstat</span></h4>
-      <p><code translate="no">ip addr</code>로 IP 주소, <code translate="no">ss -tlnp</code>로 열린 TCP 포트와 프로세스 확인.</p></article>
-    <article class="card"><h4><code translate="no">df</code> · <code translate="no">du</code> · <code translate="no">free</code> <span class="tag">작업 관리자</span></h4>
-      <p>디스크 여유 공간(<code translate="no">df -h</code>), 폴더 크기(<code translate="no">du -sh 폴더</code>), 메모리(<code translate="no">free -h</code>).</p></article>
-  </div>
-</section>
+  <section id="linux-core">
+    <h3>2. 입문 핵심 명령 12선</h3>
+    <p class="lead">리눅스 터미널에서 반복해 쓰는 기본 명령입니다. 오른쪽 태그는 대응하는 윈도우 명령입니다.</p>
+    <div class="grid">
+      <article class="card"><h4><code translate="no">ls</code> <span class="tag">dir</span></h4>
+        <p>폴더 내용 나열. <code translate="no">ls -l</code> 상세 권한·시각, <code translate="no">ls -a</code> 숨김 파일 포함, <code translate="no">ls -lh</code> K·M·G 단위 크기 표시.</p></article>
+      <article class="card"><h4><code translate="no">cd</code> <span class="tag">cd</span></h4>
+        <p>작업 폴더 이동. <code translate="no">cd ..</code> 상위 폴더, <code translate="no">cd ~</code> 또는 <code translate="no">cd</code> 홈 폴더, <code translate="no">cd -</code> 직전 폴더 복귀.</p></article>
+      <article class="card"><h4><code translate="no">cp</code> · <code translate="no">mv</code> · <code translate="no">rm</code> <span class="tag">copy · move · del</span></h4>
+        <p><span class="tag note">주의: rm은 휴지통 미경유</span> 복사·이동(이름 변경)·즉시 삭제. 폴더 재귀 처리는 <code translate="no">cp -r</code>, <code translate="no">rm -r</code>.</p></article>
+      <article class="card"><h4><code translate="no">mkdir</code> <span class="tag">mkdir</span></h4>
+        <p>폴더 생성. 중간 경로까지 한 번에 만들려면 <code translate="no">mkdir -p a/b/c</code>를 씁니다.</p></article>
+      <article class="card"><h4><code translate="no">cat</code> · <code translate="no">less</code> <span class="tag">type · more</span></h4>
+        <p>파일 내용 출력·열람. 긴 파일은 <code translate="no">less</code>로 한 화면씩 넘겨 보고 <code translate="no">q</code>로 종료합니다.</p></article>
+      <article class="card"><h4><code translate="no">grep</code> <span class="tag">findstr</span></h4>
+        <p>패턴 일치 줄 검색. 하위 폴더 전체를 줄 번호와 함께 찾으려면 <code translate="no">grep -rn "TODO" .</code>을 실행합니다.</p></article>
+      <article class="card"><h4><code translate="no">find</code> <span class="tag">dir /s</span></h4>
+        <p>조건별 파일 탐색. 현재 경로 아래 HTML 파일은 <code translate="no">find . -name "*.html"</code>로 찾습니다.</p></article>
+      <article class="card"><h4><code translate="no">sudo</code> <span class="tag">관리자 권한 실행</span></h4>
+        <p>다른 사용자(기본 root) 권한으로 단일 명령 실행. 패키지 설치·시스템 서비스 변경 전에 붙입니다.</p></article>
+      <article class="card"><h4><code translate="no">apt</code> <span class="tag">winget</span></h4>
+        <p>Ubuntu·Debian 패키지 관리. <code translate="no">sudo apt update</code>로 목록을 갱신한 뒤 <code translate="no">sudo apt install tree</code>로 설치합니다.</p></article>
+      <article class="card"><h4><code translate="no">ps</code> · <code translate="no">kill</code> <span class="tag">tasklist · taskkill</span></h4>
+        <p>프로세스 조회와 종료 신호 전달. <code translate="no">ps aux</code>로 PID를 확인한 뒤 <code translate="no">kill PID</code>를 실행합니다.</p></article>
+      <article class="card"><h4><code translate="no">ip</code> · <code translate="no">ss</code> <span class="tag">ipconfig · netstat</span></h4>
+        <p>네트워크 인터페이스·소켓 확인. <code translate="no">ip addr</code>로 IP를, <code translate="no">ss -tlnp</code>로 수신 대기 TCP 포트와 프로세스를 봅니다.</p></article>
+      <article class="card"><h4><code translate="no">df</code> · <code translate="no">du</code> · <code translate="no">free</code> <span class="tag">작업 관리자</span></h4>
+        <p>자원 사용량 확인. 파일시스템 여유(<code translate="no">df -h</code>), 특정 경로 용량(<code translate="no">du -sh 폴더</code>), 메모리·스왑(<code translate="no">free -h</code>).</p></article>
+    </div>
+  </section>
 
-<section id="linux-all">
-  <h3>3. 전체 명령</h3>
-  <p class="lead">분류별로 자주 쓰는 명령입니다. “윈도우 대응”은 cmd 기준이며 PowerShell 명령은 PS로 표시했고, 동작이 정확히 같지는 않습니다.</p>
-  <input class="filter" id="linux-cmd-filter" type="search" name="q" autocomplete="off" spellcheck="false" placeholder="명령·분류·윈도우 명령·설명 검색…" aria-label="리눅스 명령 검색">
-  <p class="count" id="linux-cmd-count" aria-live="polite"></p>
-  <p class="hint">명령을 클릭하거나 Tab으로 이동해 Enter를 누르면 자세한 설명과 사용 예, 공식 문서 링크가 펼쳐집니다. 검색어와 펼친 항목은 주소에 남아 그대로 공유할 수 있습니다.</p>
-  <div class="tablebox">
-    <table data-command-table id="linux-cmd-table">
-      <thead><tr><th>명령</th><th>분류</th><th>윈도우 대응</th><th>설명</th></tr></thead>
-      <tbody>
-        <tr><td><code translate="no">xdg-open &lt;파일|URL&gt;</code></td><td>열기</td><td><code translate="no">start</code></td><td>기본 앱으로 파일·URL 열기</td></tr>
+  <section id="linux-all">
+    <span class="sec-kicker">Reference · Linux 명령 사전</span>
+    <h3>3. 전체 명령 사전 (73개)</h3>
+    <p class="lead">분류 칩이나 검색창으로 좁혀 보세요. “윈도우 대응”은 cmd 기준이며 PowerShell 대응은 PS로 구분했습니다(세부 옵션은 동일하지 않음).</p>
+    <div class="controls">
+      <input class="filter" id="linux-cmd-filter" type="search" name="linux-q" autocomplete="off" spellcheck="false" placeholder="명령·분류·윈도우 대응·설명 검색… (단축키 /)" aria-label="리눅스 명령 검색">
+      <button class="btn-ghost" type="button" id="linux-collapse-all">펼친 설명 모두 접기</button>
+    </div>
+    <div class="chips" id="linux-cmd-chips" role="toolbar" aria-label="리눅스 명령 분류 필터"></div>
+    <div class="status-row">
+      <p class="count" id="linux-cmd-count" aria-live="polite"></p>
+      <p class="hint">행을 클릭하거나 Tab 이동 후 Enter를 누르면 상세 설명·예제 복사·공식 문서 링크가 열립니다. 검색·분류·펼침 상태는 URL에 보존됩니다.</p>
+    </div>
+    <div class="tablebox">
+      <table data-command-table id="linux-cmd-table">
+        <thead><tr><th>명령</th><th>분류</th><th>윈도우 대응</th><th>설명</th></tr></thead>
+        <tbody>
+          <tr><td><code translate="no">xdg-open &lt;파일|URL&gt;</code></td><td>열기</td><td><code translate="no">start</code></td><td>기본 앱으로 파일·URL 열기</td></tr>
         <tr><td><code translate="no">gio open &lt;파일&gt;</code></td><td>열기</td><td><code translate="no">start</code></td><td>GNOME 도구로 기본 앱 열기</td></tr>
         <tr><td><code translate="no">sensible-browser &lt;URL&gt;</code></td><td>열기</td><td><code translate="no">start</code></td><td>Debian·Ubuntu 기본 웹 브라우저 실행</td></tr>
         <tr><td><code translate="no">pwd</code></td><td>폴더·파일</td><td><code translate="no">cd</code></td><td>현재 폴더 경로 출력</td></tr>
@@ -216,7 +467,7 @@ help cd</code></pre>
         <tr><td><code translate="no">touch &lt;파일&gt;</code></td><td>폴더·파일</td><td><code translate="no">type nul &gt; 파일</code></td><td>빈 파일 만들기, 수정 시각 갱신</td></tr>
         <tr><td><code translate="no">cp &lt;원본&gt; &lt;대상&gt;</code></td><td>폴더·파일</td><td><code translate="no">copy</code>, <code translate="no">xcopy</code></td><td>파일·폴더 복사</td></tr>
         <tr><td><code translate="no">mv &lt;원본&gt; &lt;대상&gt;</code></td><td>폴더·파일</td><td><code translate="no">move</code>, <code translate="no">ren</code></td><td>이동·이름 변경</td></tr>
-        <tr><td><code translate="no">rm &lt;파일&gt;</code></td><td>폴더·파일</td><td><code translate="no">del</code>, <code translate="no">rmdir /s</code></td><td>파일·폴더 삭제(복구 불가)</td></tr>
+        <tr><td><code translate="no">rm &lt;파일&gt;</code></td><td>폴더·파일</td><td><code translate="no">del</code>, <code translate="no">rmdir /s</code></td><td>휴지통을 거치지 않는 파일·폴더 즉시 삭제</td></tr>
         <tr><td><code translate="no">ln -s &lt;대상&gt; &lt;링크&gt;</code></td><td>폴더·파일</td><td><code translate="no">mklink</code></td><td>심볼릭 링크 만들기</td></tr>
         <tr><td><code translate="no">stat &lt;파일&gt;</code></td><td>폴더·파일</td><td>PS <code translate="no">Get-Item</code></td><td>크기·권한·시각 등 상세 정보</td></tr>
         <tr><td><code translate="no">file &lt;파일&gt;</code></td><td>폴더·파일</td><td>—</td><td>파일 형식 판별</td></tr>
@@ -275,104 +526,118 @@ help cd</code></pre>
         <tr><td><code translate="no">history</code></td><td>셸·도움말</td><td><code translate="no">doskey /history</code></td><td>입력한 명령 기록</td></tr>
         <tr><td><code translate="no">clear</code></td><td>셸·도움말</td><td><code translate="no">cls</code></td><td>화면 지우기</td></tr>
         <tr><td><code translate="no">date</code></td><td>셸·도움말</td><td><code translate="no">date</code>, <code translate="no">time</code></td><td>날짜·시각 출력</td></tr>
-        <tr><td><code translate="no">nano &lt;파일&gt;</code></td><td>편집기</td><td><code translate="no">notepad</code></td><td>쉬운 터미널 텍스트 편집기</td></tr>
+        <tr><td><code translate="no">nano &lt;파일&gt;</code></td><td>편집기</td><td><code translate="no">notepad</code></td><td>하단 단축키 안내가 있는 터미널 편집기</td></tr>
         <tr><td><code translate="no">vim &lt;파일&gt;</code></td><td>편집기</td><td>—</td><td>모드 기반 텍스트 편집기</td></tr>
-      </tbody>
-    </table>
-  </div>
-  <a class="src" href="https://manpages.ubuntu.com/" target="_blank" rel="noopener">출처: Ubuntu Manpage Repository ↗</a>
-</section>
-<footer>
-  주요 출처:
-  <a href="https://portland.freedesktop.org/doc/xdg-open.html" target="_blank" rel="noopener">xdg-open (freedesktop)</a> ·
-  <a href="https://manpages.ubuntu.com/" target="_blank" rel="noopener">Ubuntu Manpages (noble)</a> ·
-  <a href="https://www.gnu.org/software/bash/manual/bash.html" target="_blank" rel="noopener">GNU Bash 매뉴얼</a> ·
-  <a href="https://learn.microsoft.com/en-us/windows/wsl/filesystems" target="_blank" rel="noopener">WSL 파일 시스템</a>.
-  2026-11-14에 조사한 내용입니다.
-</footer></section><section id="windows"><h2>Windows PowerShell</h2>
-<section id="windows-start">
-  <h3>1. 시작하기</h3>
-  <p class="lead">PowerShell은 텍스트가 아니라 <b>객체</b>를 파이프라인으로 넘깁니다. 이 차이만 알면 대부분의 명령을 조합할 수 있습니다.</p>
-  <div class="grid">
-    <article class="card">
-      <h4>실행과 버전</h4>
-      <ul>
-        <li><code translate="no">Win+X</code> → 터미널, 또는 <code translate="no">Win+R</code> → <code translate="no">powershell</code></li>
-        <li>Windows PowerShell 5.1(<code translate="no">powershell.exe</code>)은 Windows 기본 탑재, PowerShell 7(<code translate="no">pwsh.exe</code>)은 별도 설치</li>
-        <li>버전 확인: <code translate="no">$PSVersionTable</code></li>
-        <li>관리자 권한: 터미널을 오른쪽 클릭 → 관리자 권한으로 실행</li>
-      </ul>
-      <a class="src" href="https://learn.microsoft.com/en-us/powershell/scripting/overview" target="_blank" rel="noopener">출처: What is PowerShell? ↗</a>
-    </article>
-    <article class="card">
-      <h4>명령 찾기와 도움말</h4>
-      <ul>
-        <li>이름은 <b>동사-명사</b> 형식: <code translate="no">Get-Process</code>, <code translate="no">Stop-Service</code></li>
-        <li><code translate="no">Get-Command *service*</code> 명령 찾기</li>
-        <li><code translate="no">Get-Help Get-Process -Examples</code> 예제 보기 (처음엔 <code translate="no">Update-Help</code>)</li>
-        <li><code translate="no">Get-Process | Get-Member</code> 객체 속성·메서드 확인</li>
-        <li><code translate="no">Tab</code> 자동완성, <code translate="no">Ctrl+Space</code> 후보 목록</li>
-      </ul>
-      <a class="src" href="https://learn.microsoft.com/en-us/powershell/scripting/learn/ps101/02-help-system" target="_blank" rel="noopener">출처: The Help system ↗</a>
-    </article>
-    <article class="card">
-      <h4>파이프라인과 연산자</h4>
-      <ul>
-        <li><code translate="no">|</code> 객체를 다음 명령으로 전달, <code translate="no">$_</code>(또는 <code translate="no">$PSItem</code>)가 현재 객체</li>
-        <li>비교: <code translate="no">-eq</code> <code translate="no">-ne</code> <code translate="no">-gt</code> <code translate="no">-lt</code> <code translate="no">-like</code> <code translate="no">-match</code></li>
-        <li>논리: <code translate="no">-and</code> <code translate="no">-or</code> <code translate="no">-not</code></li>
-        <li><code translate="no">&gt;</code>·<code translate="no">&gt;&gt;</code> 리디렉션, <code translate="no">2&gt;&amp;1</code> 오류 합치기</li>
-        <li>변수 <code translate="no">$name = 값</code>, 환경 변수 <code translate="no">$env:PATH</code></li>
-      </ul>
-      <a class="src" href="https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_pipelines" target="_blank" rel="noopener">출처: about_Pipelines ↗</a>
-    </article>
-    <article class="card">
-      <h4>cmd·Linux 별칭 <span class="tag note">5.1 기준</span></h4>
-      <p><code translate="no">dir</code>, <code translate="no">ls</code>, <code translate="no">cd</code>, <code translate="no">cp</code>, <code translate="no">rm</code>, <code translate="no">cat</code>, <code translate="no">ps</code>, <code translate="no">kill</code> 같은 익숙한 이름이 cmdlet의 별칭으로 등록돼 있습니다. 다만 옵션은 원래 명령과 다릅니다(<code translate="no">ls -la</code>는 동작하지 않음). 스크립트에서는 전체 이름을 쓰는 것이 권장됩니다.</p>
-      <p>PowerShell 7에서는 <code translate="no">curl</code>, <code translate="no">wget</code> 등 일부 별칭이 제거되었으니 <code translate="no">Get-Alias</code>로 확인하세요.</p>
-      <a class="src" href="https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_aliases" target="_blank" rel="noopener">출처: about_Aliases ↗</a>
-    </article>
-  </div>
+        </tbody>
+      </table>
+    </div>
+    <a class="src" href="https://manpages.ubuntu.com/" target="_blank" rel="noopener">출처: Ubuntu Manpage Repository ↗</a>
+  </section>
+
+  <footer>
+    Linux 절 주요 출처:
+    <a href="https://portland.freedesktop.org/doc/xdg-open.html" target="_blank" rel="noopener">xdg-open (freedesktop)</a> ·
+    <a href="https://manpages.ubuntu.com/" target="_blank" rel="noopener">Ubuntu Manpages (noble)</a> ·
+    <a href="https://www.gnu.org/software/bash/manual/bash.html" target="_blank" rel="noopener">GNU Bash 매뉴얼</a> ·
+    <a href="https://learn.microsoft.com/en-us/windows/wsl/filesystems" target="_blank" rel="noopener">WSL 파일 시스템</a>.
+    원문 확인일: 2026-11-14 (구조·문장 개편: 2026-11-20).
+  </footer>
 </section>
 
-<section id="windows-core">
-  <h3>2. 핵심 명령</h3>
-  <p class="lead">가장 자주 쓰는 cmdlet입니다. 자세한 매개변수는 3번 표에서 행을 클릭해 확인하세요.</p>
-  <div class="grid">
-    <article class="card"><h4><code translate="no">Get-ChildItem</code> <span class="tag">파일</span></h4>
-      <p>폴더 목록(<code translate="no">dir</code>, <code translate="no">ls</code>). <code translate="no">-Recurse</code> 하위 포함, <code translate="no">-Filter</code> 이름 필터, <code translate="no">-Force</code> 숨김 포함.</p></article>
-    <article class="card"><h4><code translate="no">Copy-Item</code> / <code translate="no">Remove-Item</code> <span class="tag">파일</span></h4>
-      <p>복사·삭제. 폴더째 처리할 땐 <code translate="no">-Recurse</code>, 실행 전 확인은 <code translate="no">-WhatIf</code>.</p></article>
-    <article class="card"><h4><code translate="no">Get-Content</code> <span class="tag">텍스트</span></h4>
-      <p>파일 읽기(<code translate="no">cat</code>). <code translate="no">-Tail 20 -Wait</code>로 로그 실시간 보기.</p></article>
-    <article class="card"><h4><code translate="no">Select-String</code> <span class="tag">텍스트</span></h4>
-      <p>문자열·정규식 검색(<code translate="no">grep</code>과 비슷). <code translate="no">-Pattern</code>, <code translate="no">-Path</code>.</p></article>
-    <article class="card"><h4><code translate="no">Where-Object</code> <span class="tag">파이프라인</span></h4>
-      <p>조건으로 객체 거르기. <code translate="no">... | Where-Object CPU -gt 100</code>.</p></article>
-    <article class="card"><h4><code translate="no">Select-Object</code> / <code translate="no">Sort-Object</code> <span class="tag">파이프라인</span></h4>
-      <p>원하는 속성만 고르고 정렬. <code translate="no">-First 5</code>, <code translate="no">-Descending</code>.</p></article>
-    <article class="card"><h4><code translate="no">Get-Process</code> / <code translate="no">Stop-Process</code> <span class="tag">시스템</span></h4>
-      <p>프로세스 확인과 종료. <code translate="no">Stop-Process -Name notepad -Force</code>.</p></article>
-    <article class="card"><h4><code translate="no">Get-Service</code> <span class="tag">시스템</span></h4>
-      <p>서비스 상태 확인. 시작·중지는 <code translate="no">Start-Service</code>, <code translate="no">Stop-Service</code>.</p></article>
-    <article class="card"><h4><code translate="no">Test-NetConnection</code> <span class="tag">네트워크</span><span class="tag note">Windows 전용</span></h4>
-      <p>연결·포트 확인. <code translate="no">Test-NetConnection example.com -Port 443</code>.</p></article>
-    <article class="card"><h4><code translate="no">Invoke-RestMethod</code> <span class="tag">네트워크</span></h4>
-      <p>HTTP 요청 후 JSON을 객체로 변환. API 호출에 적합.</p></article>
-  </div>
-</section>
+<section id="windows">
+  <span class="sec-kicker">OS Section 2 · Windows PowerShell</span>
+  <h2>Windows PowerShell</h2>
 
-<section id="windows-all">
-  <h3>3. 전체 명령</h3>
-  <p class="lead">자주 쓰는 cmdlet 목록입니다. 별칭은 Windows PowerShell 5.1에서 <code translate="no">Get-Alias</code>로 확인한 값입니다.</p>
-  <input class="filter" id="windows-cmd-filter" type="search" name="q" autocomplete="off" spellcheck="false" placeholder="cmdlet·별칭·설명 검색…" aria-label="명령 검색">
-  <p class="count" id="windows-cmd-count" aria-live="polite"></p>
-  <p class="hint">명령을 클릭하거나 Tab으로 이동해 Enter를 누르면 자세한 설명과 사용 예, 공식 문서 링크가 펼쳐집니다. 검색어와 펼친 항목은 주소에 남아 그대로 공유할 수 있습니다.</p>
-  <div class="tablebox">
-    <table data-command-table id="windows-cmd-table">
-      <thead><tr><th>명령</th><th>분류</th><th>별칭</th><th>설명</th></tr></thead>
-      <tbody>
-        <tr><td><code translate="no">Get-Help</code></td><td>도움말·탐색</td><td></td><td>명령 도움말·예제 보기</td></tr>
+  <section id="windows-start">
+    <h3>1. 시작하기와 객체 파이프라인</h3>
+    <p class="lead">PowerShell은 문자열 대신 <b>형식화된 .NET 객체</b>를 파이프라인으로 넘깁니다. <code translate="no">동사-명사</code> 규칙과 객체 속성 조회만 익히면 출력 텍스트를 다시 자를 필요가 없습니다.</p>
+    <div class="grid">
+      <article class="card">
+        <h4>실행과 버전 구분</h4>
+        <ul>
+          <li><code translate="no">Win+X</code> → 터미널, 또는 <code translate="no">Win+R</code> → <code translate="no">powershell</code></li>
+          <li>Windows PowerShell 5.1(<code translate="no">powershell.exe</code>)은 Windows 기본 탑재, PowerShell 7(<code translate="no">pwsh.exe</code>)은 별도 설치</li>
+          <li>현재 세션 버전 확인: <code translate="no">$PSVersionTable</code></li>
+          <li>관리자 권한 필요 시: 터미널 아이콘 우클릭 → 관리자 권한으로 실행</li>
+        </ul>
+        <a class="src" href="https://learn.microsoft.com/en-us/powershell/scripting/overview" target="_blank" rel="noopener">출처: What is PowerShell? ↗</a>
+      </article>
+      <article class="card">
+        <h4>명령 탐색과 도움말</h4>
+        <ul>
+          <li>모든 cmdlet은 <b>동사-명사</b> 형식: <code translate="no">Get-Process</code>, <code translate="no">Stop-Service</code></li>
+          <li>명령 검색: <code translate="no">Get-Command *service*</code></li>
+          <li>실행 예제 확인: <code translate="no">Get-Help Get-Process -Examples</code> (최초 1회 <code translate="no">Update-Help</code>)</li>
+          <li>반환 객체의 속성·메서드 확인: <code translate="no">Get-Process | Get-Member</code></li>
+          <li><code translate="no">Tab</code> 자동완성, <code translate="no">Ctrl+Space</code> 후보 목록 표시</li>
+        </ul>
+        <a class="src" href="https://learn.microsoft.com/en-us/powershell/scripting/learn/ps101/02-help-system" target="_blank" rel="noopener">출처: The Help system ↗</a>
+      </article>
+      <article class="card">
+        <h4>파이프라인과 비교 연산자</h4>
+        <ul>
+          <li><code translate="no">|</code> 객체를 다음 cmdlet으로 전달, <code translate="no">$_</code>(또는 <code translate="no">$PSItem</code>)가 현재 객체</li>
+          <li>비교 연산자: <code translate="no">-eq</code> <code translate="no">-ne</code> <code translate="no">-gt</code> <code translate="no">-lt</code> <code translate="no">-like</code> <code translate="no">-match</code></li>
+          <li>논리 연산자: <code translate="no">-and</code> <code translate="no">-or</code> <code translate="no">-not</code></li>
+          <li>리디렉션: <code translate="no">&gt;</code> 덮어쓰기, <code translate="no">&gt;&gt;</code> 이어 쓰기, <code translate="no">2&gt;&amp;1</code> 오류 스트림 병합</li>
+          <li>변수 선언 <code translate="no">$name = 값</code>, 환경 변수 조회 <code translate="no">$env:PATH</code></li>
+        </ul>
+        <a class="src" href="https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_pipelines" target="_blank" rel="noopener">출처: about_Pipelines ↗</a>
+      </article>
+      <article class="card">
+        <h4>cmd·Linux 별칭 주의점 <span class="tag note">5.1 기준</span></h4>
+        <p><code translate="no">dir</code>, <code translate="no">ls</code>, <code translate="no">cd</code>, <code translate="no">cp</code>, <code translate="no">rm</code>, <code translate="no">cat</code>, <code translate="no">ps</code>, <code translate="no">kill</code>은 대응 cmdlet의 별칭으로 등록돼 있으나, 매개변수는 PowerShell 규칙을 따릅니다(<code translate="no">ls -la</code>는 오류 발생). 재사용할 스크립트에서는 항상 전체 cmdlet 이름을 쓰세요.</p>
+        <p>PowerShell 7에서는 충돌을 막기 위해 <code translate="no">curl</code>, <code translate="no">wget</code> 별칭이 제거되었습니다. 현재 세션 기준 연결은 <code translate="no">Get-Alias</code>로 확인하세요.</p>
+        <a class="src" href="https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_aliases" target="_blank" rel="noopener">출처: about_Aliases ↗</a>
+      </article>
+    </div>
+  </section>
+
+  <section id="windows-core">
+    <h3>2. 입문 핵심 명령 10선</h3>
+    <p class="lead">파일·텍스트·파이프라인·시스템·네트워크에서 가장 먼저 익힐 핵심 cmdlet입니다.</p>
+    <div class="grid">
+      <article class="card"><h4><code translate="no">Get-ChildItem</code> <span class="tag">파일</span></h4>
+        <p>폴더 항목 나열(<code translate="no">dir</code>, <code translate="no">ls</code>). <code translate="no">-Recurse</code> 하위 포함, <code translate="no">-Filter</code> 고속 이름 필터, <code translate="no">-Force</code> 숨김 포함.</p></article>
+      <article class="card"><h4><code translate="no">Copy-Item</code> / <code translate="no">Remove-Item</code> <span class="tag">파일</span></h4>
+        <p><span class="tag note">-WhatIf 선행 권장</span> 복사·영구 삭제. 하위 폴더 전체는 <code translate="no">-Recurse</code>를 붙입니다.</p></article>
+      <article class="card"><h4><code translate="no">Get-Content</code> <span class="tag">텍스트</span></h4>
+        <p>파일 내용 읽기(<code translate="no">cat</code>). 실시간 로그 추적은 <code translate="no">-Tail 20 -Wait</code>를 붙입니다.</p></article>
+      <article class="card"><h4><code translate="no">Select-String</code> <span class="tag">텍스트</span></h4>
+        <p>문자열·정규식 패턴 검색(<code translate="no">grep</code> 대응). <code translate="no">-Path</code>와 <code translate="no">-Pattern</code>으로 지정합니다.</p></article>
+      <article class="card"><h4><code translate="no">Where-Object</code> <span class="tag">파이프라인</span></h4>
+        <p>속성 조건으로 객체 걸러내기. 예: <code translate="no">Get-Process | Where-Object CPU -gt 100</code>.</p></article>
+      <article class="card"><h4><code translate="no">Select-Object</code> / <code translate="no">Sort-Object</code> <span class="tag">파이프라인</span></h4>
+        <p>필요한 속성만 추리고 정렬. 상위 n개는 <code translate="no">-First 5</code>, 내림차순은 <code translate="no">-Descending</code>.</p></article>
+      <article class="card"><h4><code translate="no">Get-Process</code> / <code translate="no">Stop-Process</code> <span class="tag">시스템</span></h4>
+        <p>프로세스 객체 조회와 종료. 강제 종료 전 대상 프로세스 이름·ID를 먼저 확인하세요.</p></article>
+      <article class="card"><h4><code translate="no">Get-Service</code> <span class="tag">시스템</span></h4>
+        <p>Windows 서비스 상태 조회. 시작·중지는 관리자 권한에서 <code translate="no">Start-Service</code>, <code translate="no">Stop-Service</code>를 씁니다.</p></article>
+      <article class="card"><h4><code translate="no">Test-NetConnection</code> <span class="tag">네트워크</span><span class="tag note">Windows 전용</span></h4>
+        <p>ICMP 응답·TCP 포트·라우팅 경로 통합 진단. 예: <code translate="no">Test-NetConnection example.com -Port 443</code>.</p></article>
+      <article class="card"><h4><code translate="no">Invoke-RestMethod</code> <span class="tag">네트워크</span></h4>
+        <p>HTTP·REST API 호출 후 JSON·XML 응답을 즉시 PowerShell 객체로 변환합니다.</p></article>
+    </div>
+  </section>
+
+  <section id="windows-all">
+    <span class="sec-kicker">Reference · PowerShell cmdlet 사전</span>
+    <h3>3. 전체 명령 사전 (96개)</h3>
+    <p class="lead">분류 칩이나 검색창으로 좁혀 보세요. 별칭 열은 Windows PowerShell 5.1의 <code translate="no">Get-Alias</code> 기준입니다.</p>
+    <div class="controls">
+      <input class="filter" id="windows-cmd-filter" type="search" name="windows-q" autocomplete="off" spellcheck="false" placeholder="cmdlet·별칭·분류·설명 검색… (단축키 /)" aria-label="PowerShell 명령 검색">
+      <button class="btn-ghost" type="button" id="windows-collapse-all">펼친 설명 모두 접기</button>
+    </div>
+    <div class="chips" id="windows-cmd-chips" role="toolbar" aria-label="PowerShell 명령 분류 필터"></div>
+    <div class="status-row">
+      <p class="count" id="windows-cmd-count" aria-live="polite"></p>
+      <p class="hint">행을 클릭하거나 Tab 이동 후 Enter를 누르면 상세 설명·예제 복사·Microsoft Learn 링크가 열립니다.</p>
+    </div>
+    <div class="tablebox">
+      <table data-command-table id="windows-cmd-table">
+        <thead><tr><th>명령</th><th>분류</th><th>별칭 (5.1)</th><th>설명</th></tr></thead>
+        <tbody>
+          <tr><td><code translate="no">Get-Help</code></td><td>도움말·탐색</td><td></td><td>명령 도움말·예제 보기</td></tr>
         <tr><td><code translate="no">Get-Command</code></td><td>도움말·탐색</td><td><code translate="no">gcm</code></td><td>사용 가능한 명령 찾기</td></tr>
         <tr><td><code translate="no">Get-Member</code></td><td>도움말·탐색</td><td><code translate="no">gm</code></td><td>객체의 속성·메서드 확인</td></tr>
         <tr><td><code translate="no">Get-Alias</code></td><td>도움말·탐색</td><td><code translate="no">gal</code></td><td>별칭 목록·원래 명령 확인</td></tr>
@@ -468,27 +733,223 @@ help cd</code></pre>
         <tr><td><code translate="no">Receive-Job</code></td><td>스크립트·세션</td><td><code translate="no">rcjb</code></td><td>백그라운드 작업 결과 받기</td></tr>
         <tr><td><code translate="no">Invoke-Command</code></td><td>스크립트·세션</td><td><code translate="no">icm</code></td><td>원격·로컬에서 명령 실행</td></tr>
         <tr><td><code translate="no">Enter-PSSession</code></td><td>스크립트·세션</td><td><code translate="no">etsn</code></td><td>원격 컴퓨터에 대화형 접속</td></tr>
-      </tbody>
-    </table>
-  </div>
-  <p class="lead" style="margin-top:12px">전체 cmdlet은 <code translate="no">Get-Command</code>로 확인하거나 Microsoft Learn의 모듈 레퍼런스를 참고하세요.</p>
-  <a class="src" href="https://learn.microsoft.com/en-us/powershell/module/" target="_blank" rel="noopener">출처: PowerShell Module Browser ↗</a>
-</section>
-<footer>
-  주요 출처:
-  <a href="https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/" target="_blank" rel="noopener">Microsoft.PowerShell.Management</a> ·
-  <a href="https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/" target="_blank" rel="noopener">Microsoft.PowerShell.Utility</a> ·
-  <a href="https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/" target="_blank" rel="noopener">Microsoft.PowerShell.Core</a> ·
-  <a href="https://learn.microsoft.com/en-us/powershell/module/nettcpip/" target="_blank" rel="noopener">NetTCPIP</a>.
-  2026-11-09에 조사한 내용이며, 매개변수는 <code translate="no">Get-Help &lt;cmdlet&gt; -Full</code>로 최종 확인하세요.
-</footer></section></main></div><script>
-(function(){
+        </tbody>
+      </table>
+    </div>
+    <p class="lead" style="margin-top:12px">설치된 전체 모듈 명령은 <code translate="no">Get-Command</code>로 조회하거나 Microsoft Learn 모듈 브라우저를 확인하세요.</p>
+    <a class="src" href="https://learn.microsoft.com/en-us/powershell/module/" target="_blank" rel="noopener">출처: PowerShell Module Browser ↗</a>
+  </section>
 
-  var REF = 'https://manpages.ubuntu.com/';
+  <footer>
+    PowerShell 절 주요 출처:
+    <a href="https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.management/" target="_blank" rel="noopener">Microsoft.PowerShell.Management</a> ·
+    <a href="https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.utility/" target="_blank" rel="noopener">Microsoft.PowerShell.Utility</a> ·
+    <a href="https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/" target="_blank" rel="noopener">Microsoft.PowerShell.Core</a> ·
+    <a href="https://learn.microsoft.com/en-us/powershell/module/nettcpip/" target="_blank" rel="noopener">NetTCPIP</a>.
+    원문 확인일: 2026-11-09 (구조·문장 개편: 2026-11-20) · 세부 매개변수는 <code translate="no">Get-Help &lt;cmdlet&gt; -Full</code>로 최종 확인하세요.
+  </footer>
+</section>
+
+</main>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  document.querySelectorAll('code, pre').forEach(function (el) {
+    el.setAttribute('translate', 'no');
+  });
+
+  function decodeEntities(htmlStr) {
+    var txt = document.createElement('textarea');
+    txt.innerHTML = htmlStr;
+    return txt.value;
+  }
+
+  function copyText(text, btn) {
+    function markCopied() {
+      var orig = btn.textContent;
+      btn.textContent = '복사됨';
+      btn.classList.add('copied');
+      setTimeout(function () {
+        btn.textContent = orig;
+        btn.classList.remove('copied');
+      }, 1400);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(markCopied).catch(function () {});
+    } else {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); markCopied(); } catch (e) {}
+      document.body.removeChild(ta);
+    }
+  }
+
+  function initCommandSection(cfg) {
+    var table = document.getElementById(cfg.tableId);
+    var filter = document.getElementById(cfg.filterId);
+    var chipsBox = document.getElementById(cfg.chipsId);
+    var count = document.getElementById(cfg.countId);
+    var collapseBtn = document.getElementById(cfg.collapseId);
+    var params = new URLSearchParams(location.search);
+    var opened = (params.get(cfg.prefix + '-open') || '').split(',').filter(Boolean);
+    var activeCat = params.get(cfg.prefix + '-cat') || 'all';
+    var items = [];
+    var catCounts = Object.create(null);
+    var catOrder = [];
+
+    function setOpen(it, open) {
+      it.row.hidden = !open;
+      it.tr.classList.toggle('open', open);
+      it.btn.setAttribute('aria-expanded', String(open));
+    }
+
+    function syncUrl() {
+      var p = new URLSearchParams(location.search);
+      var q = filter.value.trim();
+      if (q) p.set(cfg.prefix + '-q', q); else p.delete(cfg.prefix + '-q');
+      if (activeCat && activeCat !== 'all') p.set(cfg.prefix + '-cat', activeCat); else p.delete(cfg.prefix + '-cat');
+      var openNames = items.filter(function (it) { return !it.row.hidden; }).map(function (it) { return it.name; });
+      if (openNames.length) p.set(cfg.prefix + '-open', openNames.join(',')); else p.delete(cfg.prefix + '-open');
+      var s = p.toString();
+      try { history.replaceState(null, '', location.pathname + (s ? '?' + s : '') + location.hash); } catch (e) {}
+    }
+
+    table.querySelectorAll('tbody tr').forEach(function (tr, i) {
+      var name = tr.querySelector('code').textContent.split(' ')[0];
+      var cat = tr.cells[1].textContent.trim();
+      var d = cfg.details[name];
+      if (!d) return;
+      if (!catCounts[cat]) {
+        catCounts[cat] = 0;
+        catOrder.push(cat);
+      }
+      catCounts[cat]++;
+
+      var cell = tr.cells[0];
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'toggle';
+      btn.setAttribute('aria-expanded', 'false');
+      btn.setAttribute('aria-controls', cfg.prefix + '-detail-' + i);
+      while (cell.firstChild) btn.appendChild(cell.firstChild);
+      cell.appendChild(btn);
+      tr.classList.add('cmd');
+
+      var row = document.createElement('tr');
+      row.className = 'detail';
+      row.id = cfg.prefix + '-detail-' + i;
+      row.hidden = true;
+      var html = '<td colspan="' + tr.cells.length + '"><p>' + d[0] + '</p>';
+      if (d[1]) {
+        html += '<div class="ex"><span>예: <code translate="no">' + d[1] + '</code></span>' +
+                '<button type="button" class="copy-btn" data-copy="1" aria-label="' + name + ' 예제 명령 복사">복사</button></div>';
+      }
+      html += '<a class="src" href="' + cfg.linkOf(name, d) + '" target="_blank" rel="noopener">' + cfg.docLabel + ' ↗</a></td>';
+      row.innerHTML = html;
+      tr.after(row);
+
+      if (d[1]) {
+        var rawEx = decodeEntities(d[1]);
+        row.querySelector('.copy-btn').addEventListener('click', function (e) {
+          e.stopPropagation();
+          copyText(rawEx, e.currentTarget);
+        });
+      }
+
+      var it = { name: name, cat: cat, tr: tr, row: row, btn: btn };
+      items.push(it);
+
+      tr.addEventListener('click', function (e) {
+        if (e.target.closest('a, .copy-btn')) return;
+        if (window.getSelection && String(window.getSelection()).length > 0) return;
+        setOpen(it, it.row.hidden);
+        syncUrl();
+      });
+
+      if (opened.indexOf(name) !== -1) setOpen(it, true);
+    });
+
+    if (activeCat !== 'all' && !catCounts[activeCat]) activeCat = 'all';
+
+    var chipButtons = [];
+    function makeChip(val, label) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'chip';
+      b.dataset.cat = val;
+      b.setAttribute('aria-pressed', String(val === activeCat));
+      b.textContent = label;
+      b.addEventListener('click', function () {
+        activeCat = (activeCat === val && val !== 'all') ? 'all' : val;
+        chipButtons.forEach(function (cb) {
+          cb.setAttribute('aria-pressed', String(cb.dataset.cat === activeCat));
+        });
+        applyFilter();
+        syncUrl();
+      });
+      chipsBox.appendChild(b);
+      chipButtons.push(b);
+    }
+
+    makeChip('all', '전체 ' + items.length);
+    catOrder.forEach(function (cat) {
+      makeChip(cat, cat + ' ' + catCounts[cat]);
+    });
+
+    var empty = document.createElement('tr');
+    empty.className = 'empty';
+    empty.hidden = true;
+    empty.innerHTML = '<td colspan="' + table.tHead.rows[0].cells.length + '">일치하는 명령이 없습니다. 검색어를 지우거나 분류를 “전체”로 바꿔 보세요.</td>';
+    table.tBodies[0].appendChild(empty);
+
+    function applyFilter() {
+      var q = filter.value.trim().toLowerCase();
+      var shown = 0;
+      items.forEach(function (it) {
+        var catHit = (activeCat === 'all') || (it.cat === activeCat);
+        var qHit = !q || (it.tr.textContent + ' ' + it.row.textContent).toLowerCase().indexOf(q) !== -1;
+        var hit = catHit && qHit;
+        it.tr.style.display = hit ? '' : 'none';
+        it.row.style.display = hit ? '' : 'none';
+        if (hit) shown++;
+      });
+      empty.hidden = shown !== 0;
+      var suffix = activeCat !== 'all' ? ' (분류: ' + activeCat + ')' : '';
+      count.textContent = (q || activeCat !== 'all')
+        ? '명령 ' + items.length + '개 중 ' + shown + '개 표시' + suffix
+        : '명령 ' + items.length + '개';
+    }
+
+    filter.value = params.get(cfg.prefix + '-q') || '';
+    filter.addEventListener('input', function () { applyFilter(); syncUrl(); });
+    filter.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && filter.value) {
+        filter.value = '';
+        applyFilter();
+        syncUrl();
+      }
+    });
+
+    collapseBtn.addEventListener('click', function () {
+      items.forEach(function (it) { setOpen(it, false); });
+      syncUrl();
+    });
+
+    applyFilter();
+    return filter;
+  }
+
   var U = 'https://manpages.ubuntu.com/manpages/noble/en/man';
   var BASH = 'https://www.gnu.org/software/bash/manual/bash.html';
-  // 명령별 상세 설명: [설명, 사용 예(선택), 공식 문서 링크(선택)]
-  var DETAILS = {
+  var LINUX_REF = 'https://manpages.ubuntu.com/';
+  var LINUX_DETAILS = {
     'xdg-open': ['파일이나 URL을 사용자가 지정한 기본 앱으로 엽니다. 윈도우의 <code translate="no">start</code>와 같은 용도이며 데스크톱 환경(GNOME, KDE 등)을 가리지 않습니다. Ubuntu에서는 <code translate="no">open</code>도 이 명령으로 연결되어 있습니다.', 'xdg-open file.html', 'https://portland.freedesktop.org/doc/xdg-open.html'],
     'gio': ['GNOME의 GIO 명령줄 도구입니다. <code translate="no">gio open</code>은 파일 형식에 등록된 기본 앱으로 엽니다. 이 밖에 <code translate="no">gio trash</code>(휴지통으로 보내기), <code translate="no">gio info</code> 같은 하위 명령이 있습니다.', 'gio open file.html', U + '1/gio.1.html'],
     'sensible-browser': ['Debian·Ubuntu에서 기본으로 설정된 웹 브라우저를 실행합니다. 스크립트에서 "아무 브라우저나" 열고 싶을 때 씁니다. 파일을 형식에 맞는 앱으로 열려면 <code translate="no">xdg-open</code>이 더 일반적입니다.', 'sensible-browser https://example.com', U + '1/sensible-browser.1.html'],
@@ -501,7 +962,7 @@ help cd</code></pre>
     'touch': ['파일의 접근·수정 시각을 현재 시각으로 바꿉니다. 파일이 없으면 빈 파일을 만들기 때문에 빈 파일 생성에 자주 씁니다.', 'touch index.html', U + '1/touch.1.html'],
     'cp': ['파일을 복사합니다. 폴더는 <code translate="no">-r</code>(재귀)이 필요하고, <code translate="no">-i</code>는 덮어쓰기 전에 묻고, <code translate="no">-a</code>는 권한·시각 등 속성을 보존합니다.', 'cp -r src/ backup/', U + '1/cp.1.html'],
     'mv': ['파일·폴더를 옮기거나 이름을 바꿉니다. 윈도우의 <code translate="no">move</code>와 <code translate="no">ren</code>을 합친 역할입니다. <code translate="no">-i</code>로 덮어쓰기 전에 확인합니다.', 'mv old.txt new.txt', U + '1/mv.1.html'],
-    'rm': ['파일을 삭제합니다. 휴지통을 거치지 않으므로 복구가 어렵습니다. 폴더는 <code translate="no">-r</code>, 확인 없이 강제 삭제는 <code translate="no">-f</code>이며 <code translate="no">-i</code>는 하나씩 확인합니다. 휴지통으로 보내려면 <code translate="no">gio trash</code>를 씁니다.', 'rm -i *.log', U + '1/rm.1.html'],
+    'rm': ['주의: 휴지통을 거치지 않고 즉시 삭제하므로 복구하기 어렵습니다. 삭제 전 하나씩 확인하려면 <code translate="no">-i</code>를 붙이고, 휴지통으로 보내려면 <code translate="no">gio trash</code>를 쓰세요. 폴더 재귀 삭제는 <code translate="no">-r</code>, 확인 생략 강제 삭제는 <code translate="no">-f</code>입니다.', 'rm -i *.log', U + '1/rm.1.html'],
     'ln': ['링크를 만듭니다. <code translate="no">-s</code>를 주면 바로가기와 비슷한 심볼릭 링크를 만들고, 없으면 하드 링크를 만듭니다. 순서는 <code translate="no">ln -s 대상 링크이름</code>입니다.', 'ln -s /opt/app/bin/app ~/bin/app', U + '1/ln.1.html'],
     'stat': ['파일의 크기, 권한, 소유자, 접근·수정·변경 시각 등 상세 정보를 보여줍니다.', 'stat file.html', U + '1/stat.1.html'],
     'file': ['파일 내용을 검사해 형식을 판별합니다. 리눅스는 확장자보다 내용으로 형식을 판단하는 경우가 많아 유용합니다.', 'file download.bin', U + '1/file.1.html'],
@@ -522,14 +983,14 @@ help cd</code></pre>
     'chown': ['파일의 소유자와 그룹을 바꿉니다. 형식은 <code translate="no">사용자:그룹</code>이고 보통 <code translate="no">sudo</code>가 필요합니다. <code translate="no">-R</code>로 하위까지 적용합니다.', 'sudo chown -R $USER:$USER ./data', U + '1/chown.1.html'],
     'sudo': ['다른 사용자(기본 root) 권한으로 명령을 실행합니다. 처음 실행할 때 내 계정 암호를 묻습니다. 윈도우의 "관리자 권한으로 실행"과 비슷합니다. <code translate="no">sudo -i</code>로 root 셸을 엽니다.', 'sudo apt update', U + '8/sudo.8.html'],
     'uname': ['커널 이름·버전·아키텍처 등 시스템 정보를 출력합니다. <code translate="no">-a</code>로 전부 보여줍니다. 배포판 버전은 <code translate="no">cat /etc/os-release</code>로 확인합니다.', 'uname -a', U + '1/uname.1.html'],
-    'df': ['마운트된 파일 시스템별 디스크 사용량과 여유 공간을 보여줍니다. <code translate="no">-h</code>로 읽기 쉬운 단위를 씁니다.', 'df -h', U + '1/df.1.html'],
-    'du': ['파일·폴더가 차지하는 디스크 용량을 계산합니다. <code translate="no">-s</code>는 합계만, <code translate="no">-h</code>는 읽기 쉬운 단위입니다. 큰 폴더를 찾을 때 <code translate="no">sort -h</code>와 함께 씁니다.', 'du -sh * | sort -h', U + '1/du.1.html'],
-    'free': ['전체·사용 중·사용 가능한 메모리와 스왑을 보여줍니다. <code translate="no">-h</code>로 읽기 쉬운 단위를 씁니다.', 'free -h', U + '1/free.1.html'],
+    'df': ['마운트된 파일 시스템별 디스크 사용량과 여유 공간을 출력합니다. K·M·G 단위로 보려면 <code translate="no">-h</code>를 붙입니다.', 'df -h', U + '1/df.1.html'],
+    'du': ['파일·폴더가 차지하는 디스크 용량을 계산합니다. 합계만 보려면 <code translate="no">-s</code>, K·M·G 단위는 <code translate="no">-h</code>를 붙이고, 큰 폴더 순 정렬은 <code translate="no">sort -h</code>와 파이프로 연결합니다.', 'du -sh * | sort -h', U + '1/du.1.html'],
+    'free': ['전체·사용 중·가용 메모리와 스왑 용량을 출력합니다. K·M·G 단위로 보려면 <code translate="no">-h</code>를 붙입니다.', 'free -h', U + '1/free.1.html'],
     'lsblk': ['디스크와 파티션 같은 블록 장치를 나무 모양으로 나열합니다. 장치 이름, 크기, 마운트 위치를 확인할 때 씁니다.', 'lsblk', U + '8/lsblk.8.html'],
     'mount': ['파일 시스템을 폴더에 연결(마운트)합니다. 인자 없이 쓰면 현재 마운트 목록을 보여줍니다. 연결 해제는 <code translate="no">umount</code>입니다.', 'sudo mount /dev/sdb1 /mnt', U + '8/mount.8.html'],
     'top': ['프로세스와 CPU·메모리 사용률을 실시간으로 보여줍니다. <code translate="no">q</code>로 종료하고, <code translate="no">M</code>은 메모리순, <code translate="no">P</code>는 CPU순 정렬입니다. 더 보기 편한 <code translate="no">htop</code>은 별도 설치합니다.', 'top', U + '1/top.1.html'],
     'ps': ['실행 중인 프로세스 목록을 출력합니다. <code translate="no">ps aux</code>는 모든 사용자의 전체 프로세스를, <code translate="no">ps -ef</code>는 표준 형식으로 보여줍니다. <code translate="no">grep</code>과 함께 특정 프로세스를 찾습니다.', 'ps aux | grep node', U + '1/ps.1.html'],
-    'kill': ['PID로 프로세스에 신호를 보냅니다. 기본은 정상 종료 요청(TERM)이고, 응답하지 않으면 <code translate="no">-9</code>(KILL)로 강제 종료합니다. <code translate="no">kill -l</code>로 신호 목록을 봅니다.', 'kill 12345', U + '1/kill.1.html'],
+    'kill': ['PID로 프로세스에 신호를 보냅니다. 먼저 기본 신호(SIGTERM)로 정상 종료를 요청하고, 응답하지 않을 때만 <code translate="no">-9</code>(SIGKILL)로 강제 종료하세요. <code translate="no">kill -l</code>로 신호 목록을 봅니다.', 'kill 12345', U + '1/kill.1.html'],
     'pkill': ['이름 등 패턴과 일치하는 프로세스에 신호를 보냅니다. <code translate="no">-f</code>는 전체 명령줄로 비교합니다. 미리 확인하려면 같은 패턴으로 <code translate="no">pgrep -a</code>를 씁니다.', 'pkill -f &quot;python server.py&quot;', U + '1/pkill.1.html'],
     'killall': ['정확히 같은 이름의 프로세스에 모두 신호를 보냅니다. <code translate="no">-i</code>로 하나씩 확인합니다.', 'killall firefox', U + '1/killall.1.html'],
     'watch': ['명령을 일정 간격(기본 2초)으로 반복 실행하며 결과를 전체 화면으로 갱신합니다. <code translate="no">-n</code>으로 간격, <code translate="no">-d</code>로 바뀐 부분 강조입니다.', 'watch -n 1 df -h', U + '1/watch.1.html'],
@@ -544,7 +1005,7 @@ help cd</code></pre>
     'wget': ['URL에서 파일을 내려받습니다. <code translate="no">-c</code>로 중단된 다운로드를 이어받고, <code translate="no">-O</code>로 저장 이름을 정합니다.', 'wget https://example.com/file.zip', U + '1/wget.1.html'],
     'ssh': ['SSH로 원격 서버에 접속하거나 원격에서 명령을 실행합니다. <code translate="no">-p</code>로 포트, <code translate="no">-i</code>로 키 파일을 지정합니다. 키는 <code translate="no">ssh-keygen</code>으로 만듭니다.', 'ssh user@192.168.0.10', U + '1/ssh.1.html'],
     'scp': ['SSH로 파일을 복사합니다. 원격 경로는 <code translate="no">사용자@호스트:경로</code> 형식이고 폴더는 <code translate="no">-r</code>이 필요합니다.', 'scp file.html user@server:/var/www/', U + '1/scp.1.html'],
-    'rsync': ['로컬이나 원격(SSH) 사이에서 바뀐 부분만 전송해 동기화합니다. <code translate="no">-a</code> 속성 보존·재귀, <code translate="no">-v</code> 자세히, <code translate="no">-z</code> 압축, <code translate="no">--delete</code> 원본에 없는 파일 삭제, <code translate="no">-n</code> 미리 보기입니다. 원본 끝의 <code translate="no">/</code> 유무에 따라 결과가 달라집니다.', 'rsync -avn src/ backup/', U + '1/rsync.1.html'],
+    'rsync': ['실행 전 <code translate="no">-n</code>(모의 실행)으로 전송·삭제 대상을 먼저 확인하고, 원본 경로 끝의 <code translate="no">/</code> 유무에 따라 대상 폴더 구조가 달라지는 점에 주의하세요. 로컬·원격(SSH) 간 변경분만 동기화하며 <code translate="no">-a</code> 속성 보존·재귀, <code translate="no">-v</code> 상세 출력, <code translate="no">-z</code> 압축, <code translate="no">--delete</code> 원본 외 파일 삭제입니다.', 'rsync -avn src/ backup/', U + '1/rsync.1.html'],
     'tar': ['여러 파일을 하나로 묶거나 풉니다. <code translate="no">-c</code> 만들기, <code translate="no">-x</code> 풀기, <code translate="no">-t</code> 목록, <code translate="no">-z</code> gzip 압축, <code translate="no">-f</code> 아카이브 파일 지정, <code translate="no">-v</code> 진행 표시입니다.', 'tar -czf site.tar.gz site/ ; tar -xzf site.tar.gz', U + '1/tar.1.html'],
     'gzip': ['파일 하나를 .gz로 압축하며 원본은 압축 파일로 바뀝니다. <code translate="no">-d</code>(또는 <code translate="no">gunzip</code>)로 풀고 <code translate="no">-k</code>로 원본을 남깁니다.', 'gzip -k big.log', U + '1/gzip.1.html'],
     'zip': ['.zip 압축 파일을 만듭니다. 폴더는 <code translate="no">-r</code>이 필요합니다. 설치되어 있지 않으면 <code translate="no">sudo apt install zip</code>으로 설치합니다.', 'zip -r site.zip site/', U + '1/zip.1.html'],
@@ -560,105 +1021,15 @@ help cd</code></pre>
     'history': ['입력한 명령 기록을 번호와 함께 보여주는 bash 내장 명령입니다. <code translate="no">!번호</code>로 다시 실행하고, <code translate="no">Ctrl+R</code>로 기록을 검색합니다.', 'history | grep ssh', BASH],
     'clear': ['터미널 화면을 지웁니다. 단축키 <code translate="no">Ctrl+L</code>과 비슷합니다.', 'clear', U + '1/clear.1.html'],
     'date': ['현재 날짜와 시각을 출력하거나 형식을 지정해 출력합니다.', 'date &quot;+%Y-%m-%d %H:%M&quot;', U + '1/date.1.html'],
-    'nano': ['초보자가 쓰기 쉬운 터미널 텍스트 편집기입니다. 화면 아래에 단축키가 표시되며 <code translate="no">Ctrl+O</code> 저장, <code translate="no">Ctrl+X</code> 종료입니다.', 'nano ~/.bashrc', U + '1/nano.1.html'],
+    'nano': ['화면 아래에 주요 단축키를 상시 표시하는 터미널 텍스트 편집기입니다. <code translate="no">Ctrl+O</code>로 저장하고 <code translate="no">Ctrl+X</code>로 종료합니다.', 'nano ~/.bashrc', U + '1/nano.1.html'],
     'vim': ['모드 기반 텍스트 편집기입니다. <code translate="no">i</code>로 입력 모드, <code translate="no">Esc</code>로 명령 모드, <code translate="no">:wq</code> 저장 후 종료, <code translate="no">:q!</code> 저장 없이 종료입니다. <code translate="no">vimtutor</code>로 연습할 수 있습니다.', 'vim file.html', U + '1/vim.1.html']
   };
 
-  function nameOf(tr) {
-    var name = tr.querySelector('code').textContent.split(' ')[0];
-    return name;
-  }
-  function linkOf(name, d) { return (d[2] || REF); }
-
-  var table = document.getElementById('linux-cmd-table');
-  var filter = document.getElementById('linux-cmd-filter');
-  var count = document.getElementById('linux-cmd-count');
-  var params = new URLSearchParams(location.search);
-  var opened = (params.get('linux-open') || '').split(',').filter(Boolean);
-  var items = [];
-
-  // 명령어·식별자는 자동 번역에서 제외
-  document.querySelectorAll('code, pre').forEach(function (el) { el.setAttribute('translate', 'no'); });
-
-  function setOpen(it, open) {
-    it.row.hidden = !open;
-    it.tr.classList.toggle('open', open);
-    it.btn.setAttribute('aria-expanded', String(open));
-  }
-
-  function syncUrl() {
-    var p = new URLSearchParams(location.search);
-    var q = filter.value.trim();
-    if (q) p.set('linux-q', q); else p.delete('linux-q');
-    var open = items.filter(function (it) { return !it.row.hidden; }).map(function (it) { return it.name; });
-    if (open.length) p.set('linux-open', open.join(',')); else p.delete('linux-open');
-    var s = p.toString();
-    try { history.replaceState(null, '', location.pathname + (s ? '?' + s : '') + location.hash); } catch (e) {}
-  }
-
-  table.querySelectorAll('tbody tr').forEach(function (tr, i) {
-    var name = nameOf(tr);
-    var d = DETAILS[name];
-    if (!d) return;
-    var cell = tr.cells[0];
-    var btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'toggle';
-    btn.setAttribute('aria-expanded', 'false');
-    btn.setAttribute('aria-controls', 'linux-detail-' + i);
-    while (cell.firstChild) btn.appendChild(cell.firstChild);
-    cell.appendChild(btn);
-    tr.classList.add('cmd');
-    var row = document.createElement('tr');
-    row.className = 'detail';
-    row.id = 'linux-detail-' + i;
-    row.hidden = true;
-    var html = '<td colspan="' + tr.cells.length + '"><p>' + d[0] + '</p>';
-    if (d[1]) html += '<div class="ex">예: <code translate="no">' + d[1] + '</code></div>';
-    html += '<a class="src" href="' + linkOf(name, d) + '" target="_blank" rel="noopener">공식 문서 ↗</a></td>';
-    row.innerHTML = html;
-    tr.after(row);
-    var it = { name: name, tr: tr, row: row, btn: btn };
-    items.push(it);
-    // 버튼의 클릭·Enter·Space는 행으로 전파되어 여기서 한 번만 처리된다
-    btn.addEventListener('click', function (e) {
-      setOpen(it, it.row.hidden);
-      syncUrl();
-    });
-    if (opened.indexOf(name) !== -1) setOpen(it, true);
-  });
-
-  var empty = document.createElement('tr');
-  empty.className = 'empty';
-  empty.hidden = true;
-  empty.innerHTML = '<td colspan="' + table.tHead.rows[0].cells.length + '">일치하는 명령이 없습니다. 다른 검색어를 입력해 보세요.</td>';
-  table.tBodies[0].appendChild(empty);
-
-  function applyFilter() {
-    var q = filter.value.trim().toLowerCase();
-    var shown = 0;
-    items.forEach(function (it) {
-      var hit = !q || (it.tr.textContent + ' ' + it.row.textContent).toLowerCase().indexOf(q) !== -1;
-      it.tr.style.display = hit ? '' : 'none';
-      it.row.style.display = hit ? '' : 'none';
-      if (hit) shown++;
-    });
-    empty.hidden = shown !== 0;
-    count.textContent = q ? '명령 ' + items.length + '개 중 ' + shown + '개 일치' : '명령 ' + items.length + '개';
-  }
-
-  filter.value = params.get('linux-q') || '';
-  filter.addEventListener('input', function () { applyFilter(); syncUrl(); });
-  applyFilter();
-
-})();
-</script><script>
-(function(){
-
-  var BASE = 'https://learn.microsoft.com/en-us/powershell/module/';
-  var M = 'microsoft.powershell.management', U = 'microsoft.powershell.utility', C = 'microsoft.powershell.core', S = 'microsoft.powershell.security';
-  // 명령별 상세 설명: [설명, 사용 예(선택), 모듈 이름(문서 링크용)]
-  var DETAILS = {
+  var PS_BASE = 'https://learn.microsoft.com/en-us/powershell/module/';
+  var M = 'microsoft.powershell.management', U_PS = 'microsoft.powershell.utility', C = 'microsoft.powershell.core', S = 'microsoft.powershell.security';
+  var WIN_DETAILS = (function () {
+    var U = U_PS;
+    var DETAILS = {
     'Get-Help': ['cmdlet과 개념(about_*) 도움말을 보여줍니다. <code translate="no">-Examples</code> 예제만, <code translate="no">-Full</code> 전체, <code translate="no">-Online</code> 웹 문서 열기. 로컬 도움말이 비어 있으면 관리자 권한으로 <code translate="no">Update-Help</code>를 실행합니다.', 'Get-Help Copy-Item -Examples', C],
     'Get-Command': ['설치된 cmdlet, 함수, 별칭, 실행 파일을 찾습니다. 와일드카드, <code translate="no">-Verb</code>, <code translate="no">-Noun</code>, <code translate="no">-Module</code>로 좁힐 수 있습니다.', 'Get-Command -Noun Service', C],
     'Get-Member': ['파이프라인으로 받은 객체의 형식, 속성, 메서드를 보여줍니다. 어떤 속성으로 필터·정렬할 수 있는지 확인할 때 씁니다.', 'Get-Service | Get-Member -MemberType Property', U],
@@ -675,7 +1046,7 @@ help cd</code></pre>
     'Copy-Item': ['파일·폴더를 복사합니다. 폴더 전체는 <code translate="no">-Recurse</code>, 덮어쓰기는 <code translate="no">-Force</code>. 실행 전 결과를 보려면 <code translate="no">-WhatIf</code>를 붙입니다.', 'Copy-Item .\\src -Destination D:\\backup\\src -Recurse', M],
     'Move-Item': ['파일·폴더를 이동합니다. 같은 폴더 안에서 쓰면 이름 변경처럼 동작합니다.', 'Move-Item *.jpg -Destination D:\\photos', M],
     'Rename-Item': ['항목 이름을 바꿉니다. <code translate="no">-NewName</code>에 스크립트 블록을 주면 일괄 변경이 됩니다.', 'Get-ChildItem *.txt | Rename-Item -NewName { $_.Name -replace \'\\.txt$\', \'.md\' }', M],
-    'Remove-Item': ['파일·폴더를 삭제합니다. 폴더는 <code translate="no">-Recurse</code>, 읽기 전용·숨김은 <code translate="no">-Force</code>. 휴지통을 거치지 않으니 <code translate="no">-WhatIf</code>로 먼저 확인하세요.', 'Remove-Item .\\build -Recurse -Force -WhatIf', M],
+    'Remove-Item': ['주의: 휴지통을 거치지 않고 영구 삭제하므로 실행 전 <code translate="no">-WhatIf</code>로 삭제 대상을 먼저 확인하세요. 하위 폴더 포함은 <code translate="no">-Recurse</code>, 읽기 전용·숨김 항목 포함은 <code translate="no">-Force</code>입니다.', 'Remove-Item .\\build -Recurse -Force -WhatIf', M],
     'Test-Path': ['경로가 있으면 <code translate="no">True</code>, 없으면 <code translate="no">False</code>를 돌려줍니다. <code translate="no">-PathType Leaf</code>(파일)·<code translate="no">Container</code>(폴더)로 종류도 확인합니다.', 'if (Test-Path .\\config.json) { \'있음\' }', M],
     'Resolve-Path': ['와일드카드나 상대 경로를 실제 전체 경로로 바꿉니다. 경로가 없으면 오류가 납니다.', 'Resolve-Path ..\\*.sln', M],
     'Join-Path': ['구분자를 신경 쓰지 않고 경로를 안전하게 합칩니다.', 'Join-Path $env:USERPROFILE \'Documents\'', M],
@@ -696,7 +1067,7 @@ help cd</code></pre>
     'ConvertTo-Json': ['객체를 JSON 문자열로 바꿉니다. 기본 깊이가 얕아(2) 중첩 객체가 잘릴 수 있으니 <code translate="no">-Depth</code>를 늘립니다.', '$config | ConvertTo-Json -Depth 5 | Set-Content config.json', U],
     'Get-Clipboard': ['클립보드의 텍스트를 가져옵니다.', 'Get-Clipboard', M],
     'Set-Clipboard': ['값을 클립보드에 복사합니다. 파이프라인으로 받은 출력도 복사할 수 있습니다.', 'Get-Location | Set-Clipboard', M],
-    'Where-Object': ['조건을 만족하는 객체만 통과시킵니다. 간단한 형식(<code translate="no">Where-Object Status -eq Running</code>)과 스크립트 블록 형식(<code translate="no">{ $_.CPU -gt 100 }</code>)이 있습니다.', 'Get-Service | Where-Object Status -eq \'Running\'', C],
+    'Where-Object': ['조건을 만족하는 객체만 다음 단계로 통과시킵니다. 단일 속성 비교문 형식(<code translate="no">Where-Object Status -eq Running</code>)과 복합 조건용 스크립트 블록 형식(<code translate="no">{ $_.CPU -gt 100 }</code>)을 지원합니다.', 'Get-Service | Where-Object Status -eq \'Running\'', C],
     'ForEach-Object': ['파이프라인의 각 객체에 스크립트 블록을 실행합니다. 현재 객체는 <code translate="no">$_</code>입니다. PowerShell 7에서는 <code translate="no">-Parallel</code>로 병렬 실행이 가능합니다.', '1..5 | ForEach-Object { $_ * 2 }', C],
     'Select-Object': ['원하는 속성만 고르거나(<code translate="no">-Property</code>), 앞·뒤 n개(<code translate="no">-First</code>, <code translate="no">-Last</code>), 중복 제거(<code translate="no">-Unique</code>), 계산 속성을 만듭니다.', 'Get-Process | Select-Object Name, Id, @{n=\'MemMB\'; e={[int]($_.WS/1MB)}} -First 5', U],
     'Sort-Object': ['속성 기준으로 정렬합니다. <code translate="no">-Descending</code> 내림차순, <code translate="no">-Unique</code> 중복 제거, 여러 속성 지정 가능.', 'Get-ChildItem | Sort-Object LastWriteTime -Descending', U],
@@ -721,8 +1092,8 @@ help cd</code></pre>
     'Get-WinEvent': ['이벤트 로그를 조회합니다. <code translate="no">-LogName</code>, <code translate="no">-MaxEvents</code>, 빠른 필터링은 <code translate="no">-FilterHashtable</code>을 씁니다.', 'Get-WinEvent -FilterHashtable @{LogName=\'System\'; Level=2} -MaxEvents 20', 'microsoft.powershell.diagnostics'],
     'Get-ScheduledTask': ['작업 스케줄러의 예약 작업을 조회합니다. 등록은 <code translate="no">Register-ScheduledTask</code>로 합니다. Windows 전용 ScheduledTasks 모듈입니다.', 'Get-ScheduledTask | Where-Object State -eq Ready', 'scheduledtasks'],
     'Get-LocalUser': ['로컬 사용자 계정 목록을 보여줍니다. 그룹 구성원은 <code translate="no">Get-LocalGroupMember</code>로 확인합니다.', 'Get-LocalUser | Select-Object Name, Enabled, LastLogon', 'microsoft.powershell.localaccounts'],
-    'Restart-Computer': ['컴퓨터를 재시작합니다. <code translate="no">-Force</code>는 로그인한 사용자가 있어도 진행합니다. <code translate="no">-ComputerName</code>으로 원격 재시작도 됩니다.', 'Restart-Computer -Force', M],
-    'Stop-Computer': ['컴퓨터를 종료합니다.', 'Stop-Computer -Force', M],
+    'Restart-Computer': ['주의: 저장하지 않은 작업이 닫히며, <code translate="no">-Force</code>를 붙이면 로그인한 사용자가 있어도 즉시 재시작합니다. <code translate="no">-WhatIf</code>로 먼저 점검할 수 있고 <code translate="no">-ComputerName</code>으로 원격 대상도 지정합니다.', 'Restart-Computer -Force', M],
+    'Stop-Computer': ['주의: 저장하지 않은 작업이 닫히므로 실행 전 열린 앱을 확인하세요. 로컬 또는 원격 컴퓨터의 전원을 종료합니다.', 'Stop-Computer -Force', M],
     'Get-NetIPConfiguration': ['어댑터별 IP 주소, 게이트웨이, DNS 서버를 요약해 보여줍니다. <code translate="no">-Detailed</code>로 상세 정보를 봅니다.', 'Get-NetIPConfiguration', 'nettcpip'],
     'Get-NetIPAddress': ['IP 주소 구성을 가져옵니다. <code translate="no">-AddressFamily IPv4</code>로 좁힐 수 있습니다.', 'Get-NetIPAddress -AddressFamily IPv4 | Select-Object InterfaceAlias, IPAddress', 'nettcpip'],
     'Get-NetAdapter': ['네트워크 어댑터의 이름, 상태, 속도, MAC 주소를 보여줍니다.', 'Get-NetAdapter | Where-Object Status -eq Up', 'netadapter'],
@@ -736,7 +1107,7 @@ help cd</code></pre>
     'Invoke-WebRequest': ['HTTP·HTTPS 요청을 보내고 응답(상태 코드, 헤더, 본문)을 받습니다. <code translate="no">-OutFile</code>로 파일 다운로드. Windows PowerShell 5.1에서는 <code translate="no">curl</code>, <code translate="no">wget</code>이 이 cmdlet의 별칭이라 실제 curl과 옵션이 다릅니다. 실제 curl은 <code translate="no">curl.exe</code>로 호출합니다.', 'Invoke-WebRequest https://example.com/file.zip -OutFile file.zip', U],
     'Invoke-RestMethod': ['REST API를 호출하고 JSON·XML 응답을 자동으로 객체로 바꿉니다. <code translate="no">-Method</code>, <code translate="no">-Headers</code>, <code translate="no">-Body</code>로 요청을 구성합니다.', 'Invoke-RestMethod https://api.github.com/repos/PowerShell/PowerShell | Select-Object stargazers_count', U],
     'Get-ItemProperty': ['항목의 속성을 읽습니다. 주로 레지스트리 값을 읽는 데 씁니다.', 'Get-ItemProperty \'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Run\'', M],
-    'Set-ItemProperty': ['항목의 속성 값을 바꿉니다. 레지스트리 값 수정에 씁니다. 바꾸기 전에 백업하세요.', 'Set-ItemProperty -Path \'HKCU:\\Control Panel\\Desktop\' -Name MenuShowDelay -Value 100', M],
+    'Set-ItemProperty': ['주의: 레지스트리 값을 수정할 때는 변경 전 현재 값을 먼저 확인하거나 백업하세요. 지정한 경로 항목의 속성 값을 새 값으로 바꿉니다.', 'Set-ItemProperty -Path \'HKCU:\\Control Panel\\Desktop\' -Name MenuShowDelay -Value 100', M],
     'Get-PSDrive': ['PowerShell 드라이브(파일 시스템, 레지스트리 <code translate="no">HKLM:</code>·<code translate="no">HKCU:</code>, <code translate="no">Env:</code> 등)와 디스크 사용량을 보여줍니다.', 'Get-PSDrive -PSProvider FileSystem', M],
     'Get-Volume': ['볼륨의 드라이브 문자, 파일 시스템, 크기, 남은 공간을 보여줍니다. Windows 전용 Storage 모듈입니다.', 'Get-Volume', 'storage'],
     'Get-Disk': ['물리 디스크의 번호, 크기, 파티션 형식, 상태를 보여줍니다.', 'Get-Disk', 'storage'],
@@ -750,99 +1121,50 @@ help cd</code></pre>
     'Get-History': ['현재 세션에서 실행한 명령 기록을 보여줍니다. <code translate="no">Invoke-History</code>(<code translate="no">r</code>)로 다시 실행할 수 있습니다. 세션 간 기록은 PSReadLine이 별도로 저장합니다.', 'Get-History -Count 10', C],
     'Start-Transcript': ['세션의 입력과 출력을 텍스트 파일로 기록합니다. <code translate="no">Stop-Transcript</code>로 끝냅니다.', 'Start-Transcript -Path .\\session.log', 'microsoft.powershell.host'],
     'Set-Alias': ['별칭을 만듭니다. 세션이 끝나면 사라지므로 계속 쓰려면 <code translate="no">$PROFILE</code> 파일에 넣습니다.', 'Set-Alias np notepad', U],
-    'Invoke-Expression': ['문자열을 명령으로 실행합니다. 외부에서 받은 문자열을 실행하면 보안 위험이 크므로 신뢰할 수 있는 입력에만 씁니다.', 'Invoke-Expression \'Get-Date\'', U],
+    'Invoke-Expression': ['경고: 외부 입력 문자열을 그대로 넘기면 임의 코드 실행 위험이 크므로 신뢰된 고정 문자열에만 제한해 사용하세요. 전달된 문자열을 PowerShell 명령으로 해석해 실행합니다.', 'Invoke-Expression \'Get-Date\'', U],
     'Start-Job': ['명령을 백그라운드 작업으로 실행합니다. <code translate="no">Get-Job</code>으로 상태 확인, <code translate="no">Receive-Job</code>으로 결과를 받습니다.', '$job = Start-Job { Get-ChildItem C:\\ -Recurse -ErrorAction SilentlyContinue | Measure-Object }', C],
     'Receive-Job': ['백그라운드 작업의 결과를 가져옵니다. <code translate="no">-Wait</code>로 완료까지 기다리고, <code translate="no">-Keep</code>으로 결과를 남겨 둡니다.', 'Receive-Job $job -Wait', C],
     'Invoke-Command': ['로컬이나 원격 컴퓨터에서 스크립트 블록을 실행합니다. 원격은 WinRM(PowerShell Remoting) 설정이 필요합니다.', 'Invoke-Command -ComputerName Server01 -ScriptBlock { Get-Service W32Time }', C],
     'Enter-PSSession': ['원격 컴퓨터에 대화형 세션으로 접속합니다. <code translate="no">Exit-PSSession</code>으로 나옵니다. WinRM 설정이 필요합니다.', 'Enter-PSSession -ComputerName Server01', C]
   };
+    return DETAILS;
+  })();
 
-  function nameOf(tr) {
-    var name = tr.querySelector('code').textContent.split(' ')[0];
-    return name;
-  }
-  function linkOf(name, d) { return BASE + d[2] + '/' + name.toLowerCase(); }
-
-  var table = document.getElementById('windows-cmd-table');
-  var filter = document.getElementById('windows-cmd-filter');
-  var count = document.getElementById('windows-cmd-count');
-  var params = new URLSearchParams(location.search);
-  var opened = (params.get('windows-open') || '').split(',').filter(Boolean);
-  var items = [];
-
-  // 명령어·식별자는 자동 번역에서 제외
-  document.querySelectorAll('code, pre').forEach(function (el) { el.setAttribute('translate', 'no'); });
-
-  function setOpen(it, open) {
-    it.row.hidden = !open;
-    it.tr.classList.toggle('open', open);
-    it.btn.setAttribute('aria-expanded', String(open));
-  }
-
-  function syncUrl() {
-    var p = new URLSearchParams(location.search);
-    var q = filter.value.trim();
-    if (q) p.set('windows-q', q); else p.delete('windows-q');
-    var open = items.filter(function (it) { return !it.row.hidden; }).map(function (it) { return it.name; });
-    if (open.length) p.set('windows-open', open.join(',')); else p.delete('windows-open');
-    var s = p.toString();
-    try { history.replaceState(null, '', location.pathname + (s ? '?' + s : '') + location.hash); } catch (e) {}
-  }
-
-  table.querySelectorAll('tbody tr').forEach(function (tr, i) {
-    var name = nameOf(tr);
-    var d = DETAILS[name];
-    if (!d) return;
-    var cell = tr.cells[0];
-    var btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'toggle';
-    btn.setAttribute('aria-expanded', 'false');
-    btn.setAttribute('aria-controls', 'windows-detail-' + i);
-    while (cell.firstChild) btn.appendChild(cell.firstChild);
-    cell.appendChild(btn);
-    tr.classList.add('cmd');
-    var row = document.createElement('tr');
-    row.className = 'detail';
-    row.id = 'windows-detail-' + i;
-    row.hidden = true;
-    var html = '<td colspan="' + tr.cells.length + '"><p>' + d[0] + '</p>';
-    if (d[1]) html += '<div class="ex">예: <code translate="no">' + d[1] + '</code></div>';
-    html += '<a class="src" href="' + linkOf(name, d) + '" target="_blank" rel="noopener">공식 문서 ↗</a></td>';
-    row.innerHTML = html;
-    tr.after(row);
-    var it = { name: name, tr: tr, row: row, btn: btn };
-    items.push(it);
-    // 버튼의 클릭·Enter·Space는 행으로 전파되어 여기서 한 번만 처리된다
-    btn.addEventListener('click', function (e) {
-      setOpen(it, it.row.hidden);
-      syncUrl();
-    });
-    if (opened.indexOf(name) !== -1) setOpen(it, true);
+  var linuxFilter = initCommandSection({
+    prefix: 'linux',
+    tableId: 'linux-cmd-table',
+    filterId: 'linux-cmd-filter',
+    chipsId: 'linux-cmd-chips',
+    countId: 'linux-cmd-count',
+    collapseId: 'linux-collapse-all',
+    details: LINUX_DETAILS,
+    docLabel: '공식 문서',
+    linkOf: function (name, d) { return d[2] || LINUX_REF; }
   });
 
-  var empty = document.createElement('tr');
-  empty.className = 'empty';
-  empty.hidden = true;
-  empty.innerHTML = '<td colspan="' + table.tHead.rows[0].cells.length + '">일치하는 명령이 없습니다. 다른 검색어를 입력해 보세요.</td>';
-  table.tBodies[0].appendChild(empty);
+  var winFilter = initCommandSection({
+    prefix: 'windows',
+    tableId: 'windows-cmd-table',
+    filterId: 'windows-cmd-filter',
+    chipsId: 'windows-cmd-chips',
+    countId: 'windows-cmd-count',
+    collapseId: 'windows-collapse-all',
+    details: WIN_DETAILS,
+    docLabel: 'Microsoft Learn',
+    linkOf: function (name, d) { return PS_BASE + d[2] + '/' + name.toLowerCase(); }
+  });
 
-  function applyFilter() {
-    var q = filter.value.trim().toLowerCase();
-    var shown = 0;
-    items.forEach(function (it) {
-      var hit = !q || (it.tr.textContent + ' ' + it.row.textContent).toLowerCase().indexOf(q) !== -1;
-      it.tr.style.display = hit ? '' : 'none';
-      it.row.style.display = hit ? '' : 'none';
-      if (hit) shown++;
-    });
-    empty.hidden = shown !== 0;
-    count.textContent = q ? '명령 ' + items.length + '개 중 ' + shown + '개 일치' : '명령 ' + items.length + '개';
-  }
-
-  filter.value = params.get('windows-q') || '';
-  filter.addEventListener('input', function () { applyFilter(); syncUrl(); });
-  applyFilter();
-
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== '/' || e.ctrlKey || e.metaKey || e.altKey) return;
+    var tag = (e.target && e.target.tagName) || '';
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || (e.target && e.target.isContentEditable)) return;
+    e.preventDefault();
+    var winRect = document.getElementById('windows').getBoundingClientRect();
+    var target = winRect.top < window.innerHeight * 0.45 ? winFilter : linuxFilter;
+    target.focus();
+    target.select();
+  });
 })();
-</script></body></html>
+</script>
+</body>
+</html>
