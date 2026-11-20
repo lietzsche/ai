@@ -49,6 +49,7 @@ DARK = {'text': '#E8E9EB', 'muted': '#A3A9B1', 'line': '#3A3F46', 'panel': '#1F2
         'no': '#F0A0A0', 'no-bg': '#3E2020', 'ok': '#86D0A8', 'ok-bg': '#183428'}
 MARK = '/* docfig */'
 NET_MARK = '/* docfig-net */'
+NET_END_MARK = '/* /docfig-net */'
 NET_SCRIPT_ID = 'docfig-net-js'
 
 
@@ -349,8 +350,9 @@ figure.fig-net{padding:14px 16px}
 .dfn-spacer{position:relative}
 .dfn-canvas{position:absolute;left:12px;top:12px;transform-origin:0 0}
 .dfn-wires{position:absolute;left:0;top:0;overflow:visible;pointer-events:none}
-.dfn-wires path.w{fill:none;stroke:var(--fg-muted);stroke-width:1.15;opacity:.36;stroke-linejoin:round}
-.dfn-wires path.a{fill:var(--fg-muted);stroke:none;opacity:.36}
+.dfn-wires g{transition:opacity .12s}
+.dfn-wires path.w{fill:none;stroke:var(--fg-muted);stroke-width:1.15;opacity:.38;stroke-linejoin:round}
+.dfn-wires path.a{fill:var(--fg-muted);stroke:none;opacity:.38}
 .dfn-wires g.soft path.w{stroke-dasharray:4 3}
 .dfn-wires g.on path.w{stroke:var(--fg-text);stroke-width:1.9;opacity:.95}
 .dfn-wires g.on path.a{fill:var(--fg-text);opacity:.95}
@@ -358,20 +360,25 @@ figure.fig-net{padding:14px 16px}
 .dfn-wires g.up path.a{fill:var(--fg-ok);opacity:1}
 .dfn-wires g.dn path.w{stroke:var(--fg-accent);stroke-width:2.2;opacity:1}
 .dfn-wires g.dn path.a{fill:var(--fg-accent);opacity:1}
-.dfn-wires g.dim{opacity:.08}
-.dfn-wires text.el{font-size:10px;fill:var(--fg-muted);opacity:0;transition:opacity .12s}
+.dfn-wires g.soft-dim{opacity:.2}
+.dfn-wires g.mute{opacity:.15}
+.dfn-wires text.el{font-size:10px;fill:var(--fg-text);opacity:0;paint-order:stroke;stroke:var(--fg-fill);stroke-width:3.5px;stroke-linecap:round;stroke-linejoin:round;transition:opacity .12s}
 .dfn-wires g.up text.el,.dfn-wires g.dn text.el,.dfn-wires g.on text.el{opacity:1;font-weight:600}
 .dfn-head{position:absolute;top:0;font-size:12.5px;font-weight:700;border-bottom:2px solid var(--fg-text);padding-bottom:3px;line-height:1.35;color:var(--fg-text)}
 .dfn-head small{display:block;font-weight:400;color:var(--fg-muted);font-size:11px}
-.dfn-node{position:absolute;background:var(--fg-panel);border:1px solid var(--fg-line);border-left:4px solid var(--fg-muted);border-radius:7px;padding:7px 9px;z-index:1;cursor:pointer;transition:opacity .12s;color:var(--fg-text)}
+.dfn-node{position:absolute;background:var(--fg-panel);border:1px solid var(--fg-line);border-left:4px solid var(--fg-muted);border-radius:7px;padding:7px 9px;z-index:1;cursor:pointer;transition:opacity .12s,border-color .12s,box-shadow .12s;color:var(--fg-text)}
 .dfn-node.T-accent{border-left-color:var(--fg-accent)}
 .dfn-node.T-warn{border-left-color:var(--fg-warn)}
 .dfn-node.T-ok{border-left-color:var(--fg-ok)}
 .dfn-node.T-gap{border-left-color:var(--fg-no);border-style:dashed;border-left-width:3px}
 .dfn-node.dashed{border-style:dashed}
-.dfn-node.dim{opacity:.18}
-.dfn-node.sel{outline:2px solid var(--fg-text);outline-offset:1px}
+.dfn-node:hover,.dfn-node.hov{border-color:var(--fg-text);box-shadow:0 2px 8px rgba(0,0,0,.09);z-index:2}
+.dfn-node.rel-up{border-color:var(--fg-ok);box-shadow:0 0 0 1px var(--fg-ok)}
+.dfn-node.rel-dn{border-color:var(--fg-accent);box-shadow:0 0 0 1px var(--fg-accent)}
+.dfn-node.mute{opacity:.55}
+.dfn-node.sel{outline:2px solid var(--fg-text);outline-offset:1px;z-index:3}
 .dfn-node:focus-visible{outline:2px solid var(--fg-accent);outline-offset:1px}
+@media (prefers-reduced-motion:reduce){.dfn-node,.dfn-wires g,.dfn-wires text.el{transition:none}}
 .dfn-top{display:flex;justify-content:space-between;align-items:baseline;gap:6px}
 .dfn-ttl{font-weight:700;font-size:12.5px;line-height:1.35}
 .dfn-bdg{flex:none;font-size:10px;font-weight:600;border-radius:999px;padding:0 6px;background:var(--fg-fill);color:var(--fg-muted)}
@@ -388,7 +395,7 @@ figure.fig-net{padding:14px 16px}
 .dfn-chip{font:inherit;font-size:11.5px;padding:1px 8px;border:1px solid var(--fg-line);border-left-width:3px;border-radius:5px;background:var(--fg-panel);color:var(--fg-text);cursor:pointer}
 .dfn-chip.up{border-left-color:var(--fg-ok)}.dfn-chip.dn{border-left-color:var(--fg-accent)}
 .dfn-chip:hover{background:var(--fg-accent-bg)}
-"""
+""" + NET_END_MARK + "\n"
 
 NET_JS = f"""<script id="{NET_SCRIPT_ID}">
 (function () {{
@@ -421,6 +428,7 @@ NET_JS = f"""<script id="{NET_SCRIPT_ID}">
     }});
 
     const EL = {{}}, HEAD = [];
+    let WIRES = [], lastPin = undefined;
     const state = {{ hover: null, pin: null, group: null }};
 
     G.stages.forEach((st, i) => {{
@@ -432,7 +440,7 @@ NET_JS = f"""<script id="{NET_SCRIPT_ID}">
     G.nodes.forEach(n => {{
       const d = document.createElement('div');
       d.className = 'dfn-node T-' + n.tone + (n.dashed ? ' dashed' : '');
-      d.dataset.id = n.id; d.tabIndex = 0; d.setAttribute('role', 'button'); d.style.width = W + 'px';
+      d.dataset.id = n.id; d.tabIndex = 0; d.setAttribute('role', 'button'); d.setAttribute('aria-pressed', 'false'); d.style.width = W + 'px';
       d.innerHTML = '<div class="dfn-top"><span class="dfn-ttl">' + esc(n.title) + '</span>'
         + (n.badge ? '<span class="dfn-bdg">' + esc(n.badge) + '</span>' : '') + '</div>'
         + (n.summary ? '<div class="dfn-sub">' + esc(n.summary) + '</div>' : '');
@@ -443,15 +451,30 @@ NET_JS = f"""<script id="{NET_SCRIPT_ID}">
     G.nodes.forEach(n => {{ if (n.group && !groups.includes(n.group)) groups.push(n.group); }});
     if (groups.length && filterBar) {{
       const allBtn = document.createElement('button');
-      allBtn.type = 'button'; allBtn.dataset.g = ''; allBtn.className = 'on'; allBtn.textContent = '전체';
+      allBtn.type = 'button'; allBtn.dataset.g = ''; allBtn.className = 'on'; allBtn.setAttribute('aria-pressed', 'true'); allBtn.textContent = '전체';
       filterBar.appendChild(allBtn);
       groups.forEach(g => {{
-        const b = document.createElement('button'); b.type = 'button'; b.dataset.g = g; b.textContent = g;
+        const b = document.createElement('button'); b.type = 'button'; b.dataset.g = g; b.setAttribute('aria-pressed', 'false'); b.textContent = g;
         filterBar.appendChild(b);
       }});
     }}
 
-    function place() {{
+    const slot = {{}};
+    G.stages.forEach(st => st.ids.forEach((id, idx) => slot[id] = idx));
+    function edgePath(a, b) {{
+      const ba = EL[a], bb = EL[b];
+      const ay = ba.offsetTop + (ba.offsetHeight || 52) / 2, by = bb.offsetTop + (bb.offsetHeight || 52) / 2;
+      const ar = ba.offsetLeft + W, bl = bb.offsetLeft, br = bb.offsetLeft + W;
+      const s = slot[a] || 0;
+      if (N[a].stage >= N[b].stage) {{
+        const xm = Math.max(ar, br) + 14 + (s % 5) * 5;
+        return {{ d: `M${{ar}},${{ay}} H${{xm}} V${{by}} H${{br + 6}}`, arw: `M${{br}},${{by}} l6,-3.2 v6.4 z`, lx: xm, ly: (ay + by) / 2 }};
+      }}
+      const xm = bl - 14 - (s % 7) * 6;
+      return {{ d: `M${{ar}},${{ay}} H${{xm}} V${{by}} H${{bl - 6}}`, arw: `M${{bl}},${{by}} l-6,-3.2 v6.4 z`, lx: (ar + bl) / 2, ly: by - 5 }};
+    }}
+
+    function layout() {{
       let maxH = 0;
       G.stages.forEach((st, i) => {{
         const x = i * (W + GAPX);
@@ -480,21 +503,20 @@ NET_JS = f"""<script id="{NET_SCRIPT_ID}">
       cv.style.transform = k < 1 ? 'scale(' + k + ')' : '';
       spacer.style.width = Math.ceil((totalW + PAD * 2) * k) + 'px';
       spacer.style.height = Math.ceil((maxH + PAD * 2) * k) + 'px';
-    }}
 
-    const slot = {{}};
-    G.stages.forEach(st => st.ids.forEach((id, idx) => slot[id] = idx));
-    function edgePath(a, b) {{
-      const ba = EL[a], bb = EL[b];
-      const ay = ba.offsetTop + (ba.offsetHeight || 52) / 2, by = bb.offsetTop + (bb.offsetHeight || 52) / 2;
-      const ar = ba.offsetLeft + W, bl = bb.offsetLeft, br = bb.offsetLeft + W;
-      const s = slot[a] || 0;
-      if (N[a].stage >= N[b].stage) {{
-        const xm = Math.max(ar, br) + 14 + (s % 5) * 5;
-        return {{ d: `M${{ar}},${{ay}} H${{xm}} V${{by}} H${{br + 6}}`, arw: `M${{br}},${{by}} l6,-3.2 v6.4 z`, lx: xm, ly: (ay + by) / 2 }};
-      }}
-      const xm = bl - 14 - (s % 7) * 6;
-      return {{ d: `M${{ar}},${{ay}} H${{xm}} V${{by}} H${{bl - 6}}`, arw: `M${{bl}},${{by}} l-6,-3.2 v6.4 z`, lx: (ar + bl) / 2, ly: by - 5 }};
+      svg.innerHTML = '';
+      WIRES = [];
+      G.edges.forEach(e => {{
+        const [a, b, lbl, soft] = e;
+        if (!EL[a] || !EL[b]) return;
+        const p = edgePath(a, b);
+        const g = document.createElementNS(NS, 'g');
+        if (soft) g.setAttribute('class', 'soft');
+        g.innerHTML = `<path class="w" d="${{p.d}}"/><path class="a" d="${{p.arw}}"/>`
+          + (lbl ? `<text class="el" x="${{p.lx}}" y="${{p.ly}}" text-anchor="middle">${{esc(lbl)}}</text>` : '');
+        svg.appendChild(g);
+        WIRES.push({{ g, a, b, soft: !!soft }});
+      }});
     }}
 
     function renderDetail(id) {{
@@ -514,78 +536,92 @@ NET_JS = f"""<script id="{NET_SCRIPT_ID}">
       detailBox.hidden = false;
     }}
 
-    function refresh() {{
-      place();
-      let keep = null, edgeCls = null;
+    function paint() {{
+      // 호버는 다른 카드를 가리지 않고(mute 없음) 직접 연결만 밝히며, 클릭 고정·필터 때만 비연관 카드를 읽히는 수준(.55)으로 낮춘다.
+      let muteKeep = null, relUp = new Set(), relDn = new Set(), edgeCls = null;
       if (state.pin && N[state.pin]) {{
-        const id = state.pin, U = new Set([id, ...reach([id], inn)]), D = new Set([id, ...reach([id], out)]);
-        keep = new Set([...U, ...D]);
-        edgeCls = (a, b) => (U.has(a) && U.has(b)) ? 'up' : (D.has(a) && D.has(b)) ? 'dn' : 'dim';
-      }} else if (state.hover && N[state.hover]) {{
-        const id = state.hover;
-        keep = new Set([id, ...(inn[id] || []), ...(out[id] || [])]);
-        edgeCls = (a, b) => (a === id || b === id) ? 'on' : 'dim';
-      }} else if (state.group) {{
-        const seed = G.nodes.filter(n => n.group === state.group).map(n => n.id);
-        const U = reach(seed, inn), D = reach(seed, out);
-        keep = new Set([...seed, ...U, ...D]);
-        edgeCls = (a, b) => (keep.has(a) && keep.has(b)) ? 'dn' : 'dim';
+        const id = state.pin;
+        relUp = reach([id], inn);
+        relDn = reach([id], out);
+        const U = new Set([id, ...relUp]), D = new Set([id, ...relDn]);
+        muteKeep = new Set([...U, ...D]);
+        edgeCls = (a, b) => (U.has(a) && U.has(b)) ? 'up' : (D.has(a) && D.has(b)) ? 'dn' : 'mute';
+      }} else {{
+        if (state.group) {{
+          const seed = G.nodes.filter(n => n.group === state.group).map(n => n.id);
+          muteKeep = new Set([...seed, ...reach(seed, inn), ...reach(seed, out)]);
+          seed.forEach(s => relDn.add(s));
+        }}
+        if (state.hover && N[state.hover]) {{
+          const id = state.hover;
+          (inn[id] || []).forEach(u => relUp.add(u));
+          (out[id] || []).forEach(d => relDn.add(d));
+          edgeCls = (a, b) => b === id ? 'up' : a === id ? 'dn' : (muteKeep ? 'mute' : 'soft-dim');
+        }} else if (muteKeep) {{
+          edgeCls = (a, b) => (muteKeep.has(a) && muteKeep.has(b)) ? 'dn' : 'mute';
+        }}
       }}
-      svg.innerHTML = '';
-      G.edges.forEach(e => {{
-        const [a, b, lbl, soft] = e;
-        if (!EL[a] || !EL[b]) return;
-        const p = edgePath(a, b);
-        const g = document.createElementNS(NS, 'g');
-        const cls = ((edgeCls ? edgeCls(a, b) : '') + (soft ? ' soft' : '')).trim();
-        if (cls) g.setAttribute('class', cls);
-        g.innerHTML = `<path class="w" d="${{p.d}}"/><path class="a" d="${{p.arw}}"/>`
-          + (lbl ? `<text class="el" x="${{p.lx}}" y="${{p.ly}}" text-anchor="middle">${{esc(lbl)}}</text>` : '');
-        svg.appendChild(g);
+
+      WIRES.forEach(w => {{
+        const c = ((edgeCls ? edgeCls(w.a, w.b) : '') + (w.soft ? ' soft' : '')).trim();
+        if (c) w.g.setAttribute('class', c); else w.g.removeAttribute('class');
       }});
       Object.values(EL).forEach(el => {{
-        el.classList.toggle('dim', !!keep && !keep.has(el.dataset.id));
-        el.classList.toggle('sel', state.pin === el.dataset.id);
+        const id = el.dataset.id, isSel = state.pin === id, isHov = !state.pin && state.hover === id;
+        el.classList.toggle('sel', isSel);
+        el.classList.toggle('hov', isHov);
+        el.classList.toggle('rel-up', !isSel && !isHov && relUp.has(id));
+        el.classList.toggle('rel-dn', !isSel && !isHov && !relUp.has(id) && relDn.has(id));
+        el.classList.toggle('mute', !!muteKeep && !muteKeep.has(id) && !isHov && !relUp.has(id) && !relDn.has(id));
+        el.setAttribute('aria-pressed', isSel ? 'true' : 'false');
       }});
       if (filterBar) {{
-        filterBar.querySelectorAll('button').forEach(b => b.classList.toggle('on', (b.dataset.g || null) === state.group));
+        filterBar.querySelectorAll('button').forEach(b => {{
+          const on = (b.dataset.g || null) === state.group;
+          b.classList.toggle('on', on);
+          b.setAttribute('aria-pressed', on ? 'true' : 'false');
+        }});
       }}
-      renderDetail(state.pin);
+      if (state.pin !== lastPin) {{
+        lastPin = state.pin;
+        renderDetail(state.pin);
+      }}
     }}
 
     cv.addEventListener('mouseover', e => {{
       if (state.pin) return;
       const nd = e.target.closest('.dfn-node'), id = nd ? nd.dataset.id : null;
-      if (id !== state.hover) {{ state.hover = id; refresh(); }}
+      if (id !== state.hover) {{ state.hover = id; paint(); }}
     }});
-    cv.addEventListener('mouseleave', () => {{ if (state.hover) {{ state.hover = null; refresh(); }} }});
+    cv.addEventListener('mouseleave', () => {{ if (state.hover) {{ state.hover = null; paint(); }} }});
     cv.addEventListener('click', e => {{
       const nd = e.target.closest('.dfn-node');
-      if (nd) {{ state.pin = state.pin === nd.dataset.id ? null : nd.dataset.id; state.hover = null; refresh(); }}
-      else if (state.pin) {{ state.pin = null; refresh(); }}
+      if (nd) {{ state.pin = state.pin === nd.dataset.id ? null : nd.dataset.id; state.hover = null; paint(); }}
+      else if (state.pin) {{ state.pin = null; paint(); }}
     }});
     cv.addEventListener('keydown', e => {{
       if (e.key !== 'Enter' && e.key !== ' ') return;
       const nd = e.target.closest('.dfn-node');
-      if (nd) {{ e.preventDefault(); state.pin = state.pin === nd.dataset.id ? null : nd.dataset.id; refresh(); }}
+      if (nd) {{ e.preventDefault(); state.pin = state.pin === nd.dataset.id ? null : nd.dataset.id; paint(); }}
     }});
     detailBox.addEventListener('click', e => {{
-      if (e.target.closest('[data-clear]')) {{ state.pin = null; refresh(); return; }}
+      if (e.target.closest('[data-clear]')) {{ state.pin = null; paint(); return; }}
       const go = e.target.closest('[data-go]');
-      if (go && N[go.dataset.go]) {{ state.pin = go.dataset.go; refresh(); }}
+      if (go && N[go.dataset.go]) {{ state.pin = go.dataset.go; paint(); }}
     }});
     if (filterBar) {{
       filterBar.addEventListener('click', e => {{
         const b = e.target.closest('button'); if (!b) return;
-        state.group = b.dataset.g || null; state.pin = null; refresh();
+        state.group = b.dataset.g || null; state.pin = null; paint();
       }});
     }}
-    document.addEventListener('keydown', e => {{ if (e.key === 'Escape' && state.pin) {{ state.pin = null; refresh(); }} }});
+    document.addEventListener('keydown', e => {{ if (e.key === 'Escape' && state.pin) {{ state.pin = null; paint(); }} }});
+    const fullRefresh = () => {{ layout(); paint(); }};
     if (typeof ResizeObserver !== 'undefined') {{
       let lw = 0;
-      new ResizeObserver(() => {{ const w = scroller.clientWidth; if (w > 0 && w !== lw) {{ lw = w; refresh(); }} }}).observe(scroller);
-    }} else {{ window.addEventListener('resize', refresh); }}
-    refresh();
+      new ResizeObserver(() => {{ const w = scroller.clientWidth; if (w > 0 && w !== lw) {{ lw = w; fullRefresh(); }} }}).observe(scroller);
+    }} else {{ window.addEventListener('resize', fullRefresh); }}
+    fullRefresh();
   }}
 
   function boot() {{ document.querySelectorAll('figure.fig-net').forEach(initNet); }}
@@ -698,12 +734,18 @@ class Doc:
         if NET_MARK not in self.html:
             i = self.html.index('</style>')
             self.html = self.html[:i] + NET_CSS + self.html[i:]
+        elif NET_END_MARK in self.html:
+            self.html = re.sub(re.escape(NET_MARK) + r'.*?' + re.escape(NET_END_MARK) + r'\n?', NET_CSS, self.html, count=1, flags=re.S)
+        else:
+            self.html = re.sub(re.escape(NET_MARK) + r'.*?(?=</style>)', NET_CSS, self.html, count=1, flags=re.S)
         if f'id="{NET_SCRIPT_ID}"' not in self.html:
             if '</body>' in self.html:
                 i = self.html.rindex('</body>')
                 self.html = self.html[:i] + NET_JS + self.html[i:]
             else:
                 self.html += '\n' + NET_JS
+        else:
+            self.html = re.sub(rf'<script id="{NET_SCRIPT_ID}">.*?</script>\n?', NET_JS, self.html, count=1, flags=re.S)
 
     def _one(self, old):
         c = self.html.count(old)
@@ -823,6 +865,9 @@ def check(path):
             probs.append(f'network 역방향(오른쪽→왼쪽) 간선 {len(back)}개({", ".join(back[:4])}) — 선행→후행 단방향으로 배치하세요')
     if 'fig-net' in dom and f'id="{NET_SCRIPT_ID}"' not in s:
         probs.append('network 스크립트 누락 (Doc.save()로 저장하세요)')
+    for om in re.finditer(r'\.dfn-node\.(?:dim|mute)\s*\{[^}]*?\bopacity\s*:\s*(0?\.\d+)', dom):
+        if float(om.group(1)) < 0.4:
+            probs.append(f'network 비연관 카드 과도한 흐림(opacity:{om.group(1)}) — 호버 시 맥락이 사라지지 않게 ≥0.5를 유지하세요')
 
     base = os.path.dirname(path) or '.'
     for h in re.findall(r'href="([^"#]+)', dom):

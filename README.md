@@ -34,6 +34,7 @@ Ubuntu·Debian 등 APT 기반 WSL에서 현재 설정된 저장소의 `wslu` 패
 | [docfig](.agents/skills/docfig/SKILL.md) | 자체 작성 (git `13b0dfd` 복원) | - |
 | [find-skills](.agents/skills/find-skills/SKILL.md) | [vercel-labs/skills](https://github.com/vercel-labs/skills) | MIT |
 | [handoff](.agents/skills/handoff/SKILL.md) | [mattpocock/skills](https://github.com/mattpocock/skills) | MIT |
+| [skill-review](.agents/skills/skill-review/SKILL.md) | [sanyuan0704/sanyuan-skills](https://github.com/sanyuan0704/sanyuan-skills) | MIT |
 | [visual-explainer](.agents/skills/visual-explainer/SKILL.md) | [nicobailon/visual-explainer](https://github.com/nicobailon/visual-explainer) | MIT |
 
 새 스킬은 find-skills로 찾고 프로젝트 범위로 양쪽 에이전트에 설치합니다. 설치한 모든 스킬은 [스킬 통합 가이드](docs/skills-guide.html#installed)와 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)에 기록합니다.
@@ -62,4 +63,8 @@ Claude Code에서는 `/deep-research`, Codex에서는 `$deep-research` 또는 `/
 
 ### 문서 인라인 SVG 도식: docfig
 
-Claude Code에서는 `/docfig`, Codex에서는 `$docfig` 또는 `/skills`로 선택해 대상 HTML 문서와 보여 줄 관계(흐름·회로도, 전환 대조도, 상관·매핑 격자, 다층 초점 관계망)를 전달합니다. 보조 스크립트 `.agents/skills/docfig/scripts/figlib.py`(`Flow`, `compare`, `matrix`, `network`)와 참조 문서 `.agents/skills/docfig/references/patterns.md`로 외부 의존성 없는 도식을 삽입하고 밝은·어두운 화면, 글자 잘림, 단방향 질서, 접근성·링크를 점검합니다. 실제 클라이언트 호출은 아직 검증하지 않았습니다.
+Claude Code에서는 `/docfig`, Codex에서는 `$docfig` 또는 `/skills`로 선택해 대상 HTML 문서와 보여 줄 관계(흐름·회로도, 전환 대조도, 상관·매핑 격자, 다층 초점 관계망)를 전달합니다. 보조 스크립트 `.agents/skills/docfig/scripts/figlib.py`(`Flow`, `compare`, `matrix`, `network`)와 참조 문서 `.agents/skills/docfig/references/patterns.md`로 외부 의존성 없는 도식을 삽입하고 밝은·어두운 화면, 글자 잘림, 단방향 질서, 호버·선택 가독성, 접근성·링크를 점검합니다. 실제 클라이언트 호출은 아직 검증하지 않았습니다.
+
+### 스킬 품질 검토: skill-review
+
+Claude Code에서는 `/skill-review <스킬경로>`, Codex에서는 `$skill-review <스킬경로>` 또는 `/skills`로 선택해 에이전트 스킬의 구조, 트리거 설명 품질, 워크플로 설계, 토큰 효율, 안티패턴 5개 항목을 기준표(`references/review-criteria.md`)로 점검하고 강점과 구체적 수정안을 받습니다. 실제 클라이언트의 슬래시 명령 자동 발견·호출은 아직 검증하지 않았습니다.

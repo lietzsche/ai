@@ -129,3 +129,36 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ```
+
+## skill-review
+
+- 경로: `.agents/skills/skill-review/` (`.claude/skills/skill-review`는 심볼릭 링크)
+- 출처: https://github.com/sanyuan0704/sanyuan-skills/tree/08b6572ef108f22d4e8a3ecf9182a4bbef097744/skills/skill-review
+- 커밋: `08b6572ef108f22d4e8a3ecf9182a4bbef097744` (2026-11-20 설치, `skills-lock.json` 기록 확인)
+- 제작자: `sanyuan0704`
+- 라이선스: MIT (저장소 LICENSE 기준)
+- 설치: `npx skills add sanyuan0704/sanyuan-skills --skill skill-review -a claude-code -a codex -y`
+
+```text
+MIT License
+
+Copyright (c) 2026 sanyuan0704
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```

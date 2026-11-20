@@ -13,6 +13,13 @@
       "skillPath": "skills/productivity/handoff/SKILL.md",
       "computedHash": "f60a2c3688379b7a306b3a7b8dd4120eab39da44c74fa2cb62d6424935f04aa7"
     },
+    "skill-review": {
+      "source": "sanyuan0704/sanyuan-skills",
+      "commit": "08b6572ef108f22d4e8a3ecf9182a4bbef097744",
+      "sourceType": "github",
+      "skillPath": "skills/skill-review/SKILL.md",
+      "computedHash": "74f1682eb10199b66ef6314b18e216efdac90150680cbb28fa8a81e88dbfb511"
+    },
     "visual-explainer": {
       "source": "nicobailon/visual-explainer",
       "sourceType": "github",
