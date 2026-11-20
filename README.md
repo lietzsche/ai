@@ -60,6 +60,6 @@ Claude Code에서는 `/visual-explainer`, Codex에서는 `$visual-explainer` 또
 
 Claude Code에서는 `/deep-research`, Codex에서는 `$deep-research` 또는 `/skills`로 선택해 조사 주제를 전달합니다. 여러 출처를 교차 검증하고 신뢰도와 출처 URL을 붙인 Markdown 보고서를 만듭니다. 별도 API 키 없이 기본 웹 검색을 쓰지만 서브에이전트를 많이 띄워 사용량이 큽니다. 실제 호출과 보고서 생성은 아직 검증하지 않았습니다.
 
-### 문서 인라인 SVG·연결도 그림: docfig
+### 문서 인라인 SVG 도식: docfig
 
-Claude Code에서는 `/docfig`, Codex에서는 `$docfig` 또는 `/skills`로 선택해 대상 HTML 문서와 그릴 구조(흐름도·구조도·매핑 격자·다단 표/열 연결도)를 전달합니다. 보조 스크립트 `.agents/skills/docfig/scripts/figlib.py`(`Flow`, `matrix`, `lineage`, `tab_wrap`)와 참조 문서 `.agents/skills/docfig/references/lineage.md`로 외부 의존성 없는 그림과 점진적 노출 연결도를 삽입하고 밝은·어두운 화면, 역방향 간선, 접근성·링크를 점검합니다. 실제 클라이언트 호출은 아직 검증하지 않았습니다.
+Claude Code에서는 `/docfig`, Codex에서는 `$docfig` 또는 `/skills`로 선택해 대상 HTML 문서와 보여 줄 관계(흐름·회로도, 전환 대조도, 상관·매핑 격자, 다층 초점 관계망)를 전달합니다. 보조 스크립트 `.agents/skills/docfig/scripts/figlib.py`(`Flow`, `compare`, `matrix`, `network`)와 참조 문서 `.agents/skills/docfig/references/patterns.md`로 외부 의존성 없는 도식을 삽입하고 밝은·어두운 화면, 글자 잘림, 단방향 질서, 접근성·링크를 점검합니다. 실제 클라이언트 호출은 아직 검증하지 않았습니다.
