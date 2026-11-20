@@ -1,11 +1,11 @@
-<!DOCTYPE html>
-<html lang="ko">
+<!doctype html>
+<html lang="ko" data-theme="dark">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#0b0d14">
-<title>스킬 통합 가이드</title>
-<meta name="description" content="프로젝트에 설치한 모든 스킬의 출처, 설치, 사용법과 오픈소스 참고 자료를 모은 통합 문서">
+<title>스킬 통합 가이드 — 설치된 AI 스킬 7종 &amp; skills CLI</title>
+<meta name="description" content="프로젝트에 설치한 7개 AI 스킬의 역할, 출처, 설치·호출법, skills CLI 10개 명령 사전, 오픈소스 참고 후보를 정리한 통합 설명서">
 <style>
   :root {
     --bg: #0b0d14; --bg2: #121624; --card: rgba(255,255,255,0.04);
@@ -25,65 +25,128 @@
   a, button, input { touch-action: manipulation; -webkit-tap-highlight-color: rgba(124,140,255,.25); }
   :focus-visible { outline: 2px solid var(--a2); outline-offset: 2px; }
   main:focus:not(:focus-visible) { outline: none; }
-  [id] { scroll-margin-top: 16px; }
+  [id] { scroll-margin-top: 20px; }
   .skip {
-    position: absolute; left: 16px; top: -60px; z-index: 10; padding: 8px 14px; border-radius: 8px;
+    position: absolute; left: 16px; top: -60px; z-index: 20; padding: 8px 14px; border-radius: 8px;
     background: var(--a1); color: #0b0d14; font-weight: 700; text-decoration: none; transition: top .15s;
   }
   .skip:focus { top: 12px; }
-  .wrap { max-width: 1100px; margin: 0 auto; padding: 56px 24px 80px; }
-  h1, h2, h3 { text-wrap: balance; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 52px 24px 80px; }
+  h1, h2, h3, h4 { text-wrap: balance; }
   p, li { text-wrap: pretty; }
-  h1, h2, h3, p, li, td, th { word-break: keep-all; overflow-wrap: break-word; }
+  h1, h2, h3, h4, p, li, td, th { word-break: keep-all; overflow-wrap: break-word; }
   header h1 {
-    font-size: clamp(2rem, 4vw, 2.8rem); margin: 0 0 8px;
+    font-size: clamp(2rem, 4vw, 2.75rem); margin: 0 0 8px;
     background: linear-gradient(90deg, var(--a1), var(--a2));
     -webkit-background-clip: text; background-clip: text; color: transparent;
   }
-  header p { color: var(--muted); margin: 0; }
+  header > p { color: var(--muted); margin: 0; max-width: 74ch; }
   .meta { margin-top: 12px; font-size: .85rem; color: var(--muted); }
-  nav.toc { display: flex; flex-wrap: wrap; gap: 8px; margin: 28px 0 8px; }
-  nav.toc a {
-    padding: 6px 14px; border: 1px solid var(--line); border-radius: 999px;
-    color: var(--text); text-decoration: none; font-size: .9rem; background: var(--card);
-    transition: border-color .2s, transform .2s;
+  .kpi-strip {
+    display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    margin: 22px 0 8px;
   }
-  nav.toc a:hover { border-color: var(--a1); transform: translateY(-2px); }
+  .kpi {
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px;
+  }
+  .kpi strong {
+    display: block; font-size: 1.45rem; font-variant-numeric: tabular-nums; color: var(--text); line-height: 1.2;
+  }
+  .kpi span { display: block; margin-top: 4px; font-size: .83rem; color: var(--muted); }
+  nav.toc {
+    display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0 8px;
+    padding: 10px 12px; border: 1px solid var(--line); border-radius: 14px; background: rgba(18,22,36,.78);
+    backdrop-filter: blur(8px); position: sticky; top: 8px; z-index: 10;
+  }
+  nav.toc a {
+    padding: 5px 13px; border: 1px solid var(--line); border-radius: 999px;
+    color: var(--text); text-decoration: none; font-size: .88rem; background: var(--card);
+    transition: border-color .2s, transform .2s, background-color .2s;
+  }
+  nav.toc a:hover { border-color: var(--a1); background: rgba(124,140,255,.12); transform: translateY(-1px); }
+  nav.toc a.ext { border-color: rgba(63,214,198,.4); color: var(--a2); margin-left: auto; }
   section { margin-top: 52px; }
-  h2 { font-size: 1.5rem; margin: 0 0 6px; }
-  h2 + .lead { color: var(--muted); margin: 0 0 20px; }
-  .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(min(300px, 100%), 1fr)); }
+  section section { margin-top: 34px; }
+  .sec-kicker {
+    display: inline-block; font-size: .75rem; font-weight: 700; letter-spacing: .04em;
+    color: var(--a2); text-transform: uppercase; margin-bottom: 4px;
+  }
+  h2 { font-size: 1.55rem; margin: 0 0 6px; }
+  h3 { font-size: 1.2rem; margin: 0 0 6px; }
+  h4 { font-size: 1.04rem; margin: 18px 0 6px; }
+  .lead { color: var(--muted); margin: 0 0 18px; max-width: 75ch; }
+  .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fill, minmax(min(315px, 100%), 1fr)); }
   .card {
     min-width: 0; background: var(--card); border: 1px solid var(--line); border-radius: 14px;
-    padding: 20px; backdrop-filter: blur(6px); transition: border-color .25s, transform .25s;
+    padding: 20px; transition: border-color .2s, transform .2s;
   }
-  .card:hover { border-color: rgba(124,140,255,.5); transform: translateY(-3px); }
-  .card h3 { margin: 0 0 8px; font-size: 1.1rem; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-  .card p, .card li { color: #c9cde0; font-size: .95rem; margin: 6px 0; }
+  .card:hover { border-color: rgba(124,140,255,.45); transform: translateY(-2px); }
+  .card h3, .card h4 { margin: 0 0 8px; font-size: 1.08rem; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .card p, .card li { color: #c9cde0; font-size: .94rem; margin: 6px 0; }
   .card ul { padding-left: 18px; margin: 8px 0; }
-  .src { display: inline-block; margin-top: 8px; font-size: .82rem; color: var(--a2); text-decoration: none; }
+  .guard {
+    font-size: .84rem !important; color: var(--warn) !important;
+    background: rgba(245,178,90,.08); border-left: 3px solid var(--warn);
+    padding: 6px 10px; border-radius: 0 8px 8px 0; margin: 8px 0 !important;
+  }
+  .box {
+    background: var(--card); border: 1px solid var(--line); padding: 18px 20px;
+    border-radius: 14px; margin: 18px 0; overflow-wrap: anywhere;
+  }
+  .notice { border-left: 3px solid var(--warn); }
+  .scroll { overflow-x: auto; background: var(--card); border: 1px solid var(--line); border-radius: 14px; margin: 12px 0; }
+  .src { display: inline-block; margin-top: 8px; margin-right: 10px; font-size: .82rem; color: var(--a2); text-decoration: none; }
   .src:hover { text-decoration: underline; }
   .tag { font-size: .72rem; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); font-weight: 600; }
   .paid { color: var(--a3); border-color: rgba(245,138,176,.45); }
   .all { color: var(--a2); border-color: rgba(63,214,198,.4); }
   .note { color: var(--warn); border-color: rgba(245,178,90,.45); }
-  code { font-family: "JetBrains Mono", Consolas, monospace; font-size: .88em; background: rgba(255,255,255,.07); padding: 1px 6px; border-radius: 6px; overflow-wrap: break-word; }
-  pre { background: var(--bg2); border: 1px solid var(--line); border-radius: 10px; padding: 14px; overflow-x: auto; font-size: .85rem; margin: 8px 0; }
+  code { font-family: "JetBrains Mono", Consolas, monospace; font-size: .88em; background: rgba(255,255,255,.07); padding: 1px 6px; border-radius: 6px; overflow-wrap: break-word; font-variant-ligatures: none; }
+  pre { background: var(--bg2); border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; overflow-x: auto; font-size: .84rem; margin: 8px 0; font-variant-ligatures: none; }
   pre code { background: none; padding: 0; white-space: pre; }
   table { width: 100%; border-collapse: collapse; font-size: .92rem; }
-  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: top; overflow-wrap: anywhere; }
   th { color: var(--muted); font-weight: 600; background: #151a2b; }
   tbody tr { transition: background-color .15s; }
   tbody tr:hover { background: rgba(124,140,255,.07); }
   .tablebox { background: var(--card); border: 1px solid var(--line); border-radius: 14px; overflow-x: auto; }
-  .filter { width: 100%; max-width: 360px; margin: 0 0 8px; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg2); color: var(--text); font: inherit; }
+  .controls {
+    display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 0 0 10px;
+  }
+  .filter {
+    flex: 1 1 280px; max-width: 400px; padding: 10px 14px; border-radius: 10px;
+    border: 1px solid var(--line); background: var(--bg2); color: var(--text); font: inherit;
+  }
   .filter:hover { border-color: rgba(124,140,255,.5); }
   .filter:focus-visible { border-color: var(--a1); }
   .filter::placeholder { color: var(--muted); }
-  .count { font-size: .85rem; color: var(--muted); margin: 0 0 6px; font-variant-numeric: tabular-nums; }
-  footer { margin-top: 64px; color: var(--muted); font-size: .85rem; border-top: 1px solid var(--line); padding-top: 20px; }
-  footer a { color: var(--a2); }
-  #cmd-table tbody tr.cmd { cursor: pointer; }
+  .btn-ghost {
+    appearance: none; padding: 8px 12px; border-radius: 9px; border: 1px solid var(--line);
+    background: var(--card); color: var(--muted); font: inherit; font-size: .84rem; cursor: pointer;
+    transition: border-color .15s, color .15s;
+  }
+  .btn-ghost:hover { border-color: var(--a1); color: var(--text); }
+  .chips {
+    display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 10px;
+  }
+  .chip {
+    appearance: none; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--line);
+    background: var(--card); color: var(--muted); font: inherit; font-size: .8rem; cursor: pointer;
+    font-variant-numeric: tabular-nums; transition: border-color .15s, color .15s, background-color .15s;
+  }
+  .chip:hover { border-color: rgba(124,140,255,.5); color: var(--text); }
+  .chip[aria-pressed="true"] {
+    border-color: var(--a2); background: rgba(63,214,198,.14); color: var(--text); font-weight: 600;
+  }
+  .status-row {
+    display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; align-items: baseline; margin: 0 0 8px;
+  }
+  .count { font-size: .85rem; color: var(--muted); margin: 0; font-variant-numeric: tabular-nums; }
+  .hint { font-size: .83rem; color: var(--muted); margin: 0; }
+  footer { margin-top: 56px; color: var(--muted); font-size: .85rem; border-top: 1px solid var(--line); padding-top: 20px; }
+  footer a, a { color: var(--a2); }
+  a:hover { text-decoration: underline; }
+  #cmd-table tbody tr.cmd { cursor: pointer; content-visibility: auto; contain-intrinsic-size: auto 46px; }
   #cmd-table .toggle {
     appearance: none; background: none; border: 0; padding: 2px 4px 2px 0; margin: 0; border-radius: 6px;
     font: inherit; color: inherit; text-align: left; cursor: pointer;
@@ -92,26 +155,39 @@
   #cmd-table .toggle:hover code { background: rgba(124,140,255,.2); }
   #cmd-table tr.cmd.open .toggle::before { transform: rotate(90deg); color: var(--a1); }
   #cmd-table tbody tr.cmd.open { background: rgba(124,140,255,.1); }
-  #cmd-table tr.detail td { background: rgba(18,22,36,.85); border-left: 3px solid var(--a1); padding: 14px 18px; animation: fadein .25s ease; }
-  #cmd-table tr.detail p { margin: 0 0 8px; color: #c9cde0; }
-  #cmd-table tr.detail .ex { margin: 6px 0; }
-  #cmd-table tr.empty td { color: var(--muted); text-align: center; padding: 20px; }
+  #cmd-table tr.detail td { background: rgba(18,22,36,.88); border-left: 3px solid var(--a1); padding: 14px 18px; animation: fadein .2s ease; }
+  #cmd-table tr.detail p { margin: 0 0 8px; color: #c9cde0; max-width: 82ch; }
+  #cmd-table tr.detail .ex {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 6px 0 8px;
+  }
+  .copy-btn {
+    appearance: none; padding: 2px 9px; border-radius: 6px; border: 1px solid var(--line);
+    background: var(--bg2); color: var(--muted); font: inherit; font-size: .76rem; cursor: pointer;
+  }
+  .copy-btn:hover { border-color: var(--a2); color: var(--text); }
+  .copy-btn.copied { border-color: var(--a2); color: var(--a2); }
+  #cmd-table tr.empty td { color: var(--muted); text-align: center; padding: 22px; }
   @keyframes fadein { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
-  .hint { font-size: .85rem; color: var(--muted); margin: 0 0 10px; }
-  @media (max-width: 600px) {
+  [hidden] { display: none !important; }
+  @media (max-width: 640px) {
     .wrap { padding: 32px 16px 56px; }
+    nav.toc { position: static; }
+    nav.toc a.ext { margin-left: 0; }
     th, td { padding: 8px 10px; }
     .card { padding: 16px; }
-    .tablebox table { min-width: 680px; }
+    .tablebox table, .scroll table { min-width: 680px; }
   }
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation: none !important; transition: none !important; }
     .card:hover, nav.toc a:hover { transform: none; }
   }
-
-tbody tr.cmd{content-visibility:auto;contain-intrinsic-size:auto 46px}
-.box{background:var(--card);border:1px solid var(--line);padding:20px;border-radius:14px;margin:20px 0;overflow-wrap:anywhere}.notice{border-left:3px solid var(--warn)}.scroll{overflow:auto}a{color:var(--a2)}a:hover{text-decoration:underline}p,li,td{overflow-wrap:anywhere}.card{min-width:0}code,pre{font-variant-ligatures:none}details summary{cursor:pointer;padding:8px}details summary:hover{color:var(--a2)}[hidden]{display:none!important}
-
+/* docfig */
+:root,[data-theme="light"]{--fg-text:#1F2328;--fg-muted:#5F6670;--fg-line:#D3D7DC;--fg-panel:#FFFFFF;--fg-fill:#F3F5F7;--fg-accent:#1F5F8B;--fg-accent-bg:#E8F1F7;--fg-warn:#8A5A00;--fg-warn-bg:#FDF3DC;--fg-no:#9B2C2C;--fg-no-bg:#FBE9E9;--fg-ok:#1D6B45;--fg-ok-bg:#E5F3EC}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--fg-text:#E8E9EB;--fg-muted:#A3A9B1;--fg-line:#3A3F46;--fg-panel:#1F2226;--fg-fill:#262A30;--fg-accent:#8CC3E8;--fg-accent-bg:#1E3442;--fg-warn:#F0C674;--fg-warn-bg:#3B2F14;--fg-no:#F0A0A0;--fg-no-bg:#3E2020;--fg-ok:#86D0A8;--fg-ok-bg:#183428}}
+:root[data-theme="dark"],[data-theme="dark"]{--fg-text:#E8E9EB;--fg-muted:#A3A9B1;--fg-line:#3A3F46;--fg-panel:#1F2226;--fg-fill:#262A30;--fg-accent:#8CC3E8;--fg-accent-bg:#1E3442;--fg-warn:#F0C674;--fg-warn-bg:#3B2F14;--fg-no:#F0A0A0;--fg-no-bg:#3E2020;--fg-ok:#86D0A8;--fg-ok-bg:#183428}
+figure.fig{background:var(--fg-panel);color:var(--fg-text);border:1px solid var(--fg-line);border-radius:10px;padding:12px 14px;margin:14px 0;overflow-x:auto}
+figure.fig>svg{display:block;width:100%;height:auto;margin:0 auto}
+figure.fig figcaption{font-size:13px;color:var(--fg-muted);margin-top:8px;line-height:1.6}
 </style>
 </head>
 <body>
@@ -119,320 +195,441 @@ tbody tr.cmd{content-visibility:auto;contain-intrinsic-size:auto 46px}
 <div class="wrap">
 <header>
   <h1>스킬 통합 가이드</h1>
-  <p>이 프로젝트에 설치한 모든 스킬의 설치·호출·사용법과 오픈소스 참고 자료를 한곳에서 봅니다. 새 스킬은 find-skills로 찾고 이 문서에 추가합니다.</p>
-  <div class="meta">조사일: 2026-11-14 (2026-11-20 갱신) · 출처: Vercel Skills, Matt Pocock Skills, Visual Explainer, samber/cc-skills, sanyuan0704/sanyuan-skills, backnotprop/pstack의 원문과 공식 문서 (각 카드에 커밋 기록) · CLI는 자주 바뀌므로 <code translate="no">npx skills --help</code>로 최신 옵션을 확인하세요.</div>
+  <p>이 저장소에 설치한 <b>AI 스킬 7종의 역할·호출법(Catalog) → 도입·검증 원리(Explanation) → 설치·사용 절차(How-to) → <code translate="no">skills</code> CLI 명령 사전(Reference) → 외부 참고 후보(Appendix)</b>를 한곳에서 봅니다.</p>
+  <div class="meta">원문 조사일: 2026-11-14 · 구조·도식 개편: 2026-11-20 (<code translate="no">technical-writing</code> · <code translate="no">docfig</code> 적용) · 출처: Vercel Skills, Matt Pocock Skills, Visual Explainer, samber/cc-skills, sanyuan0704/sanyuan-skills, backnotprop/pstack (각 카드에 커밋 기록) · 최신 CLI 옵션은 <code translate="no">npx skills --help</code>로 확인하세요.</div>
+  <div class="kpi-strip" aria-label="스킬 가이드 요약 지표">
+    <div class="kpi"><strong>7개 스킬</strong><span>현재 프로젝트 설치 목록 (<code translate="no">.agents/skills</code>)</span></div>
+    <div class="kpi"><strong>10개 · 5분류</strong><span><code translate="no">npx skills</code> CLI 명령 사전</span></div>
+    <div class="kpi"><strong>Node 22.20+</strong><span><code translate="no">skills</code> CLI 실행 필수 버전</span></div>
+    <div class="kpi"><strong>단축키 <code translate="no">/</code> · <code translate="no">Esc</code></strong><span>명령·스킬 검색창 이동 · 초기화</span></div>
+  </div>
 </header>
 
 <nav class="toc" aria-label="목차">
-  <a href="#installed">설치된 스킬 7개</a>
-  <a href="#about">스킬 찾기</a>
-  <a href="#install">설치</a>
-  <a href="#usage">사용법</a>
-  <a href="#all">skills CLI 명령</a>
-  <a href="#references">오픈소스 참고</a>
-  <a href="cli-guide.html">CLI 통합 가이드</a>
+  <a href="#overview">도입 흐름</a>
+  <a href="#installed">설치된 스킬 (7)</a>
+  <a href="#about">find-skills 원리</a>
+  <a href="#install">설치 방법</a>
+  <a href="#usage">호출·사용법</a>
+  <a href="#all">skills CLI (10)</a>
   <a href="#notes">주의 사항</a>
+  <a href="#references">미설치 참고 후보</a>
+  <a class="ext" href="cli-guide.html">CLI 통합 가이드 →</a>
 </nav>
 
 <main id="main" tabindex="-1">
+
+<section id="overview">
+  <span class="sec-kicker">Explanation · 스킬 도입과 저장소 원칙</span>
+  <h2>스킬은 어떻게 찾고 관리하는가</h2>
+  <p class="lead">필요한 기능이 생기면 <code translate="no">find-skills</code>로 후보를 찾고, 품질·라이선스 기준을 통과한 스킬만 프로젝트 범위로 양쪽 에이전트에 설치해 단일 문서에 기록합니다.</p>
+  <figure class="fig" id="fig-skill-lifecycle" data-theme="dark"><svg viewBox="0 0 1000 256" role="img" aria-label="find-skills 탐색부터 품질·라이선스 검증, 양쪽 에이전트 설치, 문서·고지 동기화로 이어지는 4단계 스킬 도입 흐름도" style="color:var(--fg-text);font-family:inherit;max-width:1000px;min-width:720px" xmlns="http://www.w3.org/2000/svg"><defs><marker id="flsklac" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--fg-accent)"/></marker><marker id="flsklg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--fg-no)"/></marker><marker id="flsklok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--fg-ok)"/></marker><marker id="flskla" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--fg-text)"/></marker></defs><text x="10" y="20" text-anchor="start" style="fill:var(--fg-text);font-size:12.5px;font-weight:700">1단계 · 필요 기능 탐색</text><text x="10" y="35" text-anchor="start" style="fill:var(--fg-muted);font-size:11px;font-weight:400">find-skills · skills.sh</text><line x1="10" y1="41" x2="225" y2="41" style="stroke:var(--fg-text);stroke-width:2"/><text x="265" y="20" text-anchor="start" style="fill:var(--fg-text);font-size:12.5px;font-weight:700">2단계 · 품질·라이선스 검증</text><text x="265" y="35" text-anchor="start" style="fill:var(--fg-muted);font-size:11px;font-weight:400">설치 전 3대 기준 통과</text><line x1="265" y1="41" x2="480" y2="41" style="stroke:var(--fg-text);stroke-width:2"/><text x="520" y="20" text-anchor="start" style="fill:var(--fg-text);font-size:12.5px;font-weight:700">3단계 · 양쪽 에이전트 설치</text><text x="520" y="35" text-anchor="start" style="fill:var(--fg-muted);font-size:11px;font-weight:400">원본 + 심볼릭 링크 고정</text><line x1="520" y1="41" x2="735" y2="41" style="stroke:var(--fg-text);stroke-width:2"/><text x="775" y="20" text-anchor="start" style="fill:var(--fg-text);font-size:12.5px;font-weight:700">4단계 · 고지·가이드 동기화</text><text x="775" y="35" text-anchor="start" style="fill:var(--fg-muted);font-size:11px;font-weight:400">원본 무수정 · 기록 일치</text><line x1="775" y1="41" x2="990" y2="41" style="stroke:var(--fg-text);stroke-width:2"/><rect x="10" y="56" width="215" height="76" rx="8" style="fill:var(--fg-panel);stroke:var(--fg-line);stroke-width:1.3"/><rect x="10" y="60" width="4" height="68" rx="2" style="fill:var(--fg-muted);stroke:none"/><rect x="185.1" y="63" width="31.9" height="16" rx="8" style="fill:var(--fg-fill);stroke:none"/><text x="201.025" y="74.5" text-anchor="middle" style="fill:var(--fg-muted);font-size:10.5px;font-weight:600">탐색</text><text x="22" y="74" text-anchor="start" style="fill:var(--fg-muted);font-size:10.5px;font-weight:400">후보 스킬 수집</text><text x="22" y="89" text-anchor="start" style="fill:var(--fg-text);font-size:13px;font-weight:700">키워드·순위표 검색</text><text x="22" y="105" text-anchor="start" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">skills.sh 상위 목록 확인</text><text x="22" y="121" text-anchor="start" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">npx skills find &lt;검색어&gt;</text><rect x="265" y="56" width="215" height="76" rx="8" style="fill:var(--fg-panel);stroke:var(--fg-line);stroke-width:1.3"/><rect x="265" y="60" width="4" height="68" rx="2" style="fill:var(--fg-warn);stroke:none"/><rect x="440.1" y="63" width="31.9" height="16" rx="8" style="fill:var(--fg-warn-bg);stroke:none"/><text x="456.02500000000003" y="74.5" text-anchor="middle" style="fill:var(--fg-warn);font-size:10.5px;font-weight:600">심사</text><text x="277" y="74" text-anchor="start" style="fill:var(--fg-muted);font-size:10.5px;font-weight:400">검색 결과만 보고 추천 금지</text><text x="277" y="89" text-anchor="start" style="fill:var(--fg-text);font-size:13px;font-weight:700">신뢰도·라이선스 심사</text><text x="277" y="105" text-anchor="start" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">1K+ 설치 · 100+ GitHub 스타</text><text x="277" y="121" text-anchor="start" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">MIT·Apache-2.0 등 명확한 허가</text><rect x="520" y="56" width="215" height="76" rx="8" style="fill:var(--fg-panel);stroke:var(--fg-line);stroke-width:1.3"/><rect x="520" y="60" width="4" height="68" rx="2" style="fill:var(--fg-accent);stroke:none"/><rect x="695.0" y="63" width="31.9" height="16" rx="8" style="fill:var(--fg-accent-bg);stroke:none"/><text x="711.025" y="74.5" text-anchor="middle" style="fill:var(--fg-accent);font-size:10.5px;font-weight:600">설치</text><text x="532" y="74" text-anchor="start" style="fill:var(--fg-muted);font-size:10.5px;font-weight:400">-a claude-code -a codex</text><text x="532" y="89" text-anchor="start" style="fill:var(--fg-text);font-size:13px;font-weight:700">프로젝트 범위 동시 설치</text><text x="532" y="105" text-anchor="start" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">.agents/skills/&lt;이름&gt; 원본</text><text x="532" y="121" text-anchor="start" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">.claude 링크 + skills-lock</text><rect x="775" y="56" width="215" height="76" rx="8" style="fill:var(--fg-panel);stroke:var(--fg-line);stroke-width:1.3"/><rect x="775" y="60" width="4" height="68" rx="2" style="fill:var(--fg-ok);stroke:none"/><rect x="950.0" y="63" width="31.9" height="16" rx="8" style="fill:var(--fg-ok-bg);stroke:none"/><text x="966.025" y="74.5" text-anchor="middle" style="fill:var(--fg-ok);font-size:10.5px;font-weight:600">완료</text><text x="787" y="74" text-anchor="start" style="fill:var(--fg-muted);font-size:10.5px;font-weight:400">npx skills check 무결성 유지</text><text x="787" y="89" text-anchor="start" style="fill:var(--fg-text);font-size:13px;font-weight:700">3대 문서·잠금 파일 커밋</text><text x="787" y="105" text-anchor="start" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">THIRD_PARTY_NOTICES · README</text><text x="787" y="121" text-anchor="start" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">skills-guide 카드·개수 갱신</text><rect x="520" y="160" width="215" height="74" rx="8" style="fill:var(--fg-panel);stroke:var(--fg-no);stroke-width:1.3;stroke-dasharray:6 4"/><rect x="695.0" y="167" width="31.9" height="16" rx="8" style="fill:var(--fg-no-bg);stroke:none"/><text x="711.025" y="178.5" text-anchor="middle" style="fill:var(--fg-no);font-size:10.5px;font-weight:600">보류</text><text x="532" y="178" text-anchor="start" style="fill:var(--fg-muted);font-size:10.5px;font-weight:400">품질 게이트 탈락</text><text x="532" y="193" text-anchor="start" style="fill:var(--fg-no);font-size:13px;font-weight:700">기준 미달 · 후보 없음</text><text x="532" y="209" text-anchor="start" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">스타 100 미만 · 라이선스 불명</text><text x="532" y="225" text-anchor="start" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">설치 보류 후 직접 구현·init</text><rect x="775" y="160" width="215" height="74" rx="8" style="fill:var(--fg-panel);stroke:var(--fg-no);stroke-width:1.3;stroke-dasharray:6 4"/><text x="787" y="178" text-anchor="start" style="fill:var(--fg-muted);font-size:10.5px;font-weight:400">lock 무결성 파손 주의</text><text x="787" y="193" text-anchor="start" style="fill:var(--fg-no);font-size:13px;font-weight:700">설치본 직접 수정 금지</text><text x="787" y="209" text-anchor="start" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">SKILL.md 임의 편집 시 해시 불일치</text><text x="787" y="225" text-anchor="start" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">변경은 update · 재설치로 처리</text><polyline points="225,94 265,94" style="fill:none;stroke:var(--fg-accent);stroke-width:1.8;stroke-linejoin:round" marker-end="url(#flsklac)"/><rect x="217.0" y="71" width="56.0" height="14" rx="3" style="fill:var(--fg-panel);opacity:.9;stroke:none"/><text x="245" y="82" text-anchor="middle" style="fill:var(--fg-muted);font-size:11px;font-weight:400">후보 전달</text><polyline points="480,94 520,94" style="fill:none;stroke:var(--fg-ok);stroke-width:1.8;stroke-linejoin:round" marker-end="url(#flsklok)"/><rect x="472.0" y="71" width="56.0" height="14" rx="3" style="fill:var(--fg-panel);opacity:.9;stroke:none"/><text x="500" y="82" text-anchor="middle" style="fill:var(--fg-muted);font-size:11px;font-weight:400">기준 통과</text><polyline points="735,94 775,94" style="fill:none;stroke:var(--fg-ok);stroke-width:1.8;stroke-linejoin:round" marker-end="url(#flsklok)"/><rect x="727.0" y="71" width="56.0" height="14" rx="3" style="fill:var(--fg-panel);opacity:.9;stroke:none"/><text x="755" y="82" text-anchor="middle" style="fill:var(--fg-muted);font-size:11px;font-weight:400">잠금 갱신</text><polyline points="480,114 500,114 500,197 520,197" style="fill:none;stroke:var(--fg-no);stroke-width:1.6;stroke-linejoin:round;stroke-dasharray:6 4" marker-end="url(#flsklg)"/><rect x="470.0" y="141" width="56.0" height="14" rx="3" style="fill:var(--fg-panel);opacity:.9;stroke:none"/><text x="498" y="152" text-anchor="middle" style="fill:var(--fg-no);font-size:11px;font-weight:400">기준 미달</text><polyline points="628,132 628,160" style="fill:none;stroke:var(--fg-no);stroke-width:1.6;stroke-linejoin:round;stroke-dasharray:6 4" marker-end="url(#flsklg)"/><rect x="635.7" y="138" width="72.6" height="14" rx="3" style="fill:var(--fg-panel);opacity:.9;stroke:none"/><text x="672" y="149" text-anchor="middle" style="fill:var(--fg-no);font-size:11px;font-weight:400">원본 편집 시</text></svg><figcaption>새 스킬은 <code translate="no">find-skills</code>로 찾더라도 <b>설치 수·저장소 스타·라이선스</b> 3가지를 통과한 뒤에만 설치합니다. 설치 후에는 원본(<code translate="no">.agents/skills/</code>)을 직접 수정하지 않고 고지·README·통합 가이드 카드를 함께 갱신합니다.</figcaption></figure>
+</section>
+
 <section id="installed">
-  <h2>설치한 스킬</h2>
-  <p class="lead">이 프로젝트의 .agents/skills에 설치된 모든 스킬입니다. 각 카드에 출처, 라이선스, 설치 명령, 호출 방법과 사용 예를 기록합니다.</p>
-  <div class="grid">
-    <article class="card">
-      <h3 id="skill-find-skills"><code translate="no">find-skills</code> <span class="tag all">MIT</span><span class="tag">시작점</span></h3>
+  <span class="sec-kicker">Catalog · 현재 프로젝트 설치 목록</span>
+  <h2>설치한 스킬 (7개)</h2>
+  <p class="lead"><code translate="no">.agents/skills/</code>에 원본을 두고 <code translate="no">.claude/skills/</code> 심볼릭 링크로 연결한 실제 설치 목록입니다. 하단 <a href="#references">외부 참고 후보</a>와는 엄격히 구분합니다.</p>
+  <figure class="fig" id="fig-installed-matrix" data-theme="dark"><svg viewBox="0 0 980 398" role="img" aria-label="설치된 7개 스킬의 담당 단계와 운영·호출 시 주의점 매핑 격자" style="color:var(--fg-text);font-family:inherit;max-width:980px;min-width:720px" xmlns="http://www.w3.org/2000/svg"><defs><marker id="mtxskla" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--fg-text)"/></marker></defs><rect x="10" y="11" width="26" height="15" rx="4" style="fill:var(--fg-ok-bg);stroke:var(--fg-ok);stroke-width:1.4"/><text x="42" y="23" text-anchor="start" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">주력 핵심 역할</text><rect x="144.43" y="11" width="26" height="15" rx="4" style="fill:var(--fg-accent-bg);stroke:var(--fg-accent);stroke-width:1.6"/><text x="176.43" y="23" text-anchor="start" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">강한 결합 역할</text><rect x="278.86" y="11" width="26" height="15" rx="4" style="fill:var(--fg-panel);stroke:var(--fg-muted);stroke-width:1.2"/><text x="310.86" y="23" text-anchor="start" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">보조 산출·특성</text><rect x="413.29" y="11" width="26" height="15" rx="4" style="fill:var(--fg-warn-bg);stroke:var(--fg-warn);stroke-width:1.4"/><text x="445.29" y="23" text-anchor="start" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">호출·환경 주의점</text><text x="375.0" y="50" text-anchor="middle" style="fill:var(--fg-text);font-size:12.5px;font-weight:600">탐색 · 근거 수집</text><text x="375.0" y="65" text-anchor="middle" style="fill:var(--fg-muted);font-size:10.5px;font-weight:400">스킬·외부 출처 조사</text><text x="545.0" y="50" text-anchor="middle" style="fill:var(--fg-text);font-size:12.5px;font-weight:600">문서 · 도식 작성</text><text x="545.0" y="65" text-anchor="middle" style="fill:var(--fg-muted);font-size:10.5px;font-weight:400">교정 · SVG · HTML</text><text x="715.0" y="50" text-anchor="middle" style="fill:var(--fg-text);font-size:12.5px;font-weight:600">품질 검토 · 인계</text><text x="715.0" y="65" text-anchor="middle" style="fill:var(--fg-muted);font-size:10.5px;font-weight:400">스킬 감사 · 세션 연결</text><text x="885.0" y="50" text-anchor="middle" style="fill:var(--fg-text);font-size:12.5px;font-weight:600">운영 · 호출 주의점</text><text x="885.0" y="65" text-anchor="middle" style="fill:var(--fg-muted);font-size:10.5px;font-weight:400">잠금 · 런타임 제약</text><rect x="6" y="72" width="92" height="80" rx="6" style="fill:var(--fg-accent-bg);stroke:none"/><text x="52.0" y="109.0" text-anchor="middle" style="fill:var(--fg-text);font-size:11.5px;font-weight:600">탐색·조사</text><text x="52.0" y="123.0" text-anchor="middle" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">2개</text><text x="116" y="89.0" text-anchor="start" style="fill:var(--fg-text);font-size:12px;font-weight:600">find-skills</text><text x="116" y="103.0" text-anchor="start" style="fill:var(--fg-muted);font-size:10.5px;font-weight:400">vercel-labs/skills · MIT</text><rect x="296" y="77" width="158" height="28" rx="5" style="fill:var(--fg-ok-bg);stroke:var(--fg-ok);stroke-width:1.4"/><text x="375.0" y="95.0" text-anchor="middle" style="fill:var(--fg-ok);font-size:11.5px;font-weight:600">스킬 검색·품질 확인</text><rect x="806" y="77" width="158" height="28" rx="5" style="fill:var(--fg-warn-bg);stroke:var(--fg-warn);stroke-width:1.4"/><text x="885.0" y="95.0" text-anchor="middle" style="fill:var(--fg-warn);font-size:11.5px;font-weight:600">수동 복사(lock 미기록)</text><line x1="104" y1="112" x2="974" y2="112" style="stroke:var(--fg-line);stroke-width:1"/><text x="116" y="131.0" text-anchor="start" style="fill:var(--fg-text);font-size:12px;font-weight:600">deep-research</text><text x="116" y="145.0" text-anchor="start" style="fill:var(--fg-muted);font-size:10.5px;font-weight:400">samber/cc-skills · MIT</text><rect x="296" y="119" width="158" height="28" rx="5" style="fill:var(--fg-accent-bg);stroke:var(--fg-accent);stroke-width:1.6"/><text x="375.0" y="137.0" text-anchor="middle" style="fill:var(--fg-text);font-size:11.5px;font-weight:600">병렬 웹 교차검증</text><rect x="466" y="119" width="158" height="28" rx="5" style="fill:var(--fg-panel);stroke:var(--fg-muted);stroke-width:1.2"/><text x="545.0" y="137.0" text-anchor="middle" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">인용 MD 보고서</text><rect x="806" y="119" width="158" height="28" rx="5" style="fill:var(--fg-panel);stroke:var(--fg-muted);stroke-width:1.2"/><text x="885.0" y="137.0" text-anchor="middle" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">구독 사용량 큼</text><rect x="6" y="166" width="92" height="122" rx="6" style="fill:var(--fg-accent-bg);stroke:none"/><text x="52.0" y="224.0" text-anchor="middle" style="fill:var(--fg-text);font-size:11.5px;font-weight:600">문서·시각화</text><text x="52.0" y="238.0" text-anchor="middle" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">3개</text><rect x="104" y="170" width="4" height="30" rx="2" style="fill:var(--fg-warn)"/><text x="116" y="183.0" text-anchor="start" style="fill:var(--fg-text);font-size:12px;font-weight:600">technical-writing</text><text x="116" y="197.0" text-anchor="start" style="fill:var(--fg-muted);font-size:10.5px;font-weight:400">backnotprop/pstack · MIT</text><rect x="466" y="171" width="158" height="28" rx="5" style="fill:var(--fg-ok-bg);stroke:var(--fg-ok);stroke-width:1.4"/><text x="545.0" y="189.0" text-anchor="middle" style="fill:var(--fg-ok);font-size:11.5px;font-weight:600">Diátaxis·STE 교정</text><rect x="636" y="171" width="158" height="28" rx="5" style="fill:var(--fg-panel);stroke:var(--fg-muted);stroke-width:1.2"/><text x="715.0" y="189.0" text-anchor="middle" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">모호성·수치 검증</text><rect x="806" y="171" width="158" height="28" rx="5" style="fill:var(--fg-warn-bg);stroke:var(--fg-warn);stroke-width:1.4"/><text x="885.0" y="189.0" text-anchor="middle" style="fill:var(--fg-warn);font-size:11.5px;font-weight:600">직접 호출 전용</text><line x1="104" y1="206" x2="974" y2="206" style="stroke:var(--fg-line);stroke-width:1"/><text x="116" y="225.0" text-anchor="start" style="fill:var(--fg-text);font-size:12px;font-weight:600">docfig</text><text x="116" y="239.0" text-anchor="start" style="fill:var(--fg-muted);font-size:10.5px;font-weight:400">저장소 자체 작성 · 내장</text><rect x="466" y="213" width="158" height="28" rx="5" style="fill:var(--fg-ok-bg);stroke:var(--fg-ok);stroke-width:1.4"/><text x="545.0" y="231.0" text-anchor="middle" style="fill:var(--fg-ok);font-size:11.5px;font-weight:600">인라인 SVG 4종</text><rect x="636" y="213" width="158" height="28" rx="5" style="fill:var(--fg-accent-bg);stroke:var(--fg-accent);stroke-width:1.6"/><text x="715.0" y="231.0" text-anchor="middle" style="fill:var(--fg-text);font-size:11.5px;font-weight:600">figlib check 점검</text><rect x="806" y="213" width="158" height="28" rx="5" style="fill:var(--fg-ok-bg);stroke:var(--fg-ok);stroke-width:1.4"/><text x="885.0" y="231.0" text-anchor="middle" style="fill:var(--fg-ok);font-size:11.5px;font-weight:600">외부 의존성 없음</text><line x1="104" y1="248" x2="974" y2="248" style="stroke:var(--fg-line);stroke-width:1"/><text x="116" y="267.0" text-anchor="start" style="fill:var(--fg-text);font-size:12px;font-weight:600">visual-explainer</text><text x="116" y="281.0" text-anchor="start" style="fill:var(--fg-muted);font-size:10.5px;font-weight:400">nicobailon · MIT</text><rect x="466" y="255" width="158" height="28" rx="5" style="fill:var(--fg-accent-bg);stroke:var(--fg-accent);stroke-width:1.6"/><text x="545.0" y="273.0" text-anchor="middle" style="fill:var(--fg-text);font-size:11.5px;font-weight:600">도식 중심 HTML</text><rect x="806" y="255" width="158" height="28" rx="5" style="fill:var(--fg-warn-bg);stroke:var(--fg-warn);stroke-width:1.4"/><text x="885.0" y="273.0" text-anchor="middle" style="fill:var(--fg-warn);font-size:11.5px;font-weight:600">Node 렌더·CDN 주의</text><rect x="6" y="302" width="92" height="80" rx="6" style="fill:var(--fg-accent-bg);stroke:none"/><text x="52.0" y="339.0" text-anchor="middle" style="fill:var(--fg-text);font-size:11.5px;font-weight:600">검증·인계</text><text x="52.0" y="353.0" text-anchor="middle" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">2개</text><text x="116" y="319.0" text-anchor="start" style="fill:var(--fg-text);font-size:12px;font-weight:600">skill-review</text><text x="116" y="333.0" text-anchor="start" style="fill:var(--fg-muted);font-size:10.5px;font-weight:400">sanyuan0704 · MIT</text><rect x="636" y="307" width="158" height="28" rx="5" style="fill:var(--fg-ok-bg);stroke:var(--fg-ok);stroke-width:1.4"/><text x="715.0" y="325.0" text-anchor="middle" style="fill:var(--fg-ok);font-size:11.5px;font-weight:600">5축 스킬 품질 감사</text><rect x="806" y="307" width="158" height="28" rx="5" style="fill:var(--fg-panel);stroke:var(--fg-muted);stroke-width:1.2"/><text x="885.0" y="325.0" text-anchor="middle" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">lock 해시 관리</text><line x1="104" y1="342" x2="974" y2="342" style="stroke:var(--fg-line);stroke-width:1"/><text x="116" y="361.0" text-anchor="start" style="fill:var(--fg-text);font-size:12px;font-weight:600">handoff</text><text x="116" y="375.0" text-anchor="start" style="fill:var(--fg-muted);font-size:10.5px;font-weight:400">mattpocock/skills · MIT</text><rect x="636" y="349" width="158" height="28" rx="5" style="fill:var(--fg-accent-bg);stroke:var(--fg-accent);stroke-width:1.6"/><text x="715.0" y="367.0" text-anchor="middle" style="fill:var(--fg-text);font-size:11.5px;font-weight:600">세션 요약 인계서</text><rect x="806" y="349" width="158" height="28" rx="5" style="fill:var(--fg-warn-bg);stroke:var(--fg-warn);stroke-width:1.4"/><text x="885.0" y="367.0" text-anchor="middle" style="fill:var(--fg-warn);font-size:11.5px;font-weight:600">임시폴더·수동 재개</text><line x1="290" y1="40" x2="290" y2="384" style="stroke:var(--fg-line);stroke-width:1;stroke-dasharray:2 4"/><line x1="460" y1="40" x2="460" y2="384" style="stroke:var(--fg-line);stroke-width:1;stroke-dasharray:2 4"/><line x1="630" y1="40" x2="630" y2="384" style="stroke:var(--fg-line);stroke-width:1;stroke-dasharray:2 4"/><line x1="800" y1="40" x2="800" y2="384" style="stroke:var(--fg-line);stroke-width:1;stroke-dasharray:2 4"/><line x1="970" y1="40" x2="970" y2="384" style="stroke:var(--fg-line);stroke-width:1;stroke-dasharray:2 4"/></svg><figcaption>이 저장소에 설치된 7개 스킬의 역할 분담표입니다. 예컨대 기술 설명서를 개편할 때는 <code translate="no">technical-writing</code>(직접 호출 전용)으로 구조·문장을 잡고 <code translate="no">docfig</code>로 외부 의존성 없는 SVG 도식과 링크·경계 검사를 수행합니다.</figcaption></figure>
+
+  <div class="controls" style="margin-top:18px">
+    <input class="filter" id="installed-filter" type="search" autocomplete="off" spellcheck="false" placeholder="설치된 스킬 이름·용도·출처 검색…" aria-label="설치된 스킬 카드 검색">
+    <span class="count" id="installed-count" aria-live="polite"></span>
+  </div>
+  <div class="grid" id="installed-grid">
+    <article class="card" data-skill-card>
+      <h3 id="skill-find-skills"><code translate="no">find-skills</code> <span class="tag all">MIT</span><span class="tag">탐색 시작점</span></h3>
       <ul>
         <li>출처: <code translate="no">vercel-labs/skills</code> · 커밋 <code translate="no">b716f9d</code> (2026-11-12)</li>
         <li>위치: <code translate="no">.agents/skills/find-skills/</code>, <code translate="no">.claude/skills/find-skills</code>(링크)</li>
-        <li>용도: 필요한 기능에 맞는 스킬 검색·품질 확인·설치 제안</li>
-        <li>사용 예: “테스트 자동화 스킬 찾아줘”</li>
+        <li>용도: 필요한 기능에 맞는 외부 스킬 검색·품질 확인·설치 명령 제안</li>
+        <li>사용 예: “테스트 자동화 스킬 찾아줘”, “기술 문서 정리 스킬 찾아줘”</li>
       </ul>
-      <p><span class="tag note">설치 방식</span> 이 저장소에는 공식 <code translate="no">SKILL.md</code>를 그대로 복사해 두었습니다. find-skills 자체는 CLI 잠금 파일에 기록되지 않았으므로, 2장의 명령으로 다시 설치하면 CLI가 관리하는 상태가 됩니다.</p>
-      <a class="src" href="https://skills.sh/vercel-labs/skills/find-skills" target="_blank" rel="noopener">skills.sh 페이지 ↗</a>
-    <pre translate="no"><code translate="no">npx skills add vercel-labs/skills --skill find-skills -a claude-code -a codex
+      <p class="guard">설치 방식 참고: 이 저장소에는 공식 <code translate="no">SKILL.md</code>를 수동 복사해 두어 <code translate="no">skills-lock.json</code>에 기록되지 않았습니다. CLI 관리 상태로 전환하려면 아래 <a href="#install">설치 절</a>의 명령으로 재설치하세요.</p>
+<pre translate="no"><code translate="no">npx skills add vercel-labs/skills --skill find-skills -a claude-code -a codex
 /find-skills PR 리뷰    # Claude Code
 $find-skills PR 리뷰    # Codex</code></pre>
-</article>
-    <article class="card">
+      <a class="src" href="https://skills.sh/vercel-labs/skills/find-skills" target="_blank" rel="noopener">skills.sh 페이지 ↗</a>
+      <a class="src" href="https://github.com/vercel-labs/skills/tree/b716f9dc2ba36b6aa8f0080615e5a3a6caeac63b/skills/find-skills" target="_blank" rel="noopener">설치 원문 ↗</a>
+    </article>
+
+    <article class="card" data-skill-card>
       <h3 id="skill-handoff"><code translate="no">handoff</code> <span class="tag all">MIT</span><span class="tag">세션 인계</span></h3>
       <ul>
         <li>출처: Matt Pocock · <code translate="no">mattpocock/skills</code> · 커밋 <code translate="no">5863806</code> (2026-11-14 설치)</li>
         <li>위치: <code translate="no">.agents/skills/handoff/</code>, <code translate="no">.claude/skills/handoff</code>(링크)</li>
-        <li>용도: 현재 대화를 인계 문서로 요약해 새 세션에서 작업을 이어가기</li>
-        <li>OS 임시 폴더에 저장하며 기존 명세·계획·커밋은 참조하고 민감한 정보는 제거합니다.</li>
+        <li>용도: 현재 대화를 인계 문서로 요약해 새 세션에서 작업을 이어받기</li>
+        <li>동작 범위: OS 임시 폴더에 저장하며 기존 명세·계획·커밋은 경로로 참조하고 민감 정보는 제거합니다.</li>
       </ul>
-      <pre translate="no"><code translate="no">npx skills add mattpocock/skills --skill handoff -a claude-code -a codex
+      <p class="guard">자동 재개 훅은 포함하지 않습니다. 출력된 임시 파일 경로를 확인한 뒤 새 세션에서 “이 인계 문서를 읽고 이어가 줘”라고 직접 지시하세요.</p>
+<pre translate="no"><code translate="no">npx skills add mattpocock/skills --skill handoff -a claude-code -a codex
 /handoff 다음 세션에서 로그인 오류 수정    # Claude Code
-$handoff 다음 세션에서 로그인 오류 수정    # Codex</code></pre>
-      <p>Codex는 <code translate="no">/skills</code>에서도 선택할 수 있습니다. 생성된 경로를 확인하고 새 세션에 “이 파일을 읽고 이어가 줘”라고 요청하세요. 자동 재개 훅은 포함하지 않습니다. 실제 클라이언트 호출은 미검증입니다.</p>
-      <p>설치 시 공개 목록은 약 110만 설치, 저장소 약 32만 스타로 표시했습니다. 숫자는 변동하는 참고값입니다. CLI 잠금 파일을 함께 기록했습니다.</p>
+$handoff 다음 세션에서 로그인 오류 수정    # Codex (/skills에서도 선택)</code></pre>
+      <p>설치 시점 공개 목록은 약 110만 설치, 저장소 약 32만 스타였습니다(변동 참고값). <code translate="no">skills-lock.json</code> 기록을 완료했으며 실제 클라이언트 슬래시 호출은 미검증입니다.</p>
       <a class="src" href="https://skills.sh/mattpocock/skills/handoff" target="_blank" rel="noopener">skills.sh 페이지 ↗</a>
       <a class="src" href="https://github.com/mattpocock/skills/blob/5863806dd4e15c63174bee4e7515a4256792ecfa/skills/productivity/handoff/SKILL.md" target="_blank" rel="noopener">설치 원문 ↗</a>
     </article>
-    <article class="card">
+
+    <article class="card" data-skill-card>
       <h3 id="skill-visual-explainer"><code translate="no">visual-explainer</code> <span class="tag all">MIT</span><span class="tag">그림 중심 HTML</span></h3>
-      <ul><li>출처: Nico Bailon · <code translate="no">nicobailon/visual-explainer</code> · 커밋 <code translate="no">9d5f880</code> (2026-11-14 설치)</li>
-      <li>위치: <code translate="no">.agents/skills/visual-explainer/</code>, <code translate="no">.claude/skills/visual-explainer</code>(링크)</li>
-      <li>용도: 시스템·개념·계획·데이터를 다이어그램과 그래프 중심의 HTML로 설명</li>
-      <li>구조·흐름은 SVG, 수치·추세·비율은 차트, 과정·상태 변화는 단계별 그림으로 표현합니다. Mermaid는 요청할 때 사용합니다.</li>
-      <li>본문·참조·템플릿·렌더러를 함께 설치했습니다. Node.js 렌더러로 소스 HTML을 최종 HTML로 변환합니다.</li></ul>
-      <pre translate="no"><code translate="no">npx skills add nicobailon/visual-explainer --skill visual-explainer -a claude-code -a codex
+      <ul>
+        <li>출처: Nico Bailon · <code translate="no">nicobailon/visual-explainer</code> · 커밋 <code translate="no">9d5f880</code> (2026-11-14 설치)</li>
+        <li>위치: <code translate="no">.agents/skills/visual-explainer/</code>, <code translate="no">.claude/skills/visual-explainer</code>(링크)</li>
+        <li>용도: 시스템·개념·계획·데이터를 다이어그램과 차트 중심의 단독 HTML로 설명</li>
+        <li>구성: 구조·흐름은 SVG, 수치는 차트, 상태 변화는 단계별 그림으로 표현하며 Node.js 렌더러(<code translate="no">kit/render.mjs</code>)를 포함합니다.</li>
+      </ul>
+      <p class="guard">일부 차트는 외부 CDN을 불러올 수 있고 기본 출력 경로가 <code translate="no">~/.agent/diagrams/</code>입니다. 오프라인 문서나 이 저장소 통합 가이드에 반영할 때는 외부 라이브러리·웹폰트 금지와 대상 경로를 먼저 명시하세요.</p>
+<pre translate="no"><code translate="no">npx skills add nicobailon/visual-explainer --skill visual-explainer -a claude-code -a codex
 /visual-explainer 캐시 동작을 SVG 흐름도와 차트 중심으로 설명해 줘    # Claude Code
-$visual-explainer 캐시 동작을 SVG 흐름도와 차트 중심으로 설명해 줘    # Codex</code></pre>
-      <p>Codex는 <code translate="no">/skills</code>에서도 선택합니다. 사용 예: “두 대안의 구조 차이와 처리량을 그림으로 비교해 HTML로 정리해 줘.” 그림에 근거와 캡션을 붙이고, 수치가 없으면 임의로 만들지 않도록 요청하세요.</p>
-      <p>기본 출력은 <code translate="no">~/.agent/diagrams/</code>이며 사용자 경로를 지정할 수 있습니다. 이 프로젝트의 설명서는 새 HTML을 늘리지 않고 기존 통합 가이드 안에 반영합니다. 일부 차트는 CDN을 사용할 수 있으므로 오프라인 결과물은 외부 라이브러리·웹폰트 없이 생성하도록 명시하세요.</p>
-      <p>설치 당시 공개 목록은 874회 설치, 저장소 약 1.1만 스타로 표시됐습니다. 파일 원본·링크·잠금 해시는 확인했으며 실제 클라이언트의 스킬 호출과 생성 결과는 아직 검증하지 않았습니다.</p>
+$visual-explainer 캐시 동작을 SVG 흐름도와 차트 중심으로 설명해 줘    # Codex (/skills 선택 가능)</code></pre>
+      <p>설치 당시 공개 목록은 874회 설치, 저장소 약 1.1만 스타였습니다. 파일 원본·링크·잠금 해시는 확인했으며 실제 클라이언트의 스킬 호출과 렌더러 실행 결과는 아직 검증하지 않았습니다.</p>
       <a class="src" href="https://skills.sh/nicobailon/visual-explainer/visual-explainer" target="_blank" rel="noopener">skills.sh 페이지 ↗</a>
       <a class="src" href="https://github.com/nicobailon/visual-explainer/tree/9d5f880b7e8e0a9a80c890b8e1bb6918b68481ad/plugins/visual-explainer" target="_blank" rel="noopener">설치 원문 ↗</a>
     </article>
-    <article class="card">
+
+    <article class="card" data-skill-card>
       <h3 id="skill-deep-research"><code translate="no">deep-research</code> <span class="tag all">MIT</span><span class="tag">딥리서치</span></h3>
-      <ul><li>출처: Samuel Berthe · <code translate="no">samber/cc-skills</code> · 커밋 <code translate="no">50a3383</code> (2026-11-14 설치)</li>
-      <li>위치: <code translate="no">.agents/skills/deep-research/</code>, <code translate="no">.claude/skills/deep-research</code>(링크)</li>
-      <li>용도: 여러 출처를 교차 검증해 인용이 달린 Markdown 조사 보고서 작성. Gemini·ChatGPT 딥리서치를 대신하는 용도</li>
-      <li>범위 인터뷰 → 서브에이전트 3~20개 병렬 웹 검색 → 종합 → 보고서 순서로 진행합니다. 깊이는 Quick·Standard·Deep, 조사 유형은 시장·기술·경쟁·학술·법률 등 11가지입니다.</li>
-      <li>검증 규칙: 모든 주장에 출처 URL을 붙이고, 핵심 주장은 독립 출처 2개 이상이 없으면 신뢰도 Low로 표시하며, 출처 간 충돌과 근거 없는 항목을 숨기지 않습니다.</li>
-      <li>과금: 에이전트 기본 웹 검색·페이지 읽기만 써서 별도 API 키나 유료 서비스가 필요 없습니다. 서브에이전트를 많이 띄우므로 구독 사용량은 많이 씁니다.</li></ul>
-      <pre translate="no"><code translate="no">npx skills add samber/cc-skills --skill deep-research -a claude-code -a codex
+      <ul>
+        <li>출처: Samuel Berthe · <code translate="no">samber/cc-skills</code> · 커밋 <code translate="no">50a3383</code> (2026-11-14 설치)</li>
+        <li>위치: <code translate="no">.agents/skills/deep-research/</code>, <code translate="no">.claude/skills/deep-research</code>(링크)</li>
+        <li>용도: 다중 출처를 교차 검증해 출처 URL과 신뢰도가 붙은 Markdown 조사 보고서 작성</li>
+        <li>절차: 범위 인터뷰 → 서브에이전트 3~20개 병렬 웹 검색 → 신뢰도 판정(독립 출처 2개 미만은 Low) → 종합 보고서 (Quick·Standard·Deep 모드, 11개 조사 유형)</li>
+      </ul>
+      <p class="guard">별도 API 키는 필요 없지만 병렬 서브에이전트를 많이 실행하므로 구독 쿼터 소모가 큽니다. Claude Code 내장 스킬과 이름이 비슷하므로 <code translate="no">/deep-research</code>로 직접 호출하세요(PDF 변환은 <code translate="no">pandoc</code>·<code translate="no">md-to-pdf</code> 설치 시에만 동작).</p>
+<pre translate="no"><code translate="no">npx skills add samber/cc-skills --skill deep-research -a claude-code -a codex
 /deep-research 2026년 로컬 LLM 추론 엔진 비교, 성능·라이선스 중심    # Claude Code
-$deep-research 2026년 로컬 LLM 추론 엔진 비교, 성능·라이선스 중심    # Codex</code></pre>
-      <p>Codex는 <code translate="no">/skills</code>에서도 선택합니다. 정확도가 중요하면 “Deep 모드로”라고 지정하세요. PDF 변환은 <code translate="no">pandoc</code>이나 <code translate="no">md-to-pdf</code>가 있을 때만 동작하며, 설치되어 있지 않으면 Markdown으로만 받습니다. Claude Code의 내장 <code translate="no">anthropic-skills:deep-research</code>와 이름이 비슷하니 <code translate="no">/deep-research</code>로 직접 호출하는 편이 확실합니다.</p>
-      <p>설치 당시 공개 목록은 약 5.6천 설치, 저장소 243 스타였습니다. skills CLI 보안 평가는 Gen Safe·Socket 0건·Snyk Med Risk였으며, <code translate="no">curl</code>·<code translate="no">pandoc</code> 실행 권한 외에 스크립트나 실행 파일은 없음을 확인했습니다. 설치 파일 18개가 원본 커밋과 일치하고 Claude Code 스킬 목록에 나타나는 것까지 확인했습니다. 실제 호출과 보고서 생성, Codex 쪽 발견은 아직 검증하지 않았습니다.</p>
+$deep-research 2026년 로컬 LLM 추론 엔진 비교, 성능·라이선스 중심    # Codex (/skills 선택 가능)</code></pre>
+      <p>설치 당시 공개 목록 약 5.6천 설치, 저장소 243 스타, 보안 평가 Gen Safe·Socket 0건·Snyk Med Risk였습니다. 파일 18개 원본 일치와 Claude Code 목록 노출을 확인했으며 실제 보고서 생성과 Codex 발견은 미검증입니다.</p>
       <a class="src" href="https://skills.sh/samber/cc-skills/deep-research" target="_blank" rel="noopener">skills.sh 페이지 ↗</a>
       <a class="src" href="https://github.com/samber/cc-skills/tree/50a33836b20f690c668af557bd9ef9d07a8c7ef2/skills/deep-research" target="_blank" rel="noopener">설치 원문 ↗</a>
     </article>
-    <article class="card">
+
+    <article class="card" data-skill-card>
       <h3 id="skill-docfig"><code translate="no">docfig</code> <span class="tag">자체 스킬</span><span class="tag">인라인 SVG · 도식</span></h3>
       <ul>
-        <li>출처: 이 저장소 자체 작성 · git 이력 커밋 <code translate="no">13b0dfd</code> (2026-11-09 추가, 2026-11-15 복원, 2026-11-20 가독성·호버 UX 고도화)</li>
+        <li>출처: 이 저장소 자체 작성 · git 커밋 <code translate="no">13b0dfd</code> (2026-11-09 추가, 2026-11-15 복원, 2026-11-20 호버·배치 고도화)</li>
         <li>위치: <code translate="no">.agents/skills/docfig/</code>, <code translate="no">.claude/skills/docfig</code>(링크)</li>
-        <li>용도: HTML 문서에 외부 의존성 없는 인라인 SVG 흐름·회로도(<code translate="no">Flow</code>), 전환 대조도(<code translate="no">compare</code>), 상관·매핑 격자(<code translate="no">matrix</code>), 초점 관계망(<code translate="no">network</code>)을 넣고 밝은·어두운 화면과 글자 잘림·단방향 질서·호버 가독성·링크를 점검</li>
-        <li>보조 도구: <code translate="no">.agents/skills/docfig/scripts/figlib.py</code> (<code translate="no">Flow</code>, <code translate="no">compare</code>, <code translate="no">matrix</code>, <code translate="no">network</code>, <code translate="no">Doc</code>, <code translate="no">check</code>, <code translate="no">shot</code>), 패턴 안내 <code translate="no">references/patterns.md</code></li>
+        <li>용도: HTML 문서에 외부 의존성 없는 인라인 SVG 흐름·회로도(<code translate="no">Flow</code>), 전환 대조도(<code translate="no">compare</code>), 매핑 격자(<code translate="no">matrix</code>), 초점 관계망(<code translate="no">network</code>) 삽입 및 자동 검증</li>
+        <li>보조 도구: <code translate="no">.agents/skills/docfig/scripts/figlib.py</code> (<code translate="no">check</code>·<code translate="no">shot</code> 포함), <code translate="no">references/patterns.md</code></li>
       </ul>
-      <pre translate="no"><code translate="no"># git 이력에서 복원·고도화한 프로젝트 내장 스킬 (skills CLI 미사용)
-/docfig docs/skills-guide.html에 스킬 설치 흐름도 넣어 줘    # Claude Code
-$docfig 개념 간 상관관계와 전환 구조를 알아보기 쉽게 그려 줘  # Codex</code></pre>
-      <p>Codex는 <code translate="no">/skills</code>에서도 선택합니다. 특정 화면 틀을 복제하지 않고 관계의 위상(순차 분기·1:1 전환·2축 교차·다층 파급)에 맞춰 도식을 고릅니다. <code translate="no">network</code>는 호버 시 주변 카드를 지우지 않고 연결선·이웃만 밝히며, 클릭 고정·필터 때도 비연관 카드를 읽히는 수준(<code translate="no">opacity 0.55</code>)으로 유지합니다. <code translate="no">figlib.py check</code>로 외부 의존성·<code translate="no">figcaption</code>·<code translate="no">aria-label</code>·SVG 경계 잘림·역방향 간선·과도한 흐림·깨진 링크를 점검합니다. 실제 클라이언트 호출은 아직 검증하지 않았습니다.</p>
+      <p class="guard">작업 완료 전 <code translate="no">figlib.py check &lt;문서.html&gt;</code>을 반드시 통과시켜 외부 의존성, <code translate="no">viewBox</code> 글자 잘림, 역방향 간선, 깨진 링크가 0건인지 확인해야 합니다.</p>
+<pre translate="no"><code translate="no"># 프로젝트 내장 스킬 (skills CLI 잠금 대상 아님)
+/docfig docs/skills-guide.html에 스킬 도입 흐름도 넣어 줘    # Claude Code
+$docfig 개념 간 상관관계와 전환 구조를 알아보기 쉽게 그려 줘  # Codex (/skills 선택 가능)</code></pre>
+      <p>이 문서와 <a href="cli-guide.html">CLI 통합 가이드</a>의 인라인 SVG 도식 제작·검증에 직접 사용했습니다. 클라이언트 앱의 슬래시 명령 호출 자체는 미검증입니다.</p>
     </article>
-    <article class="card">
+
+    <article class="card" data-skill-card>
       <h3 id="skill-skill-review"><code translate="no">skill-review</code> <span class="tag all">MIT</span><span class="tag">스킬 품질 검토</span></h3>
       <ul>
         <li>출처: <code translate="no">sanyuan0704/sanyuan-skills</code> · 커밋 <code translate="no">08b6572</code> (2026-11-20 설치)</li>
         <li>위치: <code translate="no">.agents/skills/skill-review/</code>, <code translate="no">.claude/skills/skill-review</code>(링크)</li>
-        <li>용도: 에이전트 스킬(<code translate="no">SKILL.md</code>·참조·스크립트)의 구조, 트리거 설명 품질, 워크플로 설계, 토큰 효율, 안티패턴 5개 축을 기준표(<code translate="no">references/review-criteria.md</code>)로 감사·개선 제안</li>
-        <li>결과 형식: 실제 라인·패턴을 인용한 강점(Strengths)과 영향도 순 구체적 개선안(What·Where·Fix)을 제시합니다.</li>
+        <li>용도: 에이전트 스킬(<code translate="no">SKILL.md</code>·참조·스크립트)의 구조, 트리거 설명 품질, 워크플로 설계, 토큰 효율, 안티패턴 5개 축 감사</li>
+        <li>결과 형식: 기준표(<code translate="no">references/review-criteria.md</code>)에 따라 실제 라인을 인용한 강점과 우선순위별 개선안(What·Where·Fix) 제시</li>
       </ul>
-      <pre translate="no"><code translate="no">npx skills add sanyuan0704/sanyuan-skills --skill skill-review -a claude-code -a codex
+<pre translate="no"><code translate="no">npx skills add sanyuan0704/sanyuan-skills --skill skill-review -a claude-code -a codex
 /skill-review .agents/skills/docfig    # Claude Code
-$skill-review .agents/skills/docfig    # Codex</code></pre>
-      <p>Codex는 <code translate="no">/skills</code>에서도 선택합니다. 새 스킬을 작성하거나 기존 스킬의 프롬프트·UX 규칙을 다듬을 때 구조 누락·모호한 지시·검증 게이트 부재를 먼저 점검하는 용도로 씁니다.</p>
-      <p>설치 당시 공개 목록은 약 2.4천 설치, 저장소 약 4천 스타였으며 skills CLI 보안 평가는 Gen Safe·Socket 0건·Snyk Low Risk였습니다. 파일 배치·링크·<code translate="no">skills-lock.json</code> 기록은 확인했고, 이 세션에서 <code translate="no">docfig</code> 검토에 기준표를 직접 적용했습니다. 실제 클라이언트의 슬래시 명령 자동 발견·호출은 미검증입니다.</p>
+$skill-review .agents/skills/docfig    # Codex (/skills 선택 가능)</code></pre>
+      <p>설치 당시 공개 목록 약 2.4천 설치, 저장소 약 4천 스타, 보안 평가 Gen Safe·Socket 0건·Snyk Low Risk였습니다. 파일 배치·링크·<code translate="no">skills-lock.json</code> 기록을 확인했고 <code translate="no">docfig</code> 개선에 직접 적용했습니다. 실제 클라이언트 슬래시 호출은 미검증입니다.</p>
       <a class="src" href="https://skills.sh/sanyuan0704/sanyuan-skills/skill-review" target="_blank" rel="noopener">skills.sh 페이지 ↗</a>
       <a class="src" href="https://github.com/sanyuan0704/sanyuan-skills/tree/08b6572ef108f22d4e8a3ecf9182a4bbef097744/skills/skill-review" target="_blank" rel="noopener">설치 원문 ↗</a>
     </article>
-    <article class="card">
+
+    <article class="card" data-skill-card>
       <h3 id="skill-technical-writing"><code translate="no">technical-writing</code> <span class="tag all">MIT</span><span class="tag">기술 문서 정리</span></h3>
       <ul>
         <li>출처: Lauren Tan · <code translate="no">backnotprop/pstack</code> · 커밋 <code translate="no">4a4f41c</code> (2026-11-20 설치)</li>
         <li>위치: <code translate="no">.agents/skills/technical-writing/</code>, <code translate="no">.claude/skills/technical-writing</code>(링크)</li>
-        <li>용도: Diátaxis 4분류(튜토리얼·해결 안내·레퍼런스·원리 설명), Google 개발자 문서 스타일, STE(경고·전제 선행, 한 문장 한 행동), 모호성 없는 구문·수치 검증으로 기술 문서를 구조화·교정</li>
-        <li>동작 범위: 프런트매터에 <code translate="no">disable-model-invocation: true</code>가 설정되어 있어 일반 대화 중 자동 개입하지 않고 슬래시·스킬 명령으로 직접 부를 때 작동합니다(원본 무수정 유지).</li>
+        <li>용도: Diátaxis 4분류(튜토리얼·해결 안내·레퍼런스·원리 설명), Google 개발자 문서 스타일, STE(경고·전제 선행, 한 문장 한 행동), 모호성 없는 구문·수치 실증 기준 적용</li>
       </ul>
-      <pre translate="no"><code translate="no">npx skills add backnotprop/pstack --skill technical-writing -a claude-code -a codex
+      <p class="guard">원본 프런트매터에 <code translate="no">disable-model-invocation: true</code>가 설정되어 있어 일반 대화에서 자동 실행되지 않습니다. 반드시 슬래시·스킬 명령으로 직접 지정해 호출하세요(원본 무수정 원칙 준수).</p>
+<pre translate="no"><code translate="no">npx skills add backnotprop/pstack --skill technical-writing -a claude-code -a codex
 /technical-writing docs/cli-guide.html을 Diátaxis와 STE 기준으로 정리해 줘    # Claude Code
-$technical-writing docs/cli-guide.html을 Diátaxis와 STE 기준으로 정리해 줘    # Codex</code></pre>
-      <p>Codex는 <code translate="no">/skills</code>에서도 선택합니다. 설명(Explanation)·해결 안내(How-to)·사전(Reference)이 한 문서에 뒤섞여 있을 때 역할별 구획을 분리하고, 위험 명령 앞에 주의 조건을 배치하며, 문서 안의 개수·플래그 표기를 실제 값과 일치시킬 때 유용합니다.</p>
-      <p>설치 당시 공개 목록은 약 1.14만 설치, 저장소 약 4.6천 스타였으며 skills CLI 보안 평가는 Gen Safe·Socket 0건·Snyk Low Risk였습니다. 파일 배치·링크·<code translate="no">skills-lock.json</code> 기록을 확인했고, 이 세션에서 <code translate="no">docfig</code>와 함께 <a href="cli-guide.html">CLI 통합 가이드</a> 개편에 직접 적용했습니다. 실제 클라이언트의 슬래시 명령 호출은 미검증입니다.</p>
+$technical-writing docs/cli-guide.html을 Diátaxis와 STE 기준으로 정리해 줘    # Codex (/skills 선택 가능)</code></pre>
+      <p>설치 당시 공개 목록 약 1.14만 설치, 저장소 약 4.6천 스타, 보안 평가 Gen Safe·Socket 0건·Snyk Low Risk였습니다. 파일 배치·링크·<code translate="no">skills-lock.json</code> 기록을 확인했고, 이 문서와 <a href="cli-guide.html">CLI 통합 가이드</a> 개편에 직접 적용했습니다. 실제 클라이언트 슬래시 호출은 미검증입니다.</p>
       <a class="src" href="https://skills.sh/backnotprop/pstack/technical-writing" target="_blank" rel="noopener">skills.sh 페이지 ↗</a>
       <a class="src" href="https://github.com/backnotprop/pstack/tree/4a4f41c46c67a006658ac17cef2d092593f6b26a/skills/technical-writing" target="_blank" rel="noopener">설치 원문 ↗</a>
     </article>
   </div>
 </section>
+
 <section id="about">
-  <h2>find-skills란</h2>
-  <p class="lead">“X를 하는 스킬이 있을까?” 같은 질문을 받으면 에이전트가 스킬을 찾고, 품질을 확인한 뒤 설치 명령을 제안하게 만드는 스킬입니다.</p>
+  <span class="sec-kicker">Explanation · 탐색 스킬 작동 원리</span>
+  <h2><code translate="no">find-skills</code>는 어떻게 작동하는가</h2>
+  <p class="lead">“X를 하는 스킬이 있을까?” 같은 요청을 받으면 에이전트가 후보를 검색하고 품질 기준을 대조한 뒤 설치 명령을 제안하도록 안내하는 지침입니다.</p>
   <div class="grid">
     <article class="card">
-      <h3>무엇을 하나 <span class="tag all">MIT</span></h3>
-      <p>오픈 에이전트 스킬 생태계에서 스킬을 찾아 설치하도록 돕습니다. 실제 검색과 설치는 <code translate="no">skills</code> CLI(<code translate="no">npx skills</code>)가 하고, find-skills는 에이전트가 이 CLI를 언제 어떻게 쓸지 알려 주는 지침입니다.</p>
+      <h3>역할 분담 <span class="tag all">MIT</span></h3>
+      <p>실제 패키지 검색과 파일 배치는 <code translate="no">skills</code> CLI(<code translate="no">npx skills</code>)가 수행하고, <code translate="no">find-skills</code>는 에이전트가 언제 어떤 검색어와 검증 기준으로 이 CLI를 호출할지 규정합니다.</p>
       <a class="src" href="https://github.com/vercel-labs/skills/blob/main/skills/find-skills/SKILL.md" target="_blank" rel="noopener">출처: find-skills SKILL.md ↗</a>
     </article>
     <article class="card">
-      <h3>언제 작동하나</h3>
+      <h3>작동 조건</h3>
       <ul>
-        <li>“X는 어떻게 해?”에서 X가 흔한 작업일 때</li>
-        <li>“X용 스킬 찾아줘”, “X 하는 스킬 있어?”</li>
-        <li>디자인·테스트·배포 같은 분야의 도움을 원할 때</li>
-        <li>에이전트 기능을 넓히고 싶다고 할 때</li>
+        <li>“X는 어떻게 해?”에서 X가 반복 가능한 전문 작업일 때</li>
+        <li>“X용 스킬 찾아줘”, “X 하는 스킬 있어?”라고 물을 때</li>
+        <li>문서화·테스트·배포·리뷰 등 특정 분야 워크플로를 확장할 때</li>
       </ul>
     </article>
     <article class="card">
-      <h3>에이전트가 따르는 6단계</h3>
+      <h3>6단계 탐색·검증 절차</h3>
       <ul>
-        <li>① 분야와 작업 파악 → ② <a class="src" href="https://skills.sh/" target="_blank" rel="noopener">skills.sh</a> 순위표 확인</li>
-        <li>③ <code translate="no">npx skills find &lt;검색어&gt;</code>로 검색</li>
-        <li>④ 설치 수·출처·스타로 품질 확인</li>
-        <li>⑤ 이름·용도·설치 수·설치 명령·링크 제시</li>
-        <li>⑥ 사용자가 원하면 설치</li>
+        <li>1단계: 분야와 구체적 작업 목표 정의</li>
+        <li>2단계: <a class="src" href="https://skills.sh/" target="_blank" rel="noopener">skills.sh</a> 상위 검증 목록 먼저 확인</li>
+        <li>3단계: <code translate="no">npx skills find &lt;검색어&gt;</code>로 후보 탐색</li>
+        <li>4단계: 설치 수(1K+)·출처 신뢰도·GitHub 스타(100+)·라이선스 검증</li>
+        <li>5단계: 스킬 이름·용도·지표·설치 명령·링크 제시</li>
+        <li>6단계: 사용자 승인 또는 저장소 규칙에 따라 설치</li>
       </ul>
     </article>
     <article class="card">
-      <h3>못 찾으면</h3>
-      <p>맞는 스킬이 없으면 그렇다고 알리고 일반 능력으로 직접 돕겠다고 제안합니다. 자주 하는 일이라면 <code translate="no">npx skills init</code>으로 직접 스킬을 만들도록 권합니다.</p>
+      <h3>적합한 스킬이 없을 때</h3>
+      <p>품질 기준을 통과하는 스킬이 없으면 억지로 설치하지 않고 에이전트의 기본 기능으로 직접 해결합니다. 같은 작업을 반복해야 한다면 <code translate="no">npx skills init &lt;이름&gt;</code>으로 자체 스킬을 만들도록 안내합니다.</p>
     </article>
   </div>
 </section>
 
 <section id="install">
-  <h2>설치</h2>
-  <p class="lead">Node.js 22.20 이상이 필요합니다(<code translate="no">node -v</code>로 확인). 프로젝트 폴더에서 실행하면 기본으로 그 프로젝트에 설치됩니다.</p>
-  <div class="grid">
+  <span class="sec-kicker">How-to · 설치와 경로 설계</span>
+  <h2>설치 방법</h2>
+  <p class="lead">실행 전 <code translate="no">node -v</code>로 <b>Node.js 22.20 이상</b>인지 먼저 확인하세요. 저장소 루트에서 실행하면 프로젝트 범위로 설치됩니다.</p>
+  <figure class="fig" id="fig-skill-scope" data-theme="dark"><svg viewBox="0 0 1000 338" role="img" aria-label="스킬 설치 범위·연결 방식·유지보수에서의 흔한 혼동과 저장소 표준 방식 대조도" style="color:var(--fg-text);font-family:inherit;max-width:1000px;min-width:720px" xmlns="http://www.w3.org/2000/svg"><defs><marker id="cmpsklac" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--fg-accent)"/></marker><marker id="cmpskla" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" style="fill:var(--fg-text)"/></marker></defs><text x="10" y="18" text-anchor="start" style="fill:var(--fg-text);font-size:12.5px;font-weight:700">피해야 할 방식 · 혼동 지점</text><text x="10" y="33" text-anchor="start" style="fill:var(--fg-muted);font-size:11px;font-weight:400">팀 공유 누락 · 해시 충돌 위험</text><line x1="10" y1="39" x2="416" y2="39" style="stroke:var(--fg-text);stroke-width:2"/><text x="500" y="24" text-anchor="middle" style="fill:var(--fg-muted);font-size:11.5px;font-weight:600">표준 선택 기준</text><text x="584" y="18" text-anchor="start" style="fill:var(--fg-text);font-size:12.5px;font-weight:700">이 저장소의 표준 운영 방식</text><text x="584" y="33" text-anchor="start" style="fill:var(--fg-muted);font-size:11px;font-weight:400">재현 가능 · 단일 원본 유지</text><line x1="584" y1="39" x2="990" y2="39" style="stroke:var(--fg-text);stroke-width:2"/><rect x="10" y="52" width="406" height="60" rx="8" style="fill:var(--fg-panel);stroke:var(--fg-line);stroke-width:1.3;stroke-dasharray:6 4"/><text x="22" y="72" text-anchor="start" style="fill:var(--fg-text);font-size:13px;font-weight:700">전역 설치 (-g 플래그)</text><text x="22" y="88" text-anchor="start" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">개인 홈 폴더에만 깔려 저장소 복제 시 누락</text><polyline points="422,82.0 576,82.0" style="fill:none;stroke:var(--fg-accent);stroke-width:1.8;stroke-linejoin:round" marker-end="url(#cmpsklac)"/><rect x="437.9" y="63.0" width="124.3" height="14" rx="3" style="fill:var(--fg-panel);opacity:.9;stroke:none"/><text x="500" y="74.0" text-anchor="middle" style="fill:var(--fg-muted);font-size:11px;font-weight:400">-g 생략 · 저장소 고정</text><rect x="584" y="52" width="406" height="60" rx="8" style="fill:var(--fg-panel);stroke:var(--fg-line);stroke-width:1.3"/><rect x="584" y="56" width="4" height="52" rx="2" style="fill:var(--fg-ok);stroke:none"/><text x="596" y="72" text-anchor="start" style="fill:var(--fg-text);font-size:13px;font-weight:700">프로젝트 범위 설치 (기본값)</text><text x="596" y="88" text-anchor="start" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">.agents/skills + skills-lock.json으로 공유</text><rect x="10" y="122" width="406" height="60" rx="8" style="fill:var(--fg-panel);stroke:var(--fg-line);stroke-width:1.3;stroke-dasharray:6 4"/><text x="22" y="142" text-anchor="start" style="fill:var(--fg-text);font-size:13px;font-weight:700">에이전트별 개별 사본 (--copy)</text><text x="22" y="158" text-anchor="start" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">폴더마다 파일이 중복되어 업데이트 시 불일치</text><polyline points="422,152.0 576,152.0" style="fill:none;stroke:var(--fg-accent);stroke-width:1.8;stroke-linejoin:round" marker-end="url(#cmpsklac)"/><rect x="445.0" y="133.0" width="110.1" height="14" rx="3" style="fill:var(--fg-panel);opacity:.9;stroke:none"/><text x="500" y="144.0" text-anchor="middle" style="fill:var(--fg-muted);font-size:11px;font-weight:400">기본 링크 모드 유지</text><rect x="584" y="122" width="406" height="60" rx="8" style="fill:var(--fg-panel);stroke:var(--fg-line);stroke-width:1.3"/><rect x="584" y="126" width="4" height="52" rx="2" style="fill:var(--fg-ok);stroke:none"/><text x="596" y="142" text-anchor="start" style="fill:var(--fg-text);font-size:13px;font-weight:700">공유 원본 + 심볼릭 링크 연결</text><text x="596" y="158" text-anchor="start" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">.claude/skills가 .agents/skills 원본을 참조</text><rect x="10" y="192" width="406" height="60" rx="8" style="fill:var(--fg-panel);stroke:var(--fg-line);stroke-width:1.3;stroke-dasharray:6 4"/><text x="22" y="212" text-anchor="start" style="fill:var(--fg-text);font-size:13px;font-weight:700">검증 전 무조건 add 설치</text><text x="22" y="228" text-anchor="start" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">안 쓰는 스킬이 잠금 파일과 목록을 오염</text><polyline points="422,222.0 576,222.0" style="fill:none;stroke:var(--fg-accent);stroke-width:1.8;stroke-linejoin:round" marker-end="url(#cmpsklac)"/><rect x="450.2" y="203.0" width="99.6" height="14" rx="3" style="fill:var(--fg-panel);opacity:.9;stroke:none"/><text x="500" y="214.0" text-anchor="middle" style="fill:var(--fg-muted);font-size:11px;font-weight:400">사전 체험 후 설치</text><rect x="584" y="192" width="406" height="60" rx="8" style="fill:var(--fg-panel);stroke:var(--fg-line);stroke-width:1.3"/><rect x="584" y="196" width="4" height="52" rx="2" style="fill:var(--fg-ok);stroke:none"/><text x="596" y="212" text-anchor="start" style="fill:var(--fg-text);font-size:13px;font-weight:700">skills use 일회성 프롬프트 시험</text><text x="596" y="228" text-anchor="start" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">설치 없이 원문·동작 확인 후 채택 결정</text><rect x="10" y="262" width="406" height="60" rx="8" style="fill:var(--fg-panel);stroke:var(--fg-line);stroke-width:1.3;stroke-dasharray:6 4"/><text x="22" y="282" text-anchor="start" style="fill:var(--fg-text);font-size:13px;font-weight:700">설치된 SKILL.md 직접 편집</text><text x="22" y="298" text-anchor="start" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">skills check 실패 및 modified 경고 발생</text><polyline points="422,292.0 576,292.0" style="fill:none;stroke:var(--fg-accent);stroke-width:1.8;stroke-linejoin:round" marker-end="url(#cmpsklac)"/><rect x="458.5" y="273.0" width="83.0" height="14" rx="3" style="fill:var(--fg-panel);opacity:.9;stroke:none"/><text x="500" y="284.0" text-anchor="middle" style="fill:var(--fg-muted);font-size:11px;font-weight:400">원본 불변 원칙</text><rect x="584" y="262" width="406" height="60" rx="8" style="fill:var(--fg-panel);stroke:var(--fg-line);stroke-width:1.3"/><rect x="584" y="266" width="4" height="52" rx="2" style="fill:var(--fg-ok);stroke:none"/><text x="596" y="282" text-anchor="start" style="fill:var(--fg-text);font-size:13px;font-weight:700">skills update 또는 재설치</text><text x="596" y="298" text-anchor="start" style="fill:var(--fg-muted);font-size:11.5px;font-weight:400">잠금 해시 일관성 유지 (자체 스킬만 편집)</text></svg><figcaption>개인 실험이 아니라 저장소에 스킬을 추가할 때는 <b>프로젝트 범위 + 심볼릭 링크 + 잠금 파일 커밋</b> 조합을 기본으로 삼습니다. 다른 출처의 동명 스킬이 겹칠 때만 <code translate="no">--rename</code>으로 이름을 분리합니다.</figcaption></figure>
+
+  <div class="grid" style="margin-top:18px">
     <article class="card">
-      <h3>이 저장소에 설치 <span class="tag all">권장</span></h3>
-<pre translate="no"><code translate="no">npx skills add vercel-labs/skills \
-  --skill find-skills -a claude-code -a codex</code></pre>
-      <p>Claude Code와 Codex 양쪽에 프로젝트 범위로 설치합니다. 확인 질문을 건너뛰려면 <code translate="no">-y</code>를 붙입니다.</p>
-      <a class="src" href="https://github.com/vercel-labs/skills/blob/main/docs/commands.md#skills-add" target="_blank" rel="noopener">출처: skills add ↗</a>
+      <h3>이 저장소에 설치 <span class="tag all">권장 표준</span></h3>
+<pre translate="no"><code translate="no">npx skills add &lt;owner/repo&gt; \
+  --skill &lt;name&gt; -a claude-code -a codex</code></pre>
+      <p>Claude Code와 Codex 양쪽에 프로젝트 범위로 설치합니다. 비대화형 환경에서 확인 프롬프트를 생략하려면 <code translate="no">-y</code>를 덧붙입니다.</p>
+      <a class="src" href="https://github.com/vercel-labs/skills/blob/main/docs/commands.md#skills-add" target="_blank" rel="noopener">출처: skills add 공식 문서 ↗</a>
     </article>
     <article class="card">
-      <h3>대화형으로 설치</h3>
+      <h3>대화형으로 선택 설치</h3>
 <pre translate="no"><code translate="no">npx skills add vercel-labs/skills</code></pre>
-      <p>설치할 스킬과 에이전트를 화면에서 고릅니다. 설치 방식은 심볼릭 링크(권장)와 복사 중에서 고릅니다.</p>
+      <p>저장소 안의 여러 스킬과 대상 에이전트를 화면에서 직접 고릅니다. 연결 방식은 단일 원본 유지에 유리한 심볼릭 링크(권장)와 복사 중 선택합니다.</p>
     </article>
     <article class="card">
-      <h3>모든 프로젝트에서 쓰기 <span class="tag note">전역</span></h3>
+      <h3>개인 전역 환경에 설치 <span class="tag note">전역 -g</span></h3>
 <pre translate="no"><code translate="no">npx skills add vercel-labs/skills \
   --skill find-skills -g -a claude-code -a codex</code></pre>
-      <p><code translate="no">-g</code>는 사용자 폴더(<code translate="no">~/.claude/skills/</code>, <code translate="no">~/.agents/skills/</code>)에 설치합니다.</p>
+      <p>이 저장소에 커밋하지 않고 내 PC의 모든 프로젝트에서 쓰려면 <code translate="no">-g</code>를 붙여 사용자 홈 폴더에 설치합니다.</p>
     </article>
     <article class="card">
-      <h3>설치 확인</h3>
+      <h3>설치 상태·무결성 점검</h3>
 <pre translate="no"><code translate="no">npx skills list
 npx skills check</code></pre>
-      <p><code translate="no">list</code>는 설치된 스킬과 <code translate="no">skills-lock.json</code> 기준 상태를, <code translate="no">check</code>는 업데이트와 로컬 변경 여부를 보여줍니다.</p>
+      <p><code translate="no">list</code>는 설치된 스킬과 <code translate="no">skills-lock.json</code> 대조 상태를 출력하고, <code translate="no">check</code>는 원격 업데이트와 로컬 임의 변경 여부를 검사합니다.</p>
     </article>
   </div>
   <div class="tablebox" style="margin-top:16px">
     <table>
-      <thead><tr><th>에이전트</th><th><code translate="no">-a</code> 값</th><th>프로젝트 경로</th><th>전역 경로(<code translate="no">-g</code>)</th></tr></thead>
+      <thead><tr><th>에이전트</th><th><code translate="no">-a</code> 식별자</th><th>프로젝트 경로 (기본)</th><th>전역 경로 (<code translate="no">-g</code>)</th></tr></thead>
       <tbody>
-        <tr><td>Claude Code</td><td><code translate="no">claude-code</code></td><td><code translate="no">.claude/skills/</code></td><td><code translate="no">~/.claude/skills/</code></td></tr>
+        <tr><td>Claude Code</td><td><code translate="no">claude-code</code></td><td><code translate="no">.claude/skills/</code> (<code translate="no">.agents</code> 링크)</td><td><code translate="no">~/.claude/skills/</code></td></tr>
         <tr><td>Codex</td><td><code translate="no">codex</code></td><td><code translate="no">.agents/skills/</code></td><td><code translate="no">~/.agents/skills/</code></td></tr>
         <tr><td>Antigravity</td><td><code translate="no">antigravity</code></td><td><code translate="no">.agents/skills/</code></td><td><code translate="no">~/.gemini/config/skills/</code></td></tr>
         <tr><td>Cursor</td><td><code translate="no">cursor</code></td><td><code translate="no">.agents/skills/</code></td><td><code translate="no">~/.cursor/skills/</code></td></tr>
       </tbody>
     </table>
   </div>
-  <p class="hint" style="margin-top:8px">공유 원본은 <code translate="no">.agents/skills/</code>에 두고, Claude Code를 고르면 <code translate="no">.claude/skills/</code>에 그 원본을 가리키는 링크가 생깁니다. 지원 에이전트 전체 목록은 <a class="src" href="https://github.com/vercel-labs/skills/blob/main/docs/agents.md" target="_blank" rel="noopener">Supported agents ↗</a>에 있습니다.</p>
+  <p class="hint" style="margin-top:8px">공유 원본은 <code translate="no">.agents/skills/</code> 한곳에 두고, Claude Code를 함께 지정하면 <code translate="no">.claude/skills/</code>에 상대 경로 심볼릭 링크가 생성됩니다. 전체 에이전트 목록은 <a class="src" href="https://github.com/vercel-labs/skills/blob/main/docs/agents.md" target="_blank" rel="noopener">Supported agents ↗</a>를 참고하세요.</p>
 </section>
 
 <section id="usage">
-  <h2>사용법</h2>
-  <p class="lead">에이전트에게 말로 요청하는 방법과, 터미널에서 CLI를 직접 쓰는 방법이 있습니다.</p>
+  <span class="sec-kicker">How-to · 호출과 검증 절차</span>
+  <h2>호출 및 사용법</h2>
+  <p class="lead">자연어로 요청해 자동 선택되게 하거나, 에이전트별 슬래시·달러 구문으로 특정 스킬을 명시 호출할 수 있습니다.</p>
   <div class="grid">
     <article class="card">
-      <h3>에이전트에게 묻기</h3>
-<pre translate="no"><code translate="no">React 앱을 빠르게 하는 스킬 있어?
-PR 리뷰를 도와줄 스킬 찾아줘
-changelog 만드는 스킬이 있을까?</code></pre>
-      <p>스킬 설명과 맞는 요청이면 에이전트가 find-skills를 스스로 골라 씁니다.</p>
+      <h3>자연어로 자동 트리거</h3>
+<pre translate="no"><code translate="no">React 앱 성능을 점검할 스킬 찾아줘
+이 주제를 여러 출처로 교차 검증해 보고서 써 줘
+문서 개념 관계를 인라인 SVG 흐름도로 그려 줘</code></pre>
+      <p>요청이 스킬 <code translate="no">description</code>과 맞물리면 에이전트가 해당 스킬을 스스로 읽습니다. 단, <code translate="no">disable-model-invocation: true</code>가 설정된 스킬(<code translate="no">technical-writing</code> 등)은 직접 호출해야 합니다.</p>
     </article>
     <article class="card">
-      <h3>직접 호출</h3>
-<pre translate="no"><code translate="no">/find-skills PR 리뷰      # Claude Code
-$find-skills PR 리뷰      # Codex</code></pre>
-      <p>Codex에서는 <code translate="no">/skills</code> 목록에서도 고를 수 있습니다.</p>
+      <h3>에이전트별 명시적 호출</h3>
+<pre translate="no"><code translate="no">/find-skills PR 리뷰           # Claude Code
+$find-skills PR 리뷰           # Codex
+/technical-writing 대상파일    # 직접 호출 전용 스킬</code></pre>
+      <p>Codex에서는 <code translate="no">/skills</code> 메뉴에서도 설치된 스킬 목록을 열어 고를 수 있습니다.</p>
     </article>
     <article class="card">
-      <h3>터미널에서 직접 찾고 설치</h3>
-<pre translate="no"><code translate="no">npx skills find pr review
+      <h3>터미널에서 검색·설치·문서화</h3>
+<pre translate="no"><code translate="no">npx skills find technical writing
 npx skills add &lt;owner/repo&gt; --skill &lt;name&gt; \
   -a claude-code -a codex</code></pre>
-      <p>찾은 스킬을 이 저장소에 설치하는 기본 흐름입니다. 설치 후 <a class="src" href="#installed">5. 설치한 스킬</a>에 카드를 추가합니다.</p>
+      <p>설치가 끝나면 <a class="src" href="#installed">설치한 스킬 목록</a> 카드, <code translate="no">THIRD_PARTY_NOTICES.md</code>, <code translate="no">README.md</code>, <code translate="no">skills-lock.json</code> 네 곳을 함께 갱신합니다.</p>
     </article>
     <article class="card">
-      <h3>추천 전 품질 확인 <span class="tag note">필수</span></h3>
+      <h3>채택 전 필수 품질 기준 <span class="tag note">필수 게이트</span></h3>
       <ul>
-        <li>설치 수: 1K 이상을 우선, 100 미만은 주의</li>
-        <li>출처: <code translate="no">vercel-labs</code>, <code translate="no">anthropics</code>, <code translate="no">microsoft</code> 같은 공식 출처를 우선</li>
-        <li>GitHub 스타: 100 미만 저장소는 의심하고 확인</li>
+        <li><b>설치 수</b>: 1,000회 이상 우선, 100회 미만은 주의</li>
+        <li><b>출처 신뢰도</b>: 공식 조직·검증된 오픈소스 작성자 우선</li>
+        <li><b>저장소 스타·라이선스</b>: 100 스타 미만은 원문 정밀 대조, 배포 가능한 라이선스(MIT·Apache-2.0 등) 필수 확인</li>
       </ul>
-      <p>find-skills는 검색 결과만 보고 추천하지 말라고 명시합니다.</p>
     </article>
   </div>
 </section>
 
 <section id="all">
-  <h2>skills CLI 명령</h2>
-  <p class="lead">모든 명령은 앞에 <code translate="no">npx</code>를 붙여 <code translate="no">npx skills &lt;명령&gt;</code>으로 실행합니다. <code translate="no">experimental_</code> 명령은 미리보기라 언제든 바뀔 수 있습니다.</p>
-  <input class="filter" id="cmd-filter" type="search" name="q" autocomplete="off" spellcheck="false" placeholder="명령·분류·설명 검색…" aria-label="skills CLI 명령 검색">
-  <p class="count" id="cmd-count" aria-live="polite"></p>
-  <p class="hint">명령을 클릭하거나 Tab으로 이동해 Enter를 누르면 자세한 설명과 사용 예, 공식 문서 링크가 펼쳐집니다. 검색어와 펼친 항목은 주소에 남아 그대로 공유할 수 있습니다.</p>
+  <span class="sec-kicker">Reference · skills CLI 명령 사전</span>
+  <h2><code translate="no">skills</code> CLI 전체 명령 (10개)</h2>
+  <p class="lead">모든 명령은 <code translate="no">npx skills &lt;명령&gt;</code> 형식으로 실행합니다. <code translate="no">experimental_</code> 접두어가 붙은 명령은 예고 없이 사양이 바뀔 수 있습니다.</p>
+  <div class="controls">
+    <input class="filter" id="cmd-filter" type="search" name="q" autocomplete="off" spellcheck="false" placeholder="명령·분류·별칭·설명 검색… (단축키 /)" aria-label="skills CLI 명령 검색">
+    <button class="btn-ghost" type="button" id="cmd-collapse-all">펼친 설명 모두 접기</button>
+  </div>
+  <div class="chips" id="cmd-chips" role="toolbar" aria-label="skills CLI 명령 분류 필터"></div>
+  <div class="status-row">
+    <p class="count" id="cmd-count" aria-live="polite"></p>
+    <p class="hint">행을 클릭하거나 Tab 이동 후 Enter를 누르면 상세 옵션·예제 복사·공식 문서 링크가 펼쳐집니다. 검색·분류·펼침 상태는 URL에 보존됩니다.</p>
+  </div>
   <div class="tablebox">
     <table id="cmd-table">
       <thead><tr><th>명령</th><th>분류</th><th>별칭</th><th>설명</th></tr></thead>
       <tbody>
-        <tr><td><code translate="no">skills find [query]</code></td><td>검색</td><td></td><td>키워드나 대화형으로 스킬 검색</td></tr>
+        <tr><td><code translate="no">skills find [query]</code></td><td>검색</td><td></td><td>키워드 또는 대화형 목록으로 스킬 검색</td></tr>
         <tr><td><code translate="no">skills add &lt;source&gt;</code></td><td>설치</td><td></td><td>GitHub·GitLab·git URL·로컬 경로에서 스킬 설치</td></tr>
-        <tr><td><code translate="no">skills use &lt;source&gt;@&lt;skill&gt;</code></td><td>설치</td><td></td><td>설치 없이 스킬 하나로 프롬프트 생성·에이전트 실행</td></tr>
-        <tr><td><code translate="no">skills list</code></td><td>관리</td><td><code translate="no">ls</code></td><td>설치된 스킬과 상태 목록</td></tr>
-        <tr><td><code translate="no">skills check</code></td><td>관리</td><td></td><td>업데이트·로컬 변경 확인</td></tr>
-        <tr><td><code translate="no">skills update [skills...]</code></td><td>관리</td><td></td><td>설치된 스킬 업데이트</td></tr>
-        <tr><td><code translate="no">skills remove [skills...]</code></td><td>관리</td><td><code translate="no">rm</code></td><td>설치된 스킬 삭제</td></tr>
-        <tr><td><code translate="no">skills init [name]</code></td><td>만들기</td><td></td><td>새 스킬 템플릿(SKILL.md) 생성</td></tr>
-        <tr><td><code translate="no">skills experimental_sync</code></td><td>실험</td><td><code translate="no">sync</code></td><td>npm 의존성이 제공하는 스킬을 프로젝트에 동기화</td></tr>
-        <tr><td><code translate="no">skills experimental_install</code></td><td>실험</td><td><code translate="no">install</code>, <code translate="no">i</code></td><td><code translate="no">skills-lock.json</code> 기준으로 프로젝트 스킬 복원</td></tr>
+        <tr><td><code translate="no">skills use &lt;source&gt;@&lt;skill&gt;</code></td><td>설치</td><td></td><td>설치 없이 단일 스킬 프롬프트 출력 또는 에이전트 실행</td></tr>
+        <tr><td><code translate="no">skills list</code></td><td>관리</td><td><code translate="no">ls</code></td><td>설치된 스킬과 잠금 파일 대조 상태 출력</td></tr>
+        <tr><td><code translate="no">skills check</code></td><td>관리</td><td></td><td>원격 업데이트 유무와 로컬 해시 변경 검사</td></tr>
+        <tr><td><code translate="no">skills update [skills...]</code></td><td>관리</td><td></td><td>설치된 스킬을 최신 커밋으로 업데이트</td></tr>
+        <tr><td><code translate="no">skills remove [skills...]</code></td><td>관리</td><td><code translate="no">rm</code></td><td>설치된 스킬과 에이전트 링크 삭제</td></tr>
+        <tr><td><code translate="no">skills init [name]</code></td><td>만들기</td><td></td><td>새 스킬 작성용 <code translate="no">SKILL.md</code> 템플릿 생성</td></tr>
+        <tr><td><code translate="no">skills experimental_sync</code></td><td>실험</td><td><code translate="no">sync</code></td><td><code translate="no">package.json</code> npm 의존성 내장 스킬 동기화</td></tr>
+        <tr><td><code translate="no">skills experimental_install</code></td><td>실험</td><td><code translate="no">install</code>, <code translate="no">i</code></td><td><code translate="no">skills-lock.json</code> 기준으로 누락된 스킬·링크 복원</td></tr>
       </tbody>
     </table>
   </div>
-  <a class="src" href="https://github.com/vercel-labs/skills/blob/main/docs/commands.md" target="_blank" rel="noopener">출처: CLI reference ↗</a>
+  <a class="src" href="https://github.com/vercel-labs/skills/blob/main/docs/commands.md" target="_blank" rel="noopener">출처: vercel-labs/skills CLI reference ↗</a>
 </section>
-
-
 
 <section id="notes">
+  <span class="sec-kicker">Guardrails · 운영 주의 사항</span>
   <h2>주의 사항</h2>
+  <p class="lead">버전 요구사항, 개인정보·보안 감사 설정, 이름 충돌, 해시 불일치를 예방하는 4가지 필수 수칙입니다.</p>
   <div class="grid">
-    <article class="card"><h3>Node.js 버전</h3>
-      <p>CLI는 Node.js 22.20 이상이 필요합니다. 낮은 버전이면 먼저 Node.js를 올립니다.</p></article>
-    <article class="card"><h3>텔레메트리</h3>
-      <p>CLI는 익명 사용 데이터를 수집합니다. 끄려면 <code translate="no">DISABLE_TELEMETRY=1</code>이나 <code translate="no">DO_NOT_TRACK=1</code>을 설정합니다. 이 설정은 보안 감사 요청도 함께 끕니다.</p>
-      <a class="src" href="https://github.com/vercel-labs/skills/blob/main/docs/troubleshooting.md#telemetry" target="_blank" rel="noopener">출처: Telemetry ↗</a></article>
-    <article class="card"><h3>이름이 겹칠 때</h3>
-      <p>같은 이름의 스킬을 다른 출처에서 설치하면 먼저 설치한 것을 덮어씁니다. <code translate="no">--rename &lt;name&gt;</code>으로 다른 이름을 붙여 설치합니다.</p></article>
-    <article class="card"><h3>설치한 스킬은 직접 고치지 않기</h3>
-      <p>직접 수정하면 <code translate="no">skills-lock.json</code>의 해시와 달라져 <code translate="no">list</code>에서 <code translate="no">modified</code>로 표시되고 <code translate="no">check</code>가 실패합니다. 바꿔야 하면 업데이트나 재설치로 처리합니다.</p></article>
+    <article class="card">
+      <h3>Node.js 22.20 이상 필수</h3>
+      <p>실행 전 <code translate="no">node -v</code>를 먼저 확인하세요. 낮은 버전이 기본 경로에 잡혀 있으면 <code translate="no">nvm use 22</code> 등으로 Node.js 22.20 이상을 활성화한 뒤 <code translate="no">npx skills</code>를 실행합니다.</p>
+    </article>
+    <article class="card">
+      <h3>익명 텔레메트리와 보안 감사</h3>
+      <p>CLI는 기본적으로 익명 사용 통계를 전송합니다. 전송을 차단하려면 실행 앞에 <code translate="no">DISABLE_TELEMETRY=1</code> 또는 <code translate="no">DO_NOT_TRACK=1</code> 환경 변수를 지정하세요(단, 설치 시 원격 보안 감사 표시는 함께 생략됩니다).</p>
+      <a class="src" href="https://github.com/vercel-labs/skills/blob/main/docs/troubleshooting.md#telemetry" target="_blank" rel="noopener">출처: Telemetry 안내 ↗</a>
+    </article>
+    <article class="card">
+      <h3>동명 스킬 덮어쓰기 방지</h3>
+      <p>서로 다른 저장소에서 같은 이름의 스킬을 그대로 설치하면 기존 폴더를 덮어씁니다. 이름이 겹칠 때는 설치 명령에 <code translate="no">--rename &lt;새이름&gt;</code>을 붙여 분리하세요.</p>
+    </article>
+    <article class="card">
+      <h3>설치 원본 직접 수정 금지</h3>
+      <p>외부에서 설치한 <code translate="no">.agents/skills/&lt;이름&gt;/</code> 파일을 직접 고치면 <code translate="no">skills-lock.json</code> 해시와 어긋나 <code translate="no">list</code>에서 <code translate="no">modified</code>로 경고되고 <code translate="no">check</code>가 실패합니다(Windows 줄바꿈 자동 변환도 해시 차이를 유발할 수 있음). 변경은 <code translate="no">npx skills update</code>나 재설치로만 처리합니다.</p>
+    </article>
   </div>
 </section>
-<section id="references"><h2>오픈소스 참고와 세션 인계 조사</h2><p class="lead">2026-11-14 조사 자료입니다. 아래 외부 후보와 과거 스킬 이름은 현재 설치 목록과 구분합니다. 실제 설치 상태는 맨 위 <a href="#installed">설치한 스킬</a> 목록을 기준으로 봅니다.</p><section id="ref-development"><h3>02 · 개발 관련 오픈소스 레퍼런스</h3><p>아래 프로젝트를 모두 설치했다는 뜻은 아닙니다. 앞선 조사에서 찾은 외부 레퍼런스를 최초 조사 당시 로컬 스킬과 비교한 목록입니다. 인기도는 설치 수·스타라는 서로 다른 지표를 섞어 단일 순위로 만들지 않았습니다.</p>
-<div class="grid">
-<article><span class="tag">MIT · 추가 참고 후보</span><h4>Matt Pocock Skills</h4><p>인터뷰, 설계 검토, 구현·코드 리뷰를 작고 조합 가능한 스킬로 구성합니다. 공개 <code translate="no">grill-me</code>는 현재 실제 인터뷰 스킬 <code translate="no">grilling</code>을 부르는 진입점입니다.</p><p>우리 <code translate="no">grill-me</code>·<code translate="no">make-plan</code>과 비교하기 좋습니다. <code translate="no">grill-with-docs</code>도 문서 기반 검토 후보입니다.</p><p><a href="https://github.com/mattpocock/skills">저장소·라이선스</a> · <a href="https://github.com/mattpocock/skills/blob/main/skills/productivity/grill-me/SKILL.md">grill-me 원문</a></p></article>
-<article><span class="tag">MIT · 추가 참고 후보</span><h4>Obra Superpowers</h4><p>브레인스토밍, 계획, TDD, 근본 원인 디버깅, 리뷰와 완료 검증을 연결하는 개발 방법론입니다.</p><p>우리 <code translate="no">boost</code>·<code translate="no">teamwork</code>·<code translate="no">make-plan</code>의 단계 연결과 완료 조건을 비교할 때 유용합니다. 스킬 전체를 도입하기 전, 중복되는 규칙을 살펴보는 편이 좋습니다.</p><p><a href="https://github.com/obra/superpowers">저장소·스킬 목록</a></p></article>
-<article><span class="tag">MIT / Apache-2.0 · 추가 참고 후보</span><h4>Vercel Skills &amp; Agent Browser</h4><p><code translate="no">find-skills</code>는 필요한 스킬을 찾는 용도이며 저장소 라이선스는 MIT입니다. <code translate="no">agent-browser</code>는 에이전트용 브라우저 자동화 도구이며 Apache-2.0입니다.</p><p>검색은 새 스킬 탐색, 브라우저 도구는 <code translate="no">feel</code>의 실제 사용 흐름 검증을 검토할 때 참고할 수 있습니다. 브라우저 도구 설치만으로 측정 환경이 준비되는 것은 아닙니다.</p><p><a href="https://github.com/vercel-labs/skills">Skills</a> · <a href="https://github.com/vercel-labs/agent-browser">Agent Browser</a></p></article>
-<article><span class="tag">WTFPL · 추가 참고 후보</span><h4>Ultrapack</h4><p>설계 → 계획 → 실행 → 검증 → 리뷰 → 문서 갱신을 작업별 Markdown 파일에 남깁니다. Claude Code·Codex·Pi를 지원한다고 설명합니다.</p><p><code translate="no">handsoff</code>는 이 패키지의 자율 작업 규약입니다. 사용자가 찾는 세션 인계용 <code translate="no">handoff</code>와는 다른 기능입니다.</p><p><a href="https://github.com/btseytlin/ultrapack">저장소</a> · <a href="https://github.com/btseytlin/ultrapack/blob/main/license.txt">라이선스</a></p></article>
-</div><div class="box"><strong>최근 관심을 읽는 참고 지표</strong><p>조회한 skills.sh 화면에서 누적 설치는 <code translate="no">find-skills</code> 약 440만, <code translate="no">grill-me</code> 약 160만, <code translate="no">agent-browser</code> 약 150만이었습니다. 24시간 목록에서는 영상·디자인 스킬도 두드러졌습니다. 이 수치는 플랫폼의 표시값이며 품질 평가나 고유 사용자 수를 뜻하지 않습니다. <a href="https://www.skills.sh/">누적 목록</a> · <a href="https://www.skills.sh/trending">24시간 목록</a></p><p>영상 작업까지 확장한다면 Apache-2.0인 <a href="https://github.com/heygen-com/hyperframes">HeyGen Hyperframes</a>도 참고할 수 있습니다. HTML을 영상으로 렌더링하는 프로젝트로, 문서 작성 스킬과는 용도가 다릅니다.</p></div></section><section id="ref-documents"><h3>03 · 문서 관련 오픈소스 레퍼런스</h3><p><a href="https://github.com/anthropics/skills">Anthropic 공식 Skills</a>가 가장 직접적인 출발점입니다. 설치 사본의 배포 조건은 앞의 라이선스 안내를 따로 확인하세요.</p>
-<div class="scroll" tabindex="0" role="region" aria-label="문서 레퍼런스 표, 가로로 스크롤할 수 있음"><table><thead><tr><th>레퍼런스</th><th>용도</th><th>가져올 만한 설계</th><th>현재 확인 상태</th></tr></thead><tbody>
-<tr><td><a href="https://github.com/anthropics/skills/tree/main/skills/doc-coauthoring">doc-coauthoring</a></td><td>제안서·기술 명세·의사결정 문서</td><td>맥락 수집 → 구성·내용 개선 → 새로운 독자 관점의 검증</td><td>공개 원문 확인. 로컬 설치는 확인되지 않음.</td></tr>
-<tr><td><a href="https://github.com/anthropics/skills/tree/main/skills/docx">docx</a></td><td>Word 생성·편집·분석</td><td>신규 생성과 기존 XML 편집의 분기, 표·목차·페이지 설정의 오류 예방</td><td>동명 Claude 파일 확인. 공개 LICENSE는 Apache-2.0, 설치본은 서비스 약관 기반.</td></tr>
-<tr><td><a href="https://github.com/anthropics/skills/tree/main/skills/pdf">pdf</a></td><td>추출·병합·분할·OCR·폼</td><td>기본 작업과 복잡한 참조 문서를 나누는 구성</td><td>동명 Claude 파일 확인. 공개 README는 Apache-2.0으로 설명.</td></tr>
-<tr><td><a href="https://github.com/anthropics/skills/tree/main/skills/pptx">pptx</a></td><td>발표 자료 생성·템플릿 편집</td><td>생성·편집·읽기 작업 분기, 썸네일을 활용한 확인</td><td>동명 Claude 파일 확인. 공개 README는 Apache-2.0으로 설명.</td></tr>
-<tr><td><a href="https://github.com/anthropics/skills/tree/main/skills/xlsx">xlsx</a></td><td>수식·표·서식·차트·데이터 정리</td><td>최종 결과물이 스프레드시트일 때 작동하도록 범위를 한정</td><td>동명 Claude 파일 확인. 공개 README는 Apache-2.0으로 설명.</td></tr>
-<tr><td><a href="https://github.com/K-Dense-AI/scientific-agent-skills">Scientific Agent Skills</a></td><td>문헌 검토·논문·학술 발표·도식</td><td>근거 추적이 가능한 연구 문서와 학술 산출물 워크플로</td><td>추가 참고 후보. 저장소 MIT, 개별 스킬은 각자의 라이선스를 확인해야 함.</td></tr>
-</tbody></table></div><p><strong>과거 로컬 스킬과의 연결:</strong> <code translate="no">cli-guide</code>는 조사 결과를 HTML 설명서로 만드는 데, <code translate="no">docfig</code>는 HTML 안에서 흐름과 관계를 그림으로 보여주는 데 특화되어 있습니다. <code translate="no">doc-coauthoring</code>의 독자 검증 절차는 두 스킬의 결과물을 개선할 참고 패턴입니다. 이는 활용 제안이며 이미 통합했다는 뜻은 아닙니다.</p></section><section id="ref-handoff"><h3>04 · handoff — 세션을 이어가는 인계 스킬</h3>
-<div class="box notice"><strong>사용자가 찾는 기능에 맞춰 조사 대상을 정정했습니다.</strong><p>진행 상태를 파일로 남기고 새 세션이나 압축 이후의 컨텍스트에서 읽어 작업을 이어가는 handoff입니다. Ultrapack의 자율 실행 규약 handsoff 및 Android 도구 HandsOff와는 다릅니다. 아래 두 후보가 설명에 부합하지만 사용자가 들었던 링크가 없어 특정 제작자는 미확정입니다. Matt handoff는 이후 이 프로젝트의 Codex·Claude Code 양쪽에 설치했습니다. 훅 기반 후보는 설치하지 않았고, 실제 클라이언트 호출은 아직 확인하지 않았습니다.</p></div>
-<h4>A. Matt Pocock의 handoff — 요약 문서를 만들어 전달</h4>
-<p>현재 대화를 인계 문서로 요약해 새 에이전트가 작업을 이어가도록 준비하는 커뮤니티 스킬입니다. grill-me와 같은 제작자의 저장소에 있어 이전 대화 맥락에서는 유력한 후보지만, 사용자가 들은 스킬이라고 확정할 수는 없습니다. <a href="https://github.com/mattpocock/skills/blob/main/skills/productivity/handoff/SKILL.md">SKILL.md 원문</a></p>
-<div class="box"><strong>원문에서 확인한 동작</strong><ul><li>작업 저장소가 아닌 OS 임시 폴더에 인계 문서를 저장합니다.</li><li>이미 명세·계획·ADR·이슈·커밋·diff에 있는 내용은 중복하지 않고 경로나 URL로 참조합니다.</li><li>suggested skills 항목으로 다음 에이전트가 사용할 스킬을 남깁니다.</li><li>API 키·암호·개인정보 등 민감한 내용을 제거합니다.</li><li>다음 세션의 목적을 인자로 받으면 그 목적에 맞춰 작성합니다.</li><li>사용자가 직접 호출하는 설정입니다. 이 파일 자체에 자동 재주입 훅은 없습니다.</li></ul></div>
+
+<section id="references">
+  <span class="sec-kicker">Appendix · 미설치 외부 참고 자료 (2026-11-14 조사 보존)</span>
+  <h2>오픈소스 참고 후보와 세션 인계 조사</h2>
+  <p class="lead">아래 외부 저장소와 후보들은 선행 조사에서 검토한 <b>참고 자료</b>이며 현재 프로젝트 설치 목록이 아닙니다(<code translate="no">Matt handoff</code>만 이후 정식 설치). 실제 설치 여부는 상단 <a href="#installed">설치한 스킬 (7개)</a> 절을 기준으로 확인하세요.</p>
+
+  <section id="ref-development">
+    <h3>A · 개발 워크플로 오픈소스 참고 후보</h3>
+    <p class="lead">설계 인터뷰·계획·TDD·브라우저 검증 등 개발 단계별 외부 레퍼런스입니다. 설치 수와 GitHub 스타는 기준이 다른 지표이므로 단일 순위로 합산하지 않았습니다.</p>
+    <div class="grid">
+      <article class="card">
+        <h4>Matt Pocock Skills <span class="tag">MIT · 참고 후보</span></h4>
+        <p>인터뷰, 설계 검토, 구현·코드 리뷰를 작고 조합 가능한 스킬 단위로 나눕니다. 공개 <code translate="no">grill-me</code>는 실제 인터뷰 스킬 <code translate="no">grilling</code>을 부르는 진입점이며, <code translate="no">grill-with-docs</code>는 문서 기반 검토 후보입니다(<code translate="no">handoff</code>만 이 저장소에 설치됨).</p>
+        <a class="src" href="https://github.com/mattpocock/skills" target="_blank" rel="noopener">저장소·라이선스 ↗</a>
+        <a class="src" href="https://github.com/mattpocock/skills/blob/main/skills/productivity/grill-me/SKILL.md" target="_blank" rel="noopener">grill-me 원문 ↗</a>
+      </article>
+      <article class="card">
+        <h4>Obra Superpowers <span class="tag">MIT · 참고 후보</span></h4>
+        <p>브레인스토밍 → 계획 → TDD → 근본 원인 디버깅 → 리뷰·완료 검증을 하나의 개발 규율로 연결합니다. 전체 패키지를 한꺼번에 도입하기보다 기존 에이전트 슬래시 명령과 겹치는 규칙을 대조할 때 유용합니다.</p>
+        <a class="src" href="https://github.com/obra/superpowers" target="_blank" rel="noopener">저장소·스킬 목록 ↗</a>
+      </article>
+      <article class="card">
+        <h4>Vercel Skills &amp; Agent Browser <span class="tag">MIT / Apache-2.0</span></h4>
+        <p><code translate="no">find-skills</code>(MIT)는 스킬 탐색용으로 설치했고, <code translate="no">agent-browser</code>(Apache-2.0)는 에이전트용 브라우저 자동화 참고 후보입니다. WSL·Windows 환경에서는 브라우저 프로필 잠금 규칙을 먼저 점검해야 합니다.</p>
+        <a class="src" href="https://github.com/vercel-labs/skills" target="_blank" rel="noopener">Vercel Skills ↗</a>
+        <a class="src" href="https://github.com/vercel-labs/agent-browser" target="_blank" rel="noopener">Agent Browser ↗</a>
+      </article>
+      <article class="card">
+        <h4>Ultrapack <span class="tag">WTFPL · 참고 후보</span></h4>
+        <p>설계 → 계획 → 실행 → 검증 → 리뷰 → 문서 갱신 과정을 작업별 Markdown에 기록하며 Claude Code·Codex·Pi 지원을 표방합니다. 내부의 <code translate="no">handsoff</code>는 자율 실행 규약으로 세션 인계용 <code translate="no">handoff</code>와는 다른 기능입니다.</p>
+        <a class="src" href="https://github.com/btseytlin/ultrapack" target="_blank" rel="noopener">저장소 ↗</a>
+        <a class="src" href="https://github.com/btseytlin/ultrapack/blob/main/license.txt" target="_blank" rel="noopener">라이선스 ↗</a>
+      </article>
+    </div>
+    <div class="box">
+      <strong>플랫폼 표시 지표 읽는 법 (2026-11-14 조회 기준)</strong>
+      <p>조회 당시 <code translate="no">skills.sh</code> 누적 표시값은 <code translate="no">find-skills</code> 약 440만, <code translate="no">grill-me</code> 약 160만, <code translate="no">agent-browser</code> 약 150만이었으며 24시간 목록에서는 영상·디자인 스킬이 두드러졌습니다. 이는 레지스트리 집계 표시값일 뿐 품질 보증이나 고유 사용자 수를 뜻하지 않습니다. <a href="https://www.skills.sh/" target="_blank" rel="noopener">누적 목록 ↗</a> · <a href="https://www.skills.sh/trending" target="_blank" rel="noopener">24시간 목록 ↗</a></p>
+      <p>HTML을 영상으로 렌더링하는 작업까지 넓힐 때는 Apache-2.0인 <a href="https://github.com/heygen-com/hyperframes" target="_blank" rel="noopener">HeyGen Hyperframes ↗</a>도 참고할 수 있으나 정적 문서 작성 스킬과는 목적이 다릅니다.</p>
+    </div>
+  </section>
+
+  <section id="ref-documents">
+    <h3>B · 문서·산출물 오픈소스 참고 후보</h3>
+    <p class="lead"><a href="https://github.com/anthropics/skills" target="_blank" rel="noopener">Anthropic 공식 Skills</a>와 학술 문서 워크플로 참고표입니다. 개별 폴더의 라이선스 파일 유무와 배포 조건을 반드시 구분해 확인해야 합니다.</p>
+    <div class="scroll" tabindex="0" role="region" aria-label="문서 레퍼런스 표, 가로로 스크롤할 수 있음">
+      <table>
+        <thead><tr><th>레퍼런스</th><th>용도</th><th>가져올 만한 설계</th><th>현재 확인 상태</th></tr></thead>
+        <tbody>
+          <tr><td><a href="https://github.com/anthropics/skills/tree/main/skills/doc-coauthoring" target="_blank" rel="noopener">doc-coauthoring</a></td><td>제안서·기술 명세·의사결정 문서</td><td>맥락 수집 → 구성·내용 개선 → 새로운 독자 관점 검증</td><td>공개 원문 확인(별도 LICENSE 파일 미포함). 미설치.</td></tr>
+          <tr><td><a href="https://github.com/anthropics/skills/tree/main/skills/docx" target="_blank" rel="noopener">docx</a></td><td>Word 생성·편집·분석</td><td>신규 생성과 기존 XML 편집 분기, 표·목차 설정 오류 예방</td><td>공개 폴더 LICENSE 확인. 이 저장소에는 미설치.</td></tr>
+          <tr><td><a href="https://github.com/anthropics/skills/tree/main/skills/pdf" target="_blank" rel="noopener">pdf</a></td><td>추출·병합·분할·OCR·폼</td><td>기본 작업과 고급 참조 문서를 분리하는 구성</td><td>공개 폴더 LICENSE 확인. 이 저장소에는 미설치.</td></tr>
+          <tr><td><a href="https://github.com/anthropics/skills/tree/main/skills/pptx" target="_blank" rel="noopener">pptx</a></td><td>발표 자료 생성·템플릿 편집</td><td>생성·편집·읽기 작업 분기, 썸네일 기반 시각 검증</td><td>공개 폴더 LICENSE 확인. 이 저장소에는 미설치.</td></tr>
+          <tr><td><a href="https://github.com/anthropics/skills/tree/main/skills/xlsx" target="_blank" rel="noopener">xlsx</a></td><td>수식·표·서식·차트·데이터 정리</td><td>최종 산출물이 스프레드시트일 때만 작동하도록 범위 한정</td><td>공개 폴더 LICENSE 확인. 이 저장소에는 미설치.</td></tr>
+          <tr><td><a href="https://github.com/K-Dense-AI/scientific-agent-skills" target="_blank" rel="noopener">Scientific Agent Skills</a></td><td>문헌 검토·논문·학술 발표·도식</td><td>근거 추적이 가능한 연구 문서와 학술 산출물 워크플로</td><td>추가 참고 후보. 저장소 MIT(개별 스킬 라이선스 별도 확인 필요).</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="margin-top:10px"><strong>현재 저장소 스킬 조합과의 연결:</strong> 기술 설명서 구조화·문장 교정에는 MIT 라이선스가 명확한 <a href="#skill-technical-writing"><code translate="no">technical-writing</code></a>을 설치해 적용했고, HTML 내 인라인 SVG 시각화와 경계·링크 점검은 자체 스킬 <a href="#skill-docfig"><code translate="no">docfig</code></a>가 담당합니다. <code translate="no">doc-coauthoring</code>의 ‘맥락 없는 새 독자 검증’ 절차는 보조 검토 기법으로 참고할 수 있습니다.</p>
+  </section>
+
+  <section id="ref-handoff">
+    <h3>C · 세션 인계(<code translate="no">handoff</code>) 두 구현 방식 비교</h3>
+    <div class="box notice">
+      <strong>조사 대상 구분 안내</strong>
+      <p>진행 상태를 파일로 남기고 새 세션이나 컨텍스트 압축 이후에 이어받는 세션 인계 기능입니다(Ultrapack의 자율 실행 규약 <code translate="no">handsoff</code>나 Android 앱 HandsOff와는 무관). 아래 두 후보 중 검증 지표와 라이선스가 확인된 <b>Matt Pocock의 <code translate="no">handoff</code></b>를 이 저장소에 정식 설치했으며, 훅 기반 후보는 참고 기록으로만 남겼습니다.</p>
+    </div>
+    <h4>1) Matt Pocock의 <code translate="no">handoff</code> — 요약 인계서 생성 후 수동 전달 (설치됨)</h4>
+    <p>현재 대화를 요약 문서로 작성해 다음 세션 에이전트가 읽게 하는 방식입니다. 작업 저장소를 더럽히지 않도록 OS 임시 폴더에 저장하고, 기존 명세·커밋·diff는 경로로만 참조하며 API 키·암호 등 민감 정보는 제거합니다. <a href="https://github.com/mattpocock/skills/blob/main/skills/productivity/handoff/SKILL.md" target="_blank" rel="noopener">SKILL.md 원문 ↗</a></p>
 <pre translate="no"><code translate="no">현재 세션: /handoff 다음 세션에서는 로그인 오류 수정에 집중
-→ 인계 문서 경로 확인
-→ 새 세션 시작
-→ “이 인계 문서를 읽고 미완료 작업부터 이어가 줘”</code></pre>
-<p>설치 후의 사용 예시이며 실제 호출명은 플러그인 이름 공간에 따라 달라질 수 있습니다. 이번 환경에서 실행하지 않았습니다. 저장소 라이선스는 MIT입니다. <a href="https://github.com/mattpocock/skills">저장소·라이선스</a></p>
-<h4>B. xoonjaeho/claude-skill-handoff — 저장 후 훅으로 다시 읽기</h4>
-<p>README는 /clear 또는 /compact 전에 정확한 ID·진행 위치·결정과 이유 등을 파일에 보존하고 SessionStart 훅으로 다시 주입한다고 설명합니다. “압축 뒤 자동으로 다시 읽는다”는 기억과 더 가까운 후보입니다. MIT 라이선스이며 조사 당시 0스타로 표시되어 널리 검증된 도구라고 단정할 근거는 부족합니다. <a href="https://github.com/xoonjaeho/claude-skill-handoff">저장소·README</a></p>
-<ul><li><code translate="no">/handoff</code>는 <code translate="no">~/.claude/handoffs/handoff.md</code>에 선택한 상태를 저장합니다. 대화 전체 백업은 아닙니다.</li><li>사용자가 /clear 또는 /compact를 실행합니다. 스킬이 해당 명령을 대신 실행하지 않습니다.</li><li>훅은 clear·compact 출처에서 인계서를 보관 처리하고, 10분 이내 자료는 자동 주입하며 오래된 자료는 확인을 요청합니다.</li><li>일반 새 세션 시작에는 자동 주입하지 않습니다. 수동 재개 명령이나 파일 읽기가 필요합니다.</li><li>자동 재개에는 훅 등록과 Python 3.9 이상이 필요합니다. 단일 대기 파일을 사용하므로 여러 세션의 동시 인계에는 제약이 있습니다.</li></ul>
-<div class="scroll" tabindex="0" role="region" aria-label="handoff 비교 표, 가로로 스크롤할 수 있음"><table><thead><tr><th>비교</th><th>Matt handoff</th><th>xoonjaeho handoff</th></tr></thead><tbody><tr><td>핵심 방식</td><td>요약 문서 생성 후 전달</td><td>상태 파일 저장 + 훅 재주입</td></tr><tr><td>저장 위치</td><td>OS 임시 폴더</td><td>사용자 홈 .claude/handoffs</td></tr><tr><td>재개 방식</td><td>문서를 읽히는 과정 필요</td><td>clear·compact 경계에서 조건부 자동 재개</td></tr><tr><td>이번 확인 범위</td><td>원문 일치·설치 파일·Claude 링크 확인, 실제 호출 미검증</td><td>README, 미설치·실행 검증 없음</td></tr></tbody></table></div>
-<h4>compact와 함께 사용할 때의 의미</h4><p>인계서는 목표·결정·제약·진행 상태·참조 파일·다음 행동을 명시적으로 남기는 산출물입니다. 원본 대화나 파일 시스템 전체를 복제하지 않습니다. 이어받는 세션은 문서를 읽은 뒤 실제 파일·브랜치·실행 결과를 확인해야 합니다. 위 구현들을 바탕으로 한 활용 원칙이며, 인계서가 완전한 복원을 보장한다는 뜻은 아닙니다.</p></section><section id="ref-sources"><h3>06 · 출처와 검증 범위</h3><p>공개 GitHub 원문과 공식 README를 우선 근거로 사용했습니다. 세션 handoff는 Matt Pocock의 SKILL.md와 xoonjaeho 프로젝트 README로 확인했습니다. 사용자가 들었던 특정 제작자는 미확정입니다. 스타·설치 수는 변동하는 참고값입니다.</p><ul><li><a href="https://github.com/mattpocock/skills">Matt Pocock Skills</a> · <a href="https://github.com/obra/superpowers">Obra Superpowers</a></li><li><a href="https://github.com/vercel-labs/skills/blob/main/LICENSE">Vercel Skills MIT</a> · <a href="https://github.com/vercel-labs/agent-browser/blob/main/LICENSE">Agent Browser Apache-2.0</a></li><li><a href="https://github.com/anthropics/skills">Anthropic Skills</a> · <a href="https://github.com/K-Dense-AI/scientific-agent-skills">Scientific Agent Skills</a></li><li><a href="https://github.com/mattpocock/skills/blob/main/skills/productivity/handoff/SKILL.md">Matt handoff 원문</a> · <a href="https://github.com/xoonjaeho/claude-skill-handoff">훅 기반 handoff</a></li><li><a href="https://www.skills.sh/">skills.sh 누적</a> · <a href="https://www.skills.sh/trending">skills.sh 24시간</a></li></ul><p>로컬 확인 범위: 프로젝트 공통 스킬과 양쪽 진입점, Claude 동기화 스킬 파일과 문서 4종 라이선스, Codex 시스템 스킬 파일, 현재 세션의 제공 목록. 동기화 식별자·개인 설정·인증 정보는 이 공유 문서에 넣지 않았습니다. 실제 앱 호출, 설치, 런타임 기능, 전체 파일의 원본 일치 여부는 검증하지 않았습니다.</p></section></section>
+→ 출력된 OS 임시 폴더 인계 문서 경로 확인
+→ 새 세션 시작 후 “이 인계 문서를 읽고 미완료 작업부터 이어가 줘” 요청</code></pre>
+
+    <h4>2) <code translate="no">xoonjaeho/claude-skill-handoff</code> — 상태 저장 후 SessionStart 훅 재주입 (미설치 참고)</h4>
+    <p>README 기준 <code translate="no">/clear</code> 또는 <code translate="no">/compact</code> 실행 전 상태(<code translate="no">~/.claude/handoffs/handoff.md</code>)를 저장하고 <code translate="no">SessionStart</code> 훅으로 조건부 자동 재주입하는 구조입니다. 조사 당시 MIT 라이선스이나 0스타 상태로 확인되어 설치 대상에서는 제외했습니다. <a href="https://github.com/xoonjaeho/claude-skill-handoff" target="_blank" rel="noopener">저장소·README ↗</a></p>
+    <div class="scroll" tabindex="0" role="region" aria-label="handoff 두 방식 비교 표, 가로로 스크롤할 수 있음">
+      <table>
+        <thead><tr><th>비교 항목</th><th>Matt Pocock <code translate="no">handoff</code> (설치됨)</th><th>xoonjaeho <code translate="no">claude-skill-handoff</code> (미설치)</th></tr></thead>
+        <tbody>
+          <tr><td>핵심 메커니즘</td><td>요약 문서 생성 후 사용자가 경로 전달</td><td>상태 파일 저장 + <code translate="no">SessionStart</code> 훅 주입</td></tr>
+          <tr><td>저장 위치</td><td>OS 임시 폴더 (저장소 외부)</td><td>사용자 홈 <code translate="no">~/.claude/handoffs</code></td></tr>
+          <tr><td>재개 조건</td><td>새 세션에서 파일 읽기 지시 필요</td><td><code translate="no">clear</code>·<code translate="no">compact</code> 직후 10분 이내 조건부 자동 주입</td></tr>
+          <tr><td>검증·채택 상태</td><td>원문 일치·양쪽 링크·잠금 기록 완료 (실제 호출 미검증)</td><td>README 검토만 수행, 0스타로 미채택</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="margin-top:10px"><strong>컨텍스트 압축(<code translate="no">/compact</code>) 병행 원칙:</strong> 인계서는 목표·결정·제약·참조 경로·다음 행동만 요약하므로 원본 대화나 작업 트리를 대체하지 않습니다. 이어받는 세션은 반드시 실제 파일 상태와 <code translate="no">git status</code>·실행 결과를 다시 확인해야 합니다.</p>
+  </section>
+
+  <section id="ref-sources">
+    <h3>D · 참고 후보 출처와 검증 범위</h3>
+    <p>공개 GitHub 원문과 공식 README를 1차 근거로 삼았으며, 플랫폼 설치 수·스타는 조회 시점에 따라 달라지는 참고 지표입니다. 개인 설정·인증 정보·동기화 식별자는 문서에 포함하지 않았습니다.</p>
+    <ul>
+      <li><a href="https://github.com/mattpocock/skills" target="_blank" rel="noopener">Matt Pocock Skills</a> · <a href="https://github.com/obra/superpowers" target="_blank" rel="noopener">Obra Superpowers</a></li>
+      <li><a href="https://github.com/vercel-labs/skills/blob/main/LICENSE" target="_blank" rel="noopener">Vercel Skills (MIT)</a> · <a href="https://github.com/vercel-labs/agent-browser/blob/main/LICENSE" target="_blank" rel="noopener">Agent Browser (Apache-2.0)</a></li>
+      <li><a href="https://github.com/anthropics/skills" target="_blank" rel="noopener">Anthropic Skills</a> · <a href="https://github.com/K-Dense-AI/scientific-agent-skills" target="_blank" rel="noopener">Scientific Agent Skills</a></li>
+      <li><a href="https://github.com/mattpocock/skills/blob/main/skills/productivity/handoff/SKILL.md" target="_blank" rel="noopener">Matt handoff 원문</a> · <a href="https://github.com/xoonjaeho/claude-skill-handoff" target="_blank" rel="noopener">훅 기반 handoff README</a></li>
+      <li><a href="https://www.skills.sh/" target="_blank" rel="noopener">skills.sh 누적 목록</a> · <a href="https://www.skills.sh/trending" target="_blank" rel="noopener">skills.sh 24시간 목록</a></li>
+    </ul>
+  </section>
+</section>
+
 </main>
 
 <footer>
@@ -442,40 +639,104 @@ npx skills add &lt;owner/repo&gt; --skill &lt;name&gt; \
   <a href="https://github.com/vercel-labs/skills/blob/main/docs/agents.md" target="_blank" rel="noopener">Supported agents</a> ·
   <a href="https://github.com/vercel-labs/skills/blob/main/skills/find-skills/SKILL.md" target="_blank" rel="noopener">find-skills SKILL.md</a> ·
   <a href="https://skills.sh/" target="_blank" rel="noopener">skills.sh</a>.
-  2026-11-14에 조사한 내용입니다.
+  원문 조사일: 2026-11-14 · 구조·도식 개편일: 2026-11-20.
 </footer>
 </div>
+
 <script>
+(function () {
+  'use strict';
+
   var REF = 'https://github.com/vercel-labs/skills/blob/main/docs/commands.md';
-  // 명령별 상세 설명: [설명, 사용 예(선택), 공식 문서 링크(선택)]
   var DETAILS = {
-    'skills find': ['스킬을 검색합니다. 검색어 없이 실행하면 대화형(fzf 방식) 검색이 열리고, 검색어를 주면 바로 결과를 보여줍니다. <code translate="no">--owner &lt;owner&gt;</code>로 특정 조직·사용자의 저장소만 검색합니다. find-skills가 내부적으로 쓰는 명령입니다.', 'npx skills find react --owner vercel', REF + '#skills-find'],
-    'skills add': ['스킬을 설치합니다. 소스는 <code translate="no">owner/repo</code>, GitHub·GitLab·Azure Repos URL, git URL, 로컬 경로를 받습니다. <code translate="no">-s/--skill</code>로 스킬 선택, <code translate="no">-a/--agent</code>로 에이전트 선택, <code translate="no">-g</code>로 전역 설치, <code translate="no">-l</code>로 목록만 보기, <code translate="no">--copy</code>로 링크 대신 복사, <code translate="no">-y</code>로 확인 생략, <code translate="no">--all</code>로 모든 스킬을 모든 에이전트에 설치합니다.', 'npx skills add vercel-labs/skills --skill find-skills -a claude-code -a codex', REF + '#skills-add'],
-    'skills use': ['스킬을 설치하지 않고 임시 폴더에 받아 프롬프트를 만듭니다. <code translate="no">--agent</code>가 없으면 프롬프트만 출력하고, 있으면 그 에이전트를 대화형으로 실행합니다.', 'npx skills use mattpocock/skills@handoff | claude', REF + '#skills-use'],
-    'skills list': ['설치된 스킬을 보여줍니다. 프로젝트 스킬은 <code translate="no">skills-lock.json</code>과 비교해 <code translate="no">modified</code>(파일 변경), <code translate="no">untracked</code>(잠금 기록 없음), <code translate="no">Missing</code>(기록만 있고 파일 없음)을 표시합니다. <code translate="no">-g</code>는 전역, <code translate="no">-a</code>는 에이전트별 필터입니다. 별칭은 <code translate="no">ls</code>입니다.', 'npx skills ls -a claude-code', REF + '#skills-list'],
-    'skills check': ['다시 설치하지 않고 업데이트 여부를 확인합니다. 잠금 파일 해시와 다른 로컬 변경도 알려 주며, 업데이트나 변경이 있으면 종료 코드 1을 돌려줘 CI 점검에 쓸 수 있습니다.', 'npx skills check', REF + '#skills-check'],
-    'skills update': ['설치된 스킬을 업데이트합니다. 이름을 주면 해당 스킬만, <code translate="no">-g</code>는 전역만, <code translate="no">-p</code>는 프로젝트만 대상으로 합니다. <code translate="no">-y</code>를 주면 범위를 자동으로 고릅니다(프로젝트 폴더면 프로젝트, 아니면 전역).', 'npx skills update find-skills', REF + '#skills-update'],
-    'skills remove': ['설치된 스킬을 삭제합니다. 인자 없이 실행하면 대화형으로 고릅니다. <code translate="no">-a</code>로 특정 에이전트에서만, <code translate="no">-g</code>로 전역에서 삭제합니다. <code translate="no">--all</code>과 <code translate="no">--skill \'*\'</code>는 잠금 파일에 기록된 스킬만 지우고 직접 만든 스킬은 건너뜁니다. 별칭은 <code translate="no">rm</code>입니다.', 'npx skills rm find-skills', REF + '#skills-remove'],
-    'skills init': ['새 스킬의 <code translate="no">SKILL.md</code> 템플릿을 만듭니다. 이름을 주면 하위 폴더를 만들어 그 안에 생성합니다. 맞는 스킬을 찾지 못했을 때 직접 만드는 출발점입니다.', 'npx skills init my-skill', REF + '#skills-init'],
-    'skills experimental_sync': ['<code translate="no">package.json</code>에 선언한 npm 의존성이 함께 제공하는 스킬을 찾아 <code translate="no">.agents/skills/</code>와 선택한 에이전트 폴더에 연결합니다. <code translate="no">--dry-run</code>으로 계획만 보고, <code translate="no">--copy</code>로 복사합니다. skills@1.7.3 호환을 위해 <code translate="no">sync</code>도 별칭으로 남아 있습니다. 실험 기능입니다.', 'npx skills experimental_sync -a claude-code -y', REF + '#skills-sync'],
-    'skills experimental_install': ['<code translate="no">skills-lock.json</code>에 기록된 프로젝트 스킬을 복원합니다. 파일이 해시와 같은 스킬은 그대로 두고 빠진 링크만 만듭니다. <code translate="no">--frozen-lockfile</code>은 해시가 다르면 실패하며 CI에서는 기본값입니다. 소스 없이 쓴 <code translate="no">skills install</code>과 <code translate="no">skills i</code>도 이 명령입니다. 실험 기능입니다.', 'npx skills experimental_install --dry-run', REF + '#restore-skills-from-the-project-lock-file']
+    'skills find': ['키워드나 대화형(fzf 방식) 목록으로 오픈 생태계 스킬을 검색합니다. 검색어를 생략하면 대화형 검색이 열리고, <code translate="no">--owner &lt;owner&gt;</code>를 붙이면 특정 GitHub 조직·사용자의 저장소로 범위를 좁힙니다. <code translate="no">find-skills</code> 스킬이 내부적으로 호출하는 핵심 명령입니다.', 'npx skills find react --owner vercel', REF + '#skills-find'],
+    'skills add': ['지정한 소스(<code translate="no">owner/repo</code>, GitHub·GitLab·Azure Repos URL, git URL, 로컬 경로)에서 스킬을 설치합니다. 실행 전 Node.js 22.20 이상인지 확인하세요. <code translate="no">-s/--skill</code> 스킬 지정, <code translate="no">-a/--agent</code> 에이전트 지정, <code translate="no">-g</code> 전역 설치, <code translate="no">-l</code> 설치 전 목록만 확인, <code translate="no">--copy</code> 심볼릭 링크 대신 복사, <code translate="no">--rename</code> 동명 충돌 회피, <code translate="no">-y</code> 확인 프롬프트 생략입니다.', 'npx skills add vercel-labs/skills --skill find-skills -a claude-code -a codex', REF + '#skills-add'],
+    'skills use': ['저장소에 영구 설치하지 않고 임시 폴더에 받아 스킬 프롬프트를 생성합니다. <code translate="no">--agent</code>가 없으면 표준 출력으로 프롬프트만 내보내고, 지정하면 해당 에이전트를 대화형으로 실행합니다. 채택 전 원문 검토에 유용합니다.', 'npx skills use mattpocock/skills@handoff | claude', REF + '#skills-use'],
+    'skills list': ['설치된 스킬과 <code translate="no">skills-lock.json</code> 대조 결과를 출력합니다. 파일 해시가 다르면 <code translate="no">modified</code>, 잠금 기록이 없으면 <code translate="no">untracked</code>, 기록만 있고 파일이 없으면 <code translate="no">Missing</code>으로 표시합니다. <code translate="no">-g</code> 전역 조회, <code translate="no">-a</code> 에이전트별 필터이며 별칭은 <code translate="no">ls</code>입니다.', 'npx skills ls -a claude-code', REF + '#skills-list'],
+    'skills check': ['파일을 다시 쓰지 않고 원격 업데이트 유무와 로컬 해시 불일치를 검사합니다. 업데이트나 변경 사항이 하나라도 있으면 종료 코드 1을 반환하므로 CI 검증 단계에 넣기 좋습니다.', 'npx skills check', REF + '#skills-check'],
+    'skills update': ['설치된 스킬을 원격 최신 버전으로 갱신합니다. 스킬 이름을 지정하면 해당 항목만, <code translate="no">-g</code>는 전역만, <code translate="no">-p</code>는 프로젝트만 갱신합니다. <code translate="no">-y</code>를 주면 현재 위치(프로젝트 폴더 여부)에 맞춰 범위를 자동 선택합니다.', 'npx skills update skill-review', REF + '#skills-update'],
+    'skills remove': ['설치된 스킬 폴더와 에이전트 링크를 삭제합니다. 인자 없이 실행하면 대화형 선택 창이 열리고, <code translate="no">-a</code>는 특정 에이전트 연결만, <code translate="no">-g</code>는 전역에서 제거합니다. <code translate="no">--all</code>과 <code translate="no">--skill \'*\'</code>는 잠금 파일에 등록된 스킬만 지우고 직접 작성한 내장 스킬은 보존합니다. 별칭은 <code translate="no">rm</code>입니다.', 'npx skills rm handoff', REF + '#skills-remove'],
+    'skills init': ['새 스킬 작성을 위한 기본 <code translate="no">SKILL.md</code> 템플릿을 만듭니다. 이름을 인자로 넘기면 하위 폴더를 생성해 그 안에 배치합니다. 적합한 공개 스킬이 없을 때 자체 스킬을 시작하는 출발점입니다.', 'npx skills init my-skill', REF + '#skills-init'],
+    'skills experimental_sync': ['주의: 사양이 바뀔 수 있는 실험 명령입니다. 실행 전 <code translate="no">--dry-run</code>으로 반영 계획을 먼저 확인하세요. <code translate="no">package.json</code>의 npm 의존성이 번들로 제공하는 스킬을 찾아 <code translate="no">.agents/skills/</code>와 에이전트 폴더에 연결합니다(별칭 <code translate="no">sync</code>).', 'npx skills experimental_sync -a claude-code --dry-run', REF + '#skills-sync'],
+    'skills experimental_install': ['주의: 사양이 바뀔 수 있는 실험 명령입니다. 실행 전 <code translate="no">--dry-run</code>으로 복원 대상을 먼저 확인하세요. <code translate="no">skills-lock.json</code>을 기준으로 누락된 프로젝트 스킬과 링크를 복원하며, <code translate="no">--frozen-lockfile</code>(CI 기본값)에서는 해시 불일치 시 즉시 실패합니다(인자 없는 <code translate="no">skills install</code>·<code translate="no">skills i</code>와 동일).', 'npx skills experimental_install --dry-run', REF + '#restore-skills-from-the-project-lock-file']
   };
 
-  function nameOf(tr) {
-    var name = tr.querySelector('code').textContent.split(' ').slice(0, 2).join(' ');
-    return name;
-  }
-  function linkOf(name, d) { return (d[2] || REF); }
+  document.querySelectorAll('code, pre').forEach(function (el) {
+    el.setAttribute('translate', 'no');
+  });
 
+  function decodeEntities(htmlStr) {
+    var txt = document.createElement('textarea');
+    txt.innerHTML = htmlStr;
+    return txt.value;
+  }
+
+  function copyText(text, btn) {
+    function markCopied() {
+      var orig = btn.textContent;
+      btn.textContent = '복사됨';
+      btn.classList.add('copied');
+      setTimeout(function () {
+        btn.textContent = orig;
+        btn.classList.remove('copied');
+      }, 1400);
+    }
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(markCopied).catch(function () {});
+    } else {
+      var ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      try { document.execCommand('copy'); markCopied(); } catch (e) {}
+      document.body.removeChild(ta);
+    }
+  }
+
+  // Installed skill cards quick filter
+  var skillFilter = document.getElementById('installed-filter');
+  var skillCount = document.getElementById('installed-count');
+  var skillCards = Array.prototype.slice.call(document.querySelectorAll('[data-skill-card]'));
+
+  function applySkillCardFilter() {
+    var q = skillFilter.value.trim().toLowerCase();
+    var shown = 0;
+    skillCards.forEach(function (card) {
+      var hit = !q || card.textContent.toLowerCase().indexOf(q) !== -1;
+      card.style.display = hit ? '' : 'none';
+      if (hit) shown++;
+    });
+    skillCount.textContent = q
+      ? '설치된 스킬 ' + skillCards.length + '개 중 ' + shown + '개 표시'
+      : '설치된 스킬 ' + skillCards.length + '개';
+  }
+  skillFilter.addEventListener('input', applySkillCardFilter);
+  skillFilter.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && skillFilter.value) {
+      skillFilter.value = '';
+      applySkillCardFilter();
+    }
+  });
+  applySkillCardFilter();
+
+  // skills CLI command reference table
   var table = document.getElementById('cmd-table');
   var filter = document.getElementById('cmd-filter');
+  var chipsBox = document.getElementById('cmd-chips');
   var count = document.getElementById('cmd-count');
+  var collapseBtn = document.getElementById('cmd-collapse-all');
   var params = new URLSearchParams(location.search);
   var opened = (params.get('open') || '').split(',').filter(Boolean);
+  var activeCat = params.get('cat') || 'all';
   var items = [];
+  var catCounts = Object.create(null);
+  var catOrder = [];
 
-  // 명령어·식별자는 자동 번역에서 제외
-  document.querySelectorAll('code, pre').forEach(function (el) { el.setAttribute('translate', 'no'); });
+  function nameOf(tr) {
+    return tr.querySelector('code').textContent.split(' ').slice(0, 2).join(' ');
+  }
 
   function setOpen(it, open) {
     it.row.hidden = !open;
@@ -487,16 +748,24 @@ npx skills add &lt;owner/repo&gt; --skill &lt;name&gt; \
     var p = new URLSearchParams(location.search);
     var q = filter.value.trim();
     if (q) p.set('q', q); else p.delete('q');
-    var open = items.filter(function (it) { return !it.row.hidden; }).map(function (it) { return it.name; });
-    if (open.length) p.set('open', open.join(',')); else p.delete('open');
+    if (activeCat && activeCat !== 'all') p.set('cat', activeCat); else p.delete('cat');
+    var openNames = items.filter(function (it) { return !it.row.hidden; }).map(function (it) { return it.name; });
+    if (openNames.length) p.set('open', openNames.join(',')); else p.delete('open');
     var s = p.toString();
     try { history.replaceState(null, '', location.pathname + (s ? '?' + s : '') + location.hash); } catch (e) {}
   }
 
   table.querySelectorAll('tbody tr').forEach(function (tr, i) {
     var name = nameOf(tr);
+    var cat = tr.cells[1].textContent.trim();
     var d = DETAILS[name];
     if (!d) return;
+    if (!catCounts[cat]) {
+      catCounts[cat] = 0;
+      catOrder.push(cat);
+    }
+    catCounts[cat]++;
+
     var cell = tr.cells[0];
     var btn = document.createElement('button');
     btn.type = 'button';
@@ -506,48 +775,120 @@ npx skills add &lt;owner/repo&gt; --skill &lt;name&gt; \
     while (cell.firstChild) btn.appendChild(cell.firstChild);
     cell.appendChild(btn);
     tr.classList.add('cmd');
+
     var row = document.createElement('tr');
     row.className = 'detail';
     row.id = 'detail-' + i;
     row.hidden = true;
     var html = '<td colspan="' + tr.cells.length + '"><p>' + d[0] + '</p>';
-    if (d[1]) html += '<div class="ex">예: <code translate="no">' + d[1] + '</code></div>';
-    html += '<a class="src" href="' + linkOf(name, d) + '" target="_blank" rel="noopener">공식 문서 ↗</a></td>';
+    if (d[1]) {
+      html += '<div class="ex"><span>예: <code translate="no">' + d[1] + '</code></span>' +
+              '<button type="button" class="copy-btn" aria-label="' + name + ' 예제 명령 복사">복사</button></div>';
+    }
+    html += '<a class="src" href="' + (d[2] || REF) + '" target="_blank" rel="noopener">공식 문서 ↗</a></td>';
     row.innerHTML = html;
     tr.after(row);
-    var it = { name: name, tr: tr, row: row, btn: btn };
+
+    if (d[1]) {
+      var rawEx = decodeEntities(d[1]);
+      row.querySelector('.copy-btn').addEventListener('click', function (e) {
+        e.stopPropagation();
+        copyText(rawEx, e.currentTarget);
+      });
+    }
+
+    var it = { name: name, cat: cat, tr: tr, row: row, btn: btn };
     items.push(it);
-    // 버튼의 클릭·Enter·Space는 행으로 전파되어 여기서 한 번만 처리된다
+
     tr.addEventListener('click', function (e) {
-      if (e.target.closest('a')) return;
+      if (e.target.closest('a, .copy-btn')) return;
+      if (window.getSelection && String(window.getSelection()).length > 0) return;
       setOpen(it, it.row.hidden);
       syncUrl();
     });
+
     if (opened.indexOf(name) !== -1) setOpen(it, true);
+  });
+
+  if (activeCat !== 'all' && !catCounts[activeCat]) activeCat = 'all';
+
+  var chipButtons = [];
+  function makeChip(val, label) {
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'chip';
+    b.dataset.cat = val;
+    b.setAttribute('aria-pressed', String(val === activeCat));
+    b.textContent = label;
+    b.addEventListener('click', function () {
+      activeCat = (activeCat === val && val !== 'all') ? 'all' : val;
+      chipButtons.forEach(function (cb) {
+        cb.setAttribute('aria-pressed', String(cb.dataset.cat === activeCat));
+      });
+      applyFilter();
+      syncUrl();
+    });
+    chipsBox.appendChild(b);
+    chipButtons.push(b);
+  }
+
+  makeChip('all', '전체 ' + items.length);
+  catOrder.forEach(function (cat) {
+    makeChip(cat, cat + ' ' + catCounts[cat]);
   });
 
   var empty = document.createElement('tr');
   empty.className = 'empty';
   empty.hidden = true;
-  empty.innerHTML = '<td colspan="' + table.tHead.rows[0].cells.length + '">일치하는 명령이 없습니다. 다른 검색어를 입력해 보세요.</td>';
+  empty.innerHTML = '<td colspan="' + table.tHead.rows[0].cells.length + '">일치하는 명령이 없습니다. 검색어를 지우거나 분류를 “전체”로 바꿔 보세요.</td>';
   table.tBodies[0].appendChild(empty);
 
   function applyFilter() {
     var q = filter.value.trim().toLowerCase();
     var shown = 0;
     items.forEach(function (it) {
-      var hit = !q || (it.tr.textContent + ' ' + it.row.textContent).toLowerCase().indexOf(q) !== -1;
+      var catHit = (activeCat === 'all') || (it.cat === activeCat);
+      var qHit = !q || (it.tr.textContent + ' ' + it.row.textContent).toLowerCase().indexOf(q) !== -1;
+      var hit = catHit && qHit;
       it.tr.style.display = hit ? '' : 'none';
       it.row.style.display = hit ? '' : 'none';
       if (hit) shown++;
     });
     empty.hidden = shown !== 0;
-    count.textContent = q ? '명령 ' + items.length + '개 중 ' + shown + '개 일치' : '명령 ' + items.length + '개';
+    var suffix = activeCat !== 'all' ? ' (분류: ' + activeCat + ')' : '';
+    count.textContent = (q || activeCat !== 'all')
+      ? '명령 ' + items.length + '개 중 ' + shown + '개 표시' + suffix
+      : '명령 ' + items.length + '개';
   }
 
   filter.value = params.get('q') || '';
   filter.addEventListener('input', function () { applyFilter(); syncUrl(); });
+  filter.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && filter.value) {
+      filter.value = '';
+      applyFilter();
+      syncUrl();
+    }
+  });
+
+  collapseBtn.addEventListener('click', function () {
+    items.forEach(function (it) { setOpen(it, false); });
+    syncUrl();
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key !== '/' || e.ctrlKey || e.metaKey || e.altKey) return;
+    var tag = (e.target && e.target.tagName) || '';
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || (e.target && e.target.isContentEditable)) return;
+    e.preventDefault();
+    var allRect = document.getElementById('all').getBoundingClientRect();
+    var target = allRect.top < window.innerHeight * 0.55 ? filter : skillFilter;
+    target.focus();
+    target.select();
+  });
+
   applyFilter();
+})();
 </script>
 </body>
 </html>
